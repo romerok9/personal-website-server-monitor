@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kevin Romero | DevOps Engineer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            padding: 4rem 0 2rem;
+            border-bottom: 1px solid #333;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        
+        .links {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .links a {
+            color: #60a5fa;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.2s;
+        }
+        
+        .links a:hover {
+            color: #93c5fd;
+        }
+        
+        .status-link {
+            color: #10b981 !important;
+        }
+        
+        .status-link:hover {
+            color: #34d399 !important;
+        }
+        
+        section {
+            padding: 3rem 0;
+            border-bottom: 1px solid #222;
+        }
+        
+        section:last-child {
+            border-bottom: none;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .about p {
+            color: #b0b0b0;
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+        
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .skill-category {
+            background: #111;
+            padding: 1.5rem;
+            border-radius: 4px;
+            border: 1px solid #222;
+        }
+        
+        .skill-category h3 {
+            color: #60a5fa;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .skill-category ul {
+            list-style: none;
+        }
+        
+        .skill-category li {
+            color: #b0b0b0;
+            padding: 0.3rem 0;
+            font-size: 0.95rem;
+        }
+        
+        .skill-category li:before {
+            content: "▹ ";
+            color: #60a5fa;
+        }
+        
+        .project-card {
+            background: #111;
+            padding: 1.5rem;
+            border-radius: 4px;
+            border: 1px solid #222;
+            margin-bottom: 1.5rem;
+        }
+        
+        .project-card h3 {
+            color: #fff;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .project-card p {
+            color: #888;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+        
+        .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .tag {
+            background: #1a1a1a;
+            color: #60a5fa;
+            padding: 0.25rem 0.75rem;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            border: 1px solid #333;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Kevin Romero</h1>
+            <p class="subtitle">DevOps Engineer | SRE | Cloud Infrastructure</p>
+            <div class="links">
+                <a href="https://www.linkedin.com/in/kevs-romero/" target="_blank">
+                    → LinkedIn
+                </a>
+                <a href="https://n8n.mytechzone.dev" target="_blank">
+                    → n8n Workflows
+                </a>
+                <a href="https://github.com/kevs-romero" target="_blank">
+                    → GitHub
+                </a>
+                <a href="/status.html" class="status-link">
+                    🟢 Server Status
+                </a>
+            </div>
+        </header>
+
+        <section class="about">
+            <h2>About</h2>
+            <p>
+                DevOps Engineer especializado en automatización de infraestructura, 
+                CI/CD pipelines y gestión de sistemas Linux. Experiencia en diseño e 
+                implementación de soluciones cloud-native con enfoque en seguridad y alta disponibilidad.
+            </p>
+            <p>
+                Apasionado por la automatización, monitoreo y mejora continua de procesos. 
+                Experiencia trabajando con equipos multidisciplinarios en entornos ágiles.
+            </p>
+        </section>
+
+        <section>
+            <h2>Technical Skills</h2>
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h3>Cloud & Infrastructure</h3>
+                    <ul>
+                        <li>AWS (EC2, RDS, S3, CloudFormation)</li>
+                        <li>Docker & Docker Compose</li>
+                        <li>Kubernetes</li>
+                        <li>Terraform</li>
+                        <li>Cloudflare Tunnel</li>
+                    </ul>
+                </div>
+                
+                <div class="skill-category">
+                    <h3>CI/CD & Automation</h3>
+                    <ul>
+                        <li>GitLab CI/CD</li>
+                        <li>GitHub Actions</li>
+                        <li>n8n Workflows</li>
+                        <li>Bash Scripting</li>
+                        <li>Python Automation</li>
+                    </ul>
+                </div>
+                
+                <div class="skill-category">
+                    <h3>Systems & Security</h3>
+                    <ul>
+                        <li>Linux (Debian, RHEL)</li>
+                        <li>System Hardening</li>
+                        <li>Security Operations (SecOps)</li>
+                        <li>Monitoring (Prometheus, Grafana)</li>
+                        <li>PostgreSQL, MySQL</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Featured Projects</h2>
+            
+            <div class="project-card">
+                <h3>n8n Automation Platform</h3>
+                <p>Plataforma de automatización self-hosted con n8n, PostgreSQL y Nginx. 
+                   Implementación con Docker Compose, reverse proxy y túnel Cloudflare para acceso seguro.</p>
+                <div class="project-tags">
+                    <span class="tag">Docker</span>
+                    <span class="tag">n8n</span>
+                    <span class="tag">PostgreSQL</span>
+                    <span class="tag">Nginx</span>
+                    <span class="tag">Cloudflare</span>
+                </div>
+            </div>
+            
+            <div class="project-card">
+                <h3>Infrastructure Monitoring</h3>
+                <p>Sistema de monitoreo custom con Python para tracking de recursos (CPU, RAM, Disco, Red) 
+                   y containers Docker en tiempo real.</p>
+                <div class="project-tags">
+                    <span class="tag">Python</span>
+                    <span class="tag">Docker</span>
+                    <span class="tag">System Monitoring</span>
+                    <span class="tag">DevOps</span>
+                </div>
+            </div>
+            
+            <div class="project-card">
+                <h3>AWS Infrastructure Automation</h3>
+                <p>Scripts de automatización para gestión de instancias EC2, migración de volúmenes GP2 a GP3, 
+                   y optimización de recursos en AWS.</p>
+                <div class="project-tags">
+                    <span class="tag">AWS</span>
+                    <span class="tag">Bash</span>
+                    <span class="tag">EC2</span>
+                    <span class="tag">Cost Optimization</span>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2025 Kevin Romero | Built with minimal tech</p>
+        </footer>
+    </div>
+</body>
+</html>
+

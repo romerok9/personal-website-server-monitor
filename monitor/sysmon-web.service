@@ -1,0 +1,26 @@
+[Unit]
+Description=System Monitor Web Dashboard
+Documentation=https://github.com/romerok9/personal-website-server-monitor
+After=network.target docker.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/monitor
+ExecStart=/usr/bin/python3 /opt/monitor/sysmon_web.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/html
+
+[Install]
+WantedBy=multi-user.target
+
