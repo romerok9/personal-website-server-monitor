@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kevin Romero | DevOps Engineer</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" href="/favicon.ico">
     <style>
         * {
             margin: 0;
@@ -227,8 +229,8 @@
     <div class="container">
         <header>
             <div class="lang-toggle">
-                <button onclick="setLanguage('es')" id="lang-es">ES</button>
                 <button onclick="setLanguage('en')" id="lang-en">EN</button>
+                <button onclick="setLanguage('es')" id="lang-es">ES</button>
             </div>
             
             <h1>Kevin Romero</h1>
@@ -244,26 +246,23 @@
                     → GitHub
                 </a>
                 <a href="/status.html" class="status-link">
-                    🟢 <span data-lang>Server Status</span>
+                    🟢 <span id="status-link">Server Status</span>
                 </a>
             </div>
         </header>
 
         <section class="about">
-            <h2 data-lang>About</h2>
-            <p data-lang>
-                DevOps Engineer especializado en automatización de infraestructura, 
-                CI/CD pipelines y gestión de sistemas Linux. Experiencia en diseño e 
-                implementación de soluciones cloud-native con enfoque en seguridad y alta disponibilidad.
+            <h2 id="about-title">About</h2>
+            <p id="about-p1">
+                DevOps Engineer specialized in infrastructure automation, CI/CD pipelines and Linux systems management. Experience in designing and implementing cloud-native solutions with a focus on security and high availability.
             </p>
-            <p data-lang>
-                Apasionado por la automatización, monitoreo y mejora continua de procesos. 
-                Experiencia trabajando con equipos multidisciplinarios en entornos ágiles.
+            <p id="about-p2">
+                Passionate about automation, monitoring and continuous process improvement. Experience working with multidisciplinary teams in agile environments.
             </p>
         </section>
 
         <section>
-            <h2 data-lang>Technical Skills</h2>
+            <h2 id="skills-title">Technical Skills</h2>
             <div class="skills-grid">
                 <div class="skill-category">
                     <h3>Cloud & Infrastructure</h3>
@@ -301,12 +300,11 @@
         </section>
 
         <section>
-            <h2 data-lang>Featured Projects</h2>
+            <h2 id="projects-title">Featured Projects</h2>
             
             <div class="project-card">
                 <h3>n8n Automation Platform</h3>
-                <p data-lang>Plataforma de automatización self-hosted con n8n, PostgreSQL y Nginx. 
-                   Implementación con Docker Compose, reverse proxy y túnel Cloudflare para acceso seguro.</p>
+                <p id="project1-desc">Self-hosted automation platform with n8n, PostgreSQL and Nginx. Implementation with Docker Compose, reverse proxy and Cloudflare tunnel for secure access.</p>
                 <div class="project-tags">
                     <span class="tag">Docker</span>
                     <span class="tag">n8n</span>
@@ -318,8 +316,7 @@
             
             <div class="project-card">
                 <h3>Infrastructure Monitoring</h3>
-                <p data-lang>Sistema de monitoreo custom con Python para tracking de recursos (CPU, RAM, Disco, Red) 
-                   y containers Docker en tiempo real.</p>
+                <p id="project2-desc">Custom monitoring system with Python for tracking resources (CPU, RAM, Disk, Network) and Docker containers in real-time.</p>
                 <div class="project-tags">
                     <span class="tag">Python</span>
                     <span class="tag">Docker</span>
@@ -330,8 +327,7 @@
             
             <div class="project-card">
                 <h3>AWS Infrastructure Automation</h3>
-                <p data-lang>Scripts de automatización para gestión de instancias EC2, migración de volúmenes GP2 a GP3, 
-                   y optimización de recursos en AWS.</p>
+                <p id="project3-desc">Automation scripts for EC2 instance management, GP2 to GP3 volume migration, and AWS resource optimization.</p>
                 <div class="project-tags">
                     <span class="tag">AWS</span>
                     <span class="tag">Bash</span>
@@ -342,46 +338,36 @@
         </section>
 
         <footer>
-            <p data-lang>© 2025 Kevin Romero | Built with minimal tech</p>
+            <p id="footer-text">© 2025 Kevin Romero | Built with minimal tech</p>
         </footer>
     </div>
 
     <script>
         // Translations
         const translations = {
-            es: {
-                'Server Status': 'Estado del Servidor',
-                'About': 'Acerca de',
-                'DevOps Engineer especializado en automatización de infraestructura, CI/CD pipelines y gestión de sistemas Linux. Experiencia en diseño e implementación de soluciones cloud-native con enfoque en seguridad y alta disponibilidad.': 
-                    'DevOps Engineer especializado en automatización de infraestructura, CI/CD pipelines y gestión de sistemas Linux. Experiencia en diseño e implementación de soluciones cloud-native con enfoque en seguridad y alta disponibilidad.',
-                'Apasionado por la automatización, monitoreo y mejora continua de procesos. Experiencia trabajando con equipos multidisciplinarios en entornos ágiles.': 
-                    'Apasionado por la automatización, monitoreo y mejora continua de procesos. Experiencia trabajando con equipos multidisciplinarios en entornos ágiles.',
-                'Technical Skills': 'Habilidades Técnicas',
-                'Featured Projects': 'Proyectos Destacados',
-                'Plataforma de automatización self-hosted con n8n, PostgreSQL y Nginx. Implementación con Docker Compose, reverse proxy y túnel Cloudflare para acceso seguro.': 
-                    'Plataforma de automatización self-hosted con n8n, PostgreSQL y Nginx. Implementación con Docker Compose, reverse proxy y túnel Cloudflare para acceso seguro.',
-                'Sistema de monitoreo custom con Python para tracking de recursos (CPU, RAM, Disco, Red) y containers Docker en tiempo real.': 
-                    'Sistema de monitoreo custom con Python para tracking de recursos (CPU, RAM, Disco, Red) y containers Docker en tiempo real.',
-                'Scripts de automatización para gestión de instancias EC2, migración de volúmenes GP2 a GP3, y optimización de recursos en AWS.': 
-                    'Scripts de automatización para gestión de instancias EC2, migración de volúmenes GP2 a GP3, y optimización de recursos en AWS.',
-                '© 2025 Kevin Romero | Built with minimal tech': '© 2025 Kevin Romero | Construido con tecnología minimalista'
-            },
             en: {
-                'Server Status': 'Server Status',
-                'About': 'About',
-                'DevOps Engineer especializado en automatización de infraestructura, CI/CD pipelines y gestión de sistemas Linux. Experiencia en diseño e implementación de soluciones cloud-native con enfoque en seguridad y alta disponibilidad.': 
-                    'DevOps Engineer specialized in infrastructure automation, CI/CD pipelines and Linux systems management. Experience in designing and implementing cloud-native solutions with a focus on security and high availability.',
-                'Apasionado por la automatización, monitoreo y mejora continua de procesos. Experiencia trabajando con equipos multidisciplinarios en entornos ágiles.': 
-                    'Passionate about automation, monitoring and continuous process improvement. Experience working with multidisciplinary teams in agile environments.',
-                'Technical Skills': 'Technical Skills',
-                'Featured Projects': 'Featured Projects',
-                'Plataforma de automatización self-hosted con n8n, PostgreSQL y Nginx. Implementación con Docker Compose, reverse proxy y túnel Cloudflare para acceso seguro.': 
-                    'Self-hosted automation platform with n8n, PostgreSQL and Nginx. Implementation with Docker Compose, reverse proxy and Cloudflare tunnel for secure access.',
-                'Sistema de monitoreo custom con Python para tracking de recursos (CPU, RAM, Disco, Red) y containers Docker en tiempo real.': 
-                    'Custom monitoring system with Python for tracking resources (CPU, RAM, Disk, Network) and Docker containers in real-time.',
-                'Scripts de automatización para gestión de instancias EC2, migración de volúmenes GP2 a GP3, y optimización de recursos en AWS.': 
-                    'Automation scripts for EC2 instance management, GP2 to GP3 volume migration, and AWS resource optimization.',
-                '© 2025 Kevin Romero | Built with minimal tech': '© 2025 Kevin Romero | Built with minimal tech'
+                'status-link': 'Server Status',
+                'about-title': 'About',
+                'about-p1': 'DevOps Engineer specialized in infrastructure automation, CI/CD pipelines and Linux systems management. Experience in designing and implementing cloud-native solutions with a focus on security and high availability.',
+                'about-p2': 'Passionate about automation, monitoring and continuous process improvement. Experience working with multidisciplinary teams in agile environments.',
+                'skills-title': 'Technical Skills',
+                'projects-title': 'Featured Projects',
+                'project1-desc': 'Self-hosted automation platform with n8n, PostgreSQL and Nginx. Implementation with Docker Compose, reverse proxy and Cloudflare tunnel for secure access.',
+                'project2-desc': 'Custom monitoring system with Python for tracking resources (CPU, RAM, Disk, Network) and Docker containers in real-time.',
+                'project3-desc': 'Automation scripts for EC2 instance management, GP2 to GP3 volume migration, and AWS resource optimization.',
+                'footer-text': '© 2025 Kevin Romero | Built with minimal tech'
+            },
+            es: {
+                'status-link': 'Estado del Servidor',
+                'about-title': 'Acerca de',
+                'about-p1': 'DevOps Engineer especializado en automatización de infraestructura, CI/CD pipelines y gestión de sistemas Linux. Experiencia en diseño e implementación de soluciones cloud-native con enfoque en seguridad y alta disponibilidad.',
+                'about-p2': 'Apasionado por la automatización, monitoreo y mejora continua de procesos. Experiencia trabajando con equipos multidisciplinarios en entornos ágiles.',
+                'skills-title': 'Habilidades Técnicas',
+                'projects-title': 'Proyectos Destacados',
+                'project1-desc': 'Plataforma de automatización self-hosted con n8n, PostgreSQL y Nginx. Implementación con Docker Compose, reverse proxy y túnel Cloudflare para acceso seguro.',
+                'project2-desc': 'Sistema de monitoreo custom con Python para tracking de recursos (CPU, RAM, Disco, Red) y containers Docker en tiempo real.',
+                'project3-desc': 'Scripts de automatización para gestión de instancias EC2, migración de volúmenes GP2 a GP3, y optimización de recursos en AWS.',
+                'footer-text': '© 2025 Kevin Romero | Construido con tecnología minimalista'
             }
         };
 
@@ -391,21 +377,21 @@
             document.documentElement.lang = lang;
             
             // Update button states
-            document.getElementById('lang-es').classList.toggle('active', lang === 'es');
             document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            document.getElementById('lang-es').classList.toggle('active', lang === 'es');
             
-            // Update content
-            document.querySelectorAll('[data-lang]').forEach(element => {
-                const text = element.textContent.trim();
-                if (translations[lang][text]) {
-                    element.textContent = translations[lang][text];
+            // Update all translated content
+            Object.keys(translations[lang]).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = translations[lang][id];
                 }
             });
         }
 
         // Initialize language on page load
         document.addEventListener('DOMContentLoaded', () => {
-            const savedLang = localStorage.getItem('preferredLanguage') || 'es';
+            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
             setLanguage(savedLang);
         });
     </script>
