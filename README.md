@@ -1,29 +1,49 @@
-# Personal Website + Real-Time Server Monitor
+# Personal Website + Blog + Real-Time Server Monitor
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3)
+![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
 ![Docker](https://img.shields.io/badge/Docker-Monitoring-2496ED?style=flat-square&logo=docker)
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-Portfolio personal minimalista con dashboard de monitoreo en tiempo real de servidor Debian/Linux. Métricas de CPU, RAM, disco, red y containers Docker actualizadas automáticamente cada 30 segundos.
+Portfolio personal minimalista con blog técnico bilingüe (EN/ES) y dashboard de monitoreo en tiempo real de servidor Debian/Linux. Incluye métricas de CPU, RAM, disco, red, **temperatura del CPU** y containers Docker, actualizadas automáticamente cada 30 segundos.
+
+**🌐 Live Demo:** [mytechzone.dev](https://mytechzone.dev)
+
+---
 
 ## ✨ Features Overview
 
-Modern, minimalist portfolio combined with a powerful real-time server monitoring solution.
+Modern, minimalist portfolio combined with a technical blog and powerful real-time server monitoring solution.
+
+---
 
 ## 🎯 Características
 
-### Portfolio Website
-- ✅ **Diseño minimalista** - Inspirado en portafolios tech profesionales
+### 📝 Portfolio Website + Technical Blog
+
+- ✅ **Diseño minimalista** - Inspirado en portfolios tech profesionales
+- ✅ **Blog técnico completo** - 18 posts sobre DevOps, AWS, IA y Home Lab
+- ✅ **Bilingüe (EN/ES)** - Selector de idioma con localStorage
 - ✅ **Responsive** - Se adapta a móvil, tablet y desktop
 - ✅ **Dark theme** - Diseño moderno enfocado en legibilidad
-- ✅ **Sin JavaScript** - HTML/CSS puro, ultra-rápido
+- ✅ **Vanilla JavaScript** - Sin frameworks pesados, ultra-rápido
 - ✅ **SEO friendly** - Estructura semántica optimizada
+- ✅ **Custom favicon** - Diseño DevOps/Terminal style
 
-### Server Monitor
+#### Series del Blog:
+- 🏠 **Home Lab DevOps** (6 posts) - Notebook antigua → servidor profesional
+- ☁️ **Automatización AWS** (5 posts) - Scripts, CLI y cost optimization
+- 🤖 **Agentes de IA en DevOps** (4 posts) - Prompt engineering y límites
+- 🛠️ **AWS CLI Mastery** (3 posts) - JMESPath, workflows y best practices
+
+### 🖥️ Server Monitor v2.0
+
 - ✅ **Métricas del sistema**:
   - CPU: Uso en % y núcleos
+  - 🌡️ **Temperatura del CPU** con alertas por color (NUEVO en v2.0)
   - RAM: Usado/Total/Disponible
   - Disco: Uso/Total/Libre  
   - Red: Tráfico total enviado/recibido
@@ -32,11 +52,35 @@ Modern, minimalist portfolio combined with a powerful real-time server monitorin
 - ✅ **Monitoreo Docker**:
   - Estado de containers (running/stopped)
   - Nombre e imagen de cada container
-  - Destacado especial para n8n
+  - Contador de containers activos/detenidos
+
+- ✅ **Sistema de alertas inteligente**:
+  - 🟢 < 60°C: OK
+  - 🟡 60-69°C: Warm
+  - 🟠 70-79°C: Warning
+  - 🔴 ≥ 80°C: Critical
+  - ⚠️ Warning automático si temperatura ≥ 75°C
 
 - ✅ **Auto-actualización**: Dashboard se refresca cada 30s
 - ✅ **Barras de progreso visuales** con colores por estado
-- ✅ **Alertas por color**: Verde (<50%), Amarillo (50-80%), Rojo (>80%)
+- ✅ **Ligero**: < 20 MB RAM consumidos
+
+---
+
+## 🌟 Open Source
+
+Este proyecto es de código abierto para que otros puedan aprender y crear sus propios portfolios. El código está diseñado para ser fácil de entender y personalizar.
+
+**Si encuentras útil este proyecto, considera dejarle una ⭐ al repo!**
+
+### 📄 License
+
+- **Code:** MIT License (libre uso con atribución)
+- **Blog Content:** © 2025-2026 Kevin Romero (All rights reserved)
+
+Puedes usar libremente el código HTML/CSS/Python como base para tu propio sitio. El contenido escrito del blog está protegido por copyright.
+
+---
 
 ## 📋 Requisitos
 
@@ -47,61 +91,79 @@ Modern, minimalist portfolio combined with a powerful real-time server monitorin
 
 ### Dependencias Python
 
-```bash
+\`\`\`bash
 # Debian/Ubuntu
 sudo apt install python3-psutil python3-docker
 
 # Otras distros con pip
 pip3 install psutil docker
-```
+\`\`\`
+
+---
 
 ## 🚀 Quick Start
 
 ### 1. Clonar el repositorio
 
-```bash
+\`\`\`bash
 git clone https://github.com/romerok9/personal-website-server-monitor.git
 cd personal-website-server-monitor
-```
+\`\`\`
 
 ### 2. Personalizar el sitio web
 
-Edita `website/index.html`:
+Edita \`website/index.html\`:
 
-```html
+\`\`\`html
 <!-- Cambiar información personal -->
 <h1>Tu Nombre</h1>
-<p class="subtitle">Tu Título Profesional</p>
+<p class="subtitle" data-en="Your Title" data-es="Tu Título">Your Title</p>
 
 <!-- Actualizar links -->
 <a href="https://linkedin.com/in/tu-perfil">LinkedIn</a>
 <a href="https://github.com/tu-usuario">GitHub</a>
-```
+\`\`\`
 
-### 3. Configurar el monitor
+### 3. Personalizar el blog
 
-Edita `monitor/sysmon_web.py`:
+Los posts están en \`blog/posts/\`. Para crear un nuevo post:
 
-```python
+\`\`\`bash
+# Usar el template
+cp blog/posts/_TEMPLATE.html blog/posts/mi-nuevo-post.html
+
+# Editar contenido
+nano blog/posts/mi-nuevo-post.html
+
+# Agregar al index
+nano blog/index.html  # Agregar entrada en el array 'posts'
+\`\`\`
+
+### 4. Configurar el monitor
+
+Edita \`monitor/sysmon_web.py\`:
+
+\`\`\`python
 # Línea 13-14: Ajustar según tu configuración
 UPDATE_INTERVAL = 30  # Segundos entre actualizaciones
 OUTPUT_FILE = "/path/to/your/website/status.html"
-```
+\`\`\`
 
-### 4. Copiar archivos al servidor
+### 5. Copiar archivos al servidor
 
-```bash
-# Sitio web
-scp website/index.html user@your-server:/var/www/html/
+\`\`\`bash
+# Sitio web + blog
+scp -r website/* user@your-server:/var/www/html/
+scp -r blog/ user@your-server:/var/www/html/
 
 # Monitor
 scp monitor/sysmon_web.py user@your-server:/opt/monitor/
 scp monitor/start_monitor.sh user@your-server:/opt/monitor/
-```
+\`\`\`
 
-### 5. Iniciar el monitor
+### 6. Iniciar el monitor
 
-```bash
+\`\`\`bash
 ssh user@your-server
 
 # Opción 1: Foreground (para pruebas)
@@ -115,247 +177,83 @@ nohup python3 sysmon_web.py > /tmp/sysmon.log 2>&1 &
 sudo cp monitor/sysmon-web.service /etc/systemd/system/
 sudo systemctl enable sysmon-web
 sudo systemctl start sysmon-web
-```
+\`\`\`
 
-### 6. Acceder
+### 7. Acceder
 
-```
+\`\`\`
 https://yourdomain.com/              → Portfolio
+https://yourdomain.com/blog/         → Blog técnico
 https://yourdomain.com/status.html   → Server Monitor
-```
+\`\`\`
+
+---
 
 ## 📂 Estructura del Proyecto
 
-```
+\`\`\`
 personal-website-server-monitor/
 ├── website/
-│   └── index.html                  # Portfolio website
+│   ├── index.html                  # Portfolio principal (bilingüe)
+│   ├── favicon.svg                 # Favicon terminal-style
+│   └── *.sh                        # Scripts de generación
+├── blog/
+│   ├── index.html                  # Blog index con filtros
+│   └── posts/
+│       ├── _TEMPLATE.html          # Template para nuevos posts
+│       ├── notebook-a-servidor-homelab.html
+│       ├── monitoreo-python-ligero.html
+│       ├── cloudflare-tunnel-setup.html
+│       └── ... (15 posts más)
 ├── monitor/
-│   ├── sysmon_web.py              # Monitor script (genera HTML)
+│   ├── sysmon_web.py              # Monitor web (genera HTML)
 │   ├── sysmon.py                  # Monitor terminal (TUI)
 │   ├── start_monitor.sh           # Script de inicio
 │   └── sysmon-web.service         # Systemd service
 ├── .gitignore
 ├── LICENSE
 └── README.md
-```
+\`\`\`
 
-## 🎨 Personalización
+---
 
-### Colores del Website
+##
 
-Edita el `<style>` en `website/index.html`:
-
-```css
-/* Cambiar color de acentos */
-.links a {
-    color: #60a5fa;  /* Azul por defecto */
-}
-
-/* Cambiar background */
-body {
-    background: #0a0a0a;  /* Negro por defecto */
-}
-```
-
-### Umbrales de Alerta del Monitor
-
-Edita `monitor/sysmon_web.py`:
-
-```python
-# Línea ~115-117
-cpu_color = '#ef4444' if metrics['cpu']['percent'] > 80 else \
-            '#10b981' if metrics['cpu']['percent'] < 50 else '#f59e0b'
-
-# Cambia los valores 80 y 50 según necesites
-```
-
-### Frecuencia de Actualización
-
-```python
-# monitor/sysmon_web.py, línea 13
-UPDATE_INTERVAL = 30  # Cambiar a 10, 60, etc.
-```
-
-## 🖥️ Uso del Monitor de Terminal
-
-Además del monitor web, incluye una versión TUI para uso interactivo:
-
-```bash
-python3 monitor/sysmon.py
-```
-
-**Características**:
-- Interfaz ncurses en tiempo real
-- Colores dinámicos según carga
-- Lista de conexiones de red activas
-- Actualización continua (no requiere refresh manual)
-
-## 🔧 Instalación como Servicio Systemd
-
-### 1. Crear el servicio
-
-```bash
-sudo nano /etc/systemd/system/sysmon-web.service
-```
-
-```ini
-[Unit]
-Description=System Monitor Web Dashboard
-After=network.target docker.service
-
-[Service]
-Type=simple
-User=your-user
-WorkingDirectory=/opt/monitor
-ExecStart=/usr/bin/python3 /opt/monitor/sysmon_web.py
-Restart=always
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-```
-
-### 2. Activar e iniciar
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable sysmon-web
-sudo systemctl start sysmon-web
-```
-
-### 3. Verificar
-
-```bash
-sudo systemctl status sysmon-web
-sudo journalctl -u sysmon-web -f
-```
-
-## 📊 Métricas Monitoreadas
+ 📊 Métricas Monitoreadas
 
 | Métrica | Descripción | Fuente |
 |---------|-------------|--------|
-| **CPU** | Uso en % y núcleos disponibles | `/proc/stat` |
-| **RAM** | Usado/Total/Disponible en GB | `/proc/meminfo` |
-| **Disco** | Uso/Total/Libre en GB | `/proc/mounts` |
-| **Red** | Total enviado/recibido acumulado | `/proc/net/dev` |
-| **Uptime** | Tiempo desde último boot | `/proc/uptime` |
+| **CPU** | Uso en % y núcleos disponibles | \`/proc/stat\` |
+| **Temperatura** | Temperatura del CPU en °C | \`/sys/class/thermal/thermal_zone*/temp\` |
+| **RAM** | Usado/Total/Disponible en GB | \`/proc/meminfo\` |
+| **Disco** | Uso/Total/Libre en GB | \`/proc/mounts\` |
+| **Red** | Total enviado/recibido acumulado | \`/proc/net/dev\` |
+| **Uptime** | Tiempo desde último boot | \`/proc/uptime\` |
 | **Docker** | Estado de containers | Docker API |
 
-## 🛠️ Comandos Útiles
+---
 
-```bash
-# Ver si el monitor está corriendo
-ps aux | grep sysmon_web
+## ⭐ Show Your Support
 
-# Ver logs en tiempo real
-tail -f /tmp/sysmon.log
+Si este proyecto te fue útil o aprendiste algo nuevo, ¡dale una ⭐️!
 
-# Reiniciar el monitor
-pkill -f sysmon_web.py
-nohup python3 sysmon_web.py > /tmp/sysmon.log 2>&1 &
+También puedes:
+- Compartirlo con otros que estén aprendiendo DevOps
+- Dejar feedback en Issues
+- Contribuir con mejoras vía Pull Requests
 
-# Verificar última actualización del HTML
-stat /var/www/html/status.html
-
-# Ver permisos de escritura
-ls -la /var/www/html/status.html
-```
-
-## 🐛 Troubleshooting
-
-### El HTML no se genera
-
-```bash
-# Verificar que el script está corriendo
-ps aux | grep sysmon_web
-
-# Ver errores en logs
-cat /tmp/sysmon.log
-
-# Verificar permisos de escritura
-touch /var/www/html/test.html
-```
-
-### Error: ModuleNotFoundError: psutil
-
-```bash
-# Debian/Ubuntu
-sudo apt install python3-psutil python3-docker
-
-# Con pip (si no es managed environment)
-pip3 install psutil docker
-```
-
-### Docker containers no aparecen
-
-```bash
-# Agregar usuario al grupo docker
-sudo usermod -aG docker $USER
-
-# Reiniciar sesión
-exit
-# Volver a conectar via SSH
-```
-
-### 404 Not Found en /status.html
-
-```bash
-# Verificar que el archivo existe
-ls -l /var/www/html/status.html
-
-# Verificar configuración Nginx
-sudo nginx -t
-sudo systemctl restart nginx
-```
-
-## 📚 Additional Resources
-
-- [psutil Documentation](https://psutil.readthedocs.io/) - Python system monitoring library
-- [Docker Python SDK](https://docker-py.readthedocs.io/) - Docker API for Python
-
-## 🤝 Contribuciones
-
-¡Las contribuciones son bienvenidas! Si tienes ideas para mejorar:
-
-1. Fork el proyecto
-2. Crea una rama (`git checkout -b feature/MejorFeature`)
-3. Commit tus cambios (`git commit -m 'Add: nueva feature'`)
-4. Push (`git push origin feature/MejorFeature`)
-5. Abre un Pull Request
-
-## 💡 Ideas para Mejoras Futuras
-
-- [ ] Gráficos históricos con Chart.js
-- [ ] Alertas por email/webhook cuando se exceden umbrales
-- [ ] API REST para consultar métricas programáticamente
-- [ ] Dashboard multi-servidor
-- [ ] Modo light theme
-- [ ] Exportar métricas a Prometheus/Grafana
-
-## 📝 Licencia
-
-Este proyecto está bajo la licencia MIT - ver [LICENSE](LICENSE) para más detalles.
+---
 
 ## 👤 Autor
 
-**Kevin Jose Romero Perez**
+**Kevin Jose Romero Perez**  
+*DevOps Engineer | SRE | Cloud Infrastructure*
 
-- GitHub: [@romerok9](https://github.com/romerok9)
-- LinkedIn: [kevs-romero](https://www.linkedin.com/in/kevs-romero/)
-- Portfolio: [mytechzone.dev](https://mytechzone.dev) *(example)*
-
-## ⭐ Show your support
-
-Si este proyecto te fue útil, ¡dale una ⭐️!
-
-## 🙏 Agradecimientos
-
-- [psutil](https://github.com/giampaolo/psutil) - Librería para métricas del sistema
-- [docker-py](https://github.com/docker/docker-py) - API de Docker para Python
-- Inspiración de diseño: portfolios minimalistas en Dribbble
+- 🌐 Website: [mytechzone.dev](https://mytechzone.dev)
+- 💼 LinkedIn: [kevs-romero](https://www.linkedin.com/in/kevs-romero/)
+- 🐙 GitHub: [@romerok9](https://github.com/romerok9)
+- 🎓 Credly: [kevs-romero](https://www.credly.com/users/kevs-romero)
 
 ---
 
 **Made with ❤️ for the DevOps community**
-

@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2025 Kevin Jose Romero Perez
+Copyright (c) 2025-2026 Kevin Jose Romero Perez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -17,27 +17,18 @@ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OF THE OTHER DEALINGS IN THE
 SOFTWARE.
 
+---
 
+CONTENT LICENSE
 
+The written content of the blog posts (text, tutorials, and articles located 
+in the blog/posts/ directory) is NOT covered by the MIT License above.
 
+Blog Content © 2025-2026 Kevin Jose Romero Perez - All Rights Reserved
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+You may NOT copy, reproduce, or redistribute the blog content without explicit 
+permission from the author. The code (HTML/CSS/JavaScript/Python) used to 
+display the content remains under MIT License.
