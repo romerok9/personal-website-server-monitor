@@ -30,37 +30,37 @@ Productividad avanzada con AWS CLI, JMESPath y flujos de trabajo optimizados.
 
 ## 📅 Calendario de Publicación (Retroactivo)
 
-### Julio 2024
+### Julio 2025
 
 - **15 Jul** → Post 1: De Notebook Antigua a Servidor: Mi Home Lab DevOps ✅ PUBLICADO
 - **20 Jul** → Post 16: AWS CLI Productivity Tips: 10 Trucos que Debes Conocer
 - **28 Jul** → Post 7: Migración Masiva GP2 a GP3: Ahorrando Costos en AWS ✅ PUBLICADO
 
-### Agosto 2024
+### Agosto 2025
 
 - **08 Ago** → Post 12: IA en DevOps: Cómo los Agentes Cambiaron Mi Flujo de Trabajo
 - **12 Ago** → Post 2: n8n Self-Hosted: Instalación Completa con Docker Compose
 - **25 Ago** → Post 8: Bash + AWS CLI: Automatización de Infraestructura
 
-### Septiembre 2024
+### Septiembre 2025
 
 - **05 Sep** → Post 3: Monitoreo Ligero con Python: Sin Prometheus ni Grafana
 - **18 Sep** → Post 13: Prompt Engineering para SysAdmins: Técnicas Prácticas
 - **28 Sep** → Post 4: Cloudflare Tunnel: Servicios Locales Sin Abrir Puertos
 
-### Octubre 2024
+### Octubre 2025
 
 - **08 Oct** → Post 9: JMESPath: Queries Avanzadas en AWS CLI
 - **22 Oct** → Post 10: AWS SSO: Gestión de Múltiples Cuentas con CLI
 - **30 Oct** → Post 14: Lo Que la IA NO Puede Hacer: Límites y Precauciones
 
-### Noviembre 2024
+### Noviembre 2025
 
 - **02 Nov** → Post 17: Flujos de Trabajo Eficientes con AWS CLI y Bash
 - **10 Nov** → Post 5: Web Personal con i18n: Selector de Idiomas en Vanilla JS
 - **25 Nov** → Post 6: Systemd Services: De Script Bash a Daemon Profesional
 
-### Diciembre 2024
+### Diciembre 2025
 
 - **05 Dic** → Post 11: Scripts de Backup: S3 + Lifecycle Policies
 - **12 Dic** → Post 15: Caso Real: Debugging con Asistencia de IA ✅ PUBLICADO
@@ -74,33 +74,33 @@ Productividad avanzada con AWS CLI, JMESPath y flujos de trabajo optimizados.
 
 #### 🏠 Home Lab DevOps (6 de 6 ✅ SERIE COMPLETA)
 
-1. ✅ De Notebook Antigua a Servidor: Mi Home Lab DevOps (15 Jul 2024)
-2. ✅ n8n Self-Hosted: Instalación Completa con Docker Compose (12 Ago 2024)
-3. ✅ Monitoreo Ligero con Python: Sin Prometheus ni Grafana (05 Sep 2024)
-4. ✅ Cloudflare Tunnel: Servicios Locales Sin Abrir Puertos (28 Sep 2024)
-5. ✅ Web Personal con i18n: Selector de Idiomas en Vanilla JS (10 Nov 2024)
-6. ✅ Systemd Services: De Script Bash a Daemon Profesional (25 Nov 2024)
+1. ✅ De Notebook Antigua a Servidor: Mi Home Lab DevOps (15 Jul 2025)
+2. ✅ n8n Self-Hosted: Instalación Completa con Docker Compose (12 Ago 2025)
+3. ✅ Monitoreo Ligero con Python: Sin Prometheus ni Grafana (05 Sep 2025)
+4. ✅ Cloudflare Tunnel: Servicios Locales Sin Abrir Puertos (28 Sep 2025)
+5. ✅ Web Personal con i18n: Selector de Idiomas en Vanilla JS (10 Nov 2025)
+6. ✅ Systemd Services: De Script Bash a Daemon Profesional (25 Nov 2025)
 
 #### ☁️ Automatización AWS (5 de 5 ✅ SERIE COMPLETA)
 
-1. ✅ Migración Masiva GP2 a GP3: Ahorrando Costos en AWS (28 Jul 2024)
-2. ✅ Bash + AWS CLI: Automatización de Infraestructura (25 Ago 2024)
-3. ✅ AWS SSO: Gestión de Múltiples Cuentas con CLI (22 Oct 2024)
-4. ✅ Scripts de Backup: S3 + Lifecycle Policies (05 Dic 2024)
+1. ✅ Migración Masiva GP2 a GP3: Ahorrando Costos en AWS (28 Jul 2025)
+2. ✅ Bash + AWS CLI: Automatización de Infraestructura (25 Ago 2025)
+3. ✅ AWS SSO: Gestión de Múltiples Cuentas con CLI (22 Oct 2025)
+4. ✅ Scripts de Backup: S3 + Lifecycle Policies (05 Dic 2025)
 
 #### 🤖 Agentes de IA en DevOps (4 de 4 ✅ SERIE COMPLETA)
 
-1. ✅ IA en DevOps: Cómo los Agentes Cambiaron Mi Flujo de Trabajo (08 Ago 2024)
-2. ✅ Prompt Engineering para SysAdmins: Técnicas Prácticas (18 Sep 2024)
-3. ✅ Lo Que la IA NO Puede Hacer en DevOps: Limitaciones Reales (25 Oct 2024)
-4. ✅ Caso Real: Debugging con Asistencia de IA (12 Dic 2024)
+1. ✅ IA en DevOps: Cómo los Agentes Cambiaron Mi Flujo de Trabajo (08 Ago 2025)
+2. ✅ Prompt Engineering para SysAdmins: Técnicas Prácticas (18 Sep 2025)
+3. ✅ Lo Que la IA NO Puede Hacer en DevOps: Limitaciones Reales (25 Oct 2025)
+4. ✅ Caso Real: Debugging con Asistencia de IA (12 Dic 2025)
 
 #### 🛠️ AWS CLI Mastery (3 de 3 ✅ SERIE COMPLETA)
 
 1. ✅ AWS CLI Productivity Tips: 10 Trucos que Debes Conocer (20 Jul 2024)
-2. ✅ Flujos de Trabajo Eficientes con AWS CLI y Bash (02 Nov 2024)
-3. ✅ Error Handling en Scripts AWS: Patrones y Mejores Prácticas (18 Dic 2024)
-4. ✅ JMESPath: Queries Avanzadas en AWS CLI (08 Oct 2024)
+2. ✅ Flujos de Trabajo Eficientes con AWS CLI y Bash (02 Nov 2025)
+3. ✅ Error Handling en Scripts AWS: Patrones y Mejores Prácticas (18 Dic 2025)
+4. ✅ JMESPath: Queries Avanzadas en AWS CLI (08 Oct 2025)
 
 ---
 
@@ -348,7 +348,7 @@ Ideal para DevOps/SREs que [target audience].
 
 ## ✅ Status Actual
 
-**Última actualización:** 30 de Diciembre, 2024
+**Última actualización:** 2 de Enero, 2026
 
 - ✅ Blog desplegado y funcionando
 - ✅ **18 posts publicados (100% COMPLETO)** 🎉🎉🎉
