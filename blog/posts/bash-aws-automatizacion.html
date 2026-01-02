@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bash + AWS CLI: Automatización de Infraestructura | Kevin Romero</title>
+    <meta name="description" content="Scripts bash robustos para automatizar tareas en AWS. Manejo de errores, validaciones y patrones de diseño para infraestructura como código.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        article { background: #111; border: 1px solid #222; padding: 3rem; border-radius: 8px; }
+        .series-badge { background: #f59e0b20; color: #f59e0b; border: 1px solid #f59e0b; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
+        h1 { font-size: 2.5rem; color: #fff; margin: 1rem 0; }
+        h2 { color: #fff; font-size: 1.8rem; margin: 2rem 0 1rem; border-bottom: 2px solid #333; padding-bottom: 0.5rem; }
+        h3 { color: #e0e0e0; font-size: 1.3rem; margin: 1.5rem 0 1rem; }
+        pre { background: #0d0d0d; border: 1px solid #222; padding: 1.5rem; border-radius: 6px; overflow-x: auto; margin: 1.5rem 0; }
+        code { background: #1a1a1a; color: #60a5fa; padding: 0.2rem 0.5rem; border-radius: 3px; font-family: 'Courier New', monospace; }
+        pre code { background: none; padding: 0; color: #d0d0d0; }
+        .info-box { background: #0d1b2a; border-left: 4px solid #60a5fa; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        .success-box { background: #0d2a1b; border-left: 4px solid #10b981; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        ul, ol { margin-left: 2rem; margin-top: 1rem; }
+        li { margin: 0.5rem 0; }
+        footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #333; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" style="color: #60a5fa; text-decoration: none;">← Back to Blog</a>
+        <article>
+            <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #222;">
+                <span class="series-badge">☁️ Automatización AWS</span>
+                <div style="color: #666; margin: 0.5rem 0;">August 25, 2024</div>
+                <h1>Bash + AWS CLI: Automatización de Infraestructura</h1>
+            </div>
+            
+            <div style="color: #d0d0d0;">
+                <h2>📋 Contexto</h2>
+                <p>Bash + AWS CLI es una combinación poderosa para automatizar infraestructura. No necesitas Terraform o CloudFormation para todo: muchas tareas son más rápidas y simples con un buen script bash. En este post comparto patrones y scripts que uso constantemente.</p>
+
+                <h2>🎯 Por Qué Bash + AWS CLI</h2>
+                
+                <h3>Ventajas</h3>
+                <ul>
+                    <li><strong>Rápido de escribir:</strong> Script funcional en minutos</li>
+                    <li><strong>Sin dependencias:</strong> Solo necesitas AWS CLI instalado</li>
+                    <li><strong>Debugging simple:</strong> <code>set -x</code> y ves exactamente qué se ejecuta</li>
+                    <li><strong>Portátil:</strong> Corre en cualquier Linux/Mac</li>
+                    <li><strong>Ideal para tareas ad-hoc:</strong> Migraciones, cleanups, reportes</li>
+                </ul>
+
+                <h3>Cuándo Usar Bash vs Terraform</h3>
+                <ul>
+                    <li><strong>Bash:</strong> Tareas operativas, scripts de mantenimiento, reportes, migraciones</li>
+                    <li><strong>Terraform:</strong> Infraestructura declarativa, state management, múltiples entornos</li>
+                </ul>
+
+                <h2>🛠️ Patrón 1: Inventario de Recursos</h2>
+                
+                <h3>Script: Listar Instancias EC2 con Detalles</h3>
+                <pre><code>#!/bin/bash
+# ec2-inventory.sh - Lista todas las instancias EC2 con información útil
+
+set -euo pipefail
+
+readonly REGIONS=(
+    us-east-1
+    us-west-2
+    eu-west-1
+)
+
+log() {
+    echo "[$(date +'%H:%M:%S')] $*"
+}
+
+get_instances_in_region() {
+    local region=$1
+    
+    log "Scanning region: $region"
+    
+    aws ec2 describe-instances \
+        --region "$region" \
+        --query 'Reservations[].Instances[].[
+            InstanceId,
+            InstanceType,
+            State.Name,
+            Tags[?Key==`Name`].Value | [0],
+            Tags[?Key==`Environment`].Value | [0],
+            PrivateIpAddress,
+            PublicIpAddress,
+            LaunchTime
+        ]' \
+        --output text | \
+    while IFS=$'\t' read -r id type state name env private_ip public_ip launch_time; do
+        # Skip if no instances found
+        [ -z "$id" ] && continue
+        
+        # Calculate age
+        local age_days=$(( ($(date +%s) - $(date -d "$launch_time" +%s)) / 86400 ))
+        
+        printf "%-20s %-15s %-10s %-25s %-12s %s\n" \
+            "$id" \
+            "$type" \
+            "$state" \
+            "${name:-N/A}" \
+            "${env:-N/A}" \
+            "${age_days}d old"
+    done
+}
+
+main() {
+    echo "================================================================"
+    echo "  EC2 Inventory Report - $(date +'%Y-%m-%d')"
+    echo "================================================================"
+    echo ""
+    
+    printf "%-20s %-15s %-10s %-25s %-12s %s\n" \
+        "INSTANCE_ID" "TYPE" "STATE" "NAME" "ENVIRONMENT" "AGE"
+    echo "----------------------------------------------------------------"
+    
+    for region in "${REGIONS[@]}"; do
+        get_instances_in_region "$region"
+    done
+    
+    echo ""
+    log "✓ Inventory complete"
+}
+
+main "$@"</code></pre>
+
+                <h2>🛠️ Patrón 2: Operaciones Masivas</h2>
+                
+                <h3>Script: Detener Instancias No Productivas Automáticamente</h3>
+                <pre><code>#!/bin/bash
+# stop-non-prod.sh - Detiene instancias dev/staging fuera de horario laboral
+
+set -euo pipefail
+
+readonly BUSINESS_HOURS_START=8
+readonly BUSINESS_HOURS_END=18
+
+is_business_hours() {
+    local current_hour=$(date +%H)
+    
+    [ "$current_hour" -ge "$BUSINESS_HOURS_START" ] && \
+    [ "$current_hour" -lt "$BUSINESS_HOURS_END" ]
+}
+
+get_stoppable_instances() {
+    aws ec2 describe-instances \
+        --filters \
+            "Name=tag:Environment,Values=dev,staging" \
+            "Name=instance-state-name,Values=running" \
+            "Name=tag:AutoStop,Values=enabled" \
+        --query 'Reservations[].Instances[].[InstanceId,Tags[?Key==`Name`].Value|[0]]' \
+        --output text
+}
+
+stop_instances() {
+    local instances=("$@")
+    
+    if [ ${#instances[@]} -eq 0 ]; then
+        log "No instances to stop"
+        return 0
+    fi
+    
+    log "Stopping ${#instances[@]} instances..."
+    
+    aws ec2 stop-instances --instance-ids "${instances[@]}" --output json | \
+        jq -r '.StoppingInstances[] | "\(.InstanceId): \(.PreviousState.Name) → \(.CurrentState.Name)"'
+}
+
+main() {
+    log "Checking if we're outside business hours..."
+    
+    if is_business_hours; then
+        log "It's business hours (8 AM - 6 PM), skipping auto-stop"
+        exit 0
+    fi
+    
+    log "Outside business hours, proceeding with auto-stop"
+    
+    local instances=()
+    while IFS=$'\t' read -r instance_id name; do
+        [ -z "$instance_id" ] && continue
+        
+        log "Found: $instance_id ($name)"
+        instances+=("$instance_id")
+    done < <(get_stoppable_instances)
+    
+    if [ ${#instances[@]} -gt 0 ]; then
+        stop_instances "${instances[@]}"
+        log "✓ Stopped ${#instances[@]} instances"
+    else
+        log "✓ No instances to stop"
+    fi
+}
+
+main "$@"</code></pre>
+
+                <div class="info-box">
+                    <strong>💡 Tip:</strong> Ejecuta este script con cron a las 6 PM:<br>
+                    <code>0 18 * * * /path/to/stop-non-prod.sh</code>
+                </div>
+
+                <h2>🛠️ Patrón 3: Validación y Compliance</h2>
+                
+                <h3>Script: Auditar Security Groups Abiertos</h3>
+                <pre><code>#!/bin/bash
+# audit-security-groups.sh - Detecta security groups con reglas inseguras
+
+set -euo pipefail
+
+readonly DANGEROUS_PORTS=(22 3389 3306 5432 6379 27017)
+
+find_open_security_groups() {
+    aws ec2 describe-security-groups \
+        --query 'SecurityGroups[].[GroupId,GroupName,IpPermissions]' \
+        --output json | \
+    jq -r '.[] | 
+        select(.[2][]? | 
+            .IpRanges[]?.CidrIp == "0.0.0.0/0" and 
+            (.FromPort // 0) <= 65535
+        ) | 
+        "\(.[0])\t\(.[1])"'
+}
+
+check_security_group() {
+    local group_id=$1
+    local group_name=$2
+    
+    local violations=$(aws ec2 describe-security-groups \
+        --group-ids "$group_id" \
+        --query 'SecurityGroups[0].IpPermissions[]' \
+        --output json | \
+    jq -r '.[] | 
+        select(.IpRanges[]?.CidrIp == "0.0.0.0/0") | 
+        "  Port \(.FromPort // "ALL") → 0.0.0.0/0 (PUBLIC)"')
+    
+    if [ -n "$violations" ]; then
+        echo ""
+        echo "🚨 $group_name ($group_id):"
+        echo "$violations"
+        return 1
+    fi
+    
+    return 0
+}
+
+main() {
+    echo "================================================================"
+    echo "  Security Groups Audit - $(date +'%Y-%m-%d')"
+    echo "================================================================"
+    
+    local violations_found=0
+    
+    while IFS=$'\t' read -r group_id group_name; do
+        [ -z "$group_id" ] && continue
+        
+        if ! check_security_group "$group_id" "$group_name"; then
+            ((violations_found++))
+        fi
+    done < <(find_open_security_groups)
+    
+    echo ""
+    echo "================================================================"
+    if [ $violations_found -eq 0 ]; then
+        echo "✅ No violations found"
+    else
+        echo "❌ Found $violations_found security group(s) with violations"
+        exit 1
+    fi
+}
+
+main "$@"</code></pre>
+
+                <h2>🛠️ Patrón 4: Cost Optimization</h2>
+                
+                <h3>Script: Identificar Recursos Sin Usar</h3>
+                <pre><code>#!/bin/bash
+# find-unused-resources.sh - Detecta recursos que generan costos innecesarios
+
+set -euo pipefail
+
+find_unattached_ebs_volumes() {
+    echo "📦 Unattached EBS Volumes:"
+    echo ""
+    
+    aws ec2 describe-volumes \
+        --filters "Name=status,Values=available" \
+        --query 'Volumes[].[VolumeId,Size,VolumeType,CreateTime,Tags[?Key==`Name`].Value|[0]]' \
+        --output text | \
+    while IFS=$'\t' read -r vol_id size type created name; do
+        local age_days=$(( ($(date +%s) - $(date -d "$created" +%s)) / 86400 ))
+        local monthly_cost=$(echo "$size * 0.10" | bc)  # ~$0.10/GB for GP3
+        
+        printf "  %s (%s) - %dGB %s - Created %dd ago - ~\$%.2f/month\n" \
+            "$vol_id" \
+            "${name:-No Name}" \
+            "$size" \
+            "$type" \
+            "$age_days" \
+            "$monthly_cost"
+    done
+}
+
+find_unused_elastic_ips() {
+    echo ""
+    echo "🌐 Unassociated Elastic IPs:"
+    echo ""
+    
+    aws ec2 describe-addresses \
+        --query 'Addresses[?AssociationId==`null`].[PublicIp,AllocationId]' \
+        --output text | \
+    while IFS=$'\t' read -r ip allocation_id; do
+        echo "  $ip ($allocation_id) - \$3.60/month wasted"
+    done
+}
+
+find_old_snapshots() {
+    echo ""
+    echo "💾 Old Snapshots (>90 days):"
+    echo ""
+    
+    local cutoff_date=$(date -d '90 days ago' +%Y-%m-%d)
+    
+    aws ec2 describe-snapshots \
+        --owner-ids self \
+        --query "Snapshots[?StartTime<'$cutoff_date'].[SnapshotId,VolumeSize,StartTime,Description]" \
+        --output text | \
+    while IFS=$'\t' read -r snap_id size start_time desc; do
+        local age_days=$(( ($(date +%s) - $(date -d "$start_time" +%s)) / 86400 ))
+        local monthly_cost=$(echo "$size * 0.05" | bc)  # ~$0.05/GB for snapshots
+        
+        printf "  %s - %dGB - %dd old - ~\$%.2f/month\n" \
+            "$snap_id" \
+            "$size" \
+            "$age_days" \
+            "$monthly_cost"
+    done
+}
+
+find_stopped_instances() {
+    echo ""
+    echo "🛑 Stopped Instances (still incurring EBS costs):"
+    echo ""
+    
+    aws ec2 describe-instances \
+        --filters "Name=instance-state-name,Values=stopped" \
+        --query 'Reservations[].Instances[].[InstanceId,InstanceType,StateTransitionReason,Tags[?Key==`Name`].Value|[0]]' \
+        --output text | \
+    while IFS=$'\t' read -r id type reason name; do
+        # Extract stop date from reason
+        local stopped_date=$(echo "$reason" | grep -oP '\(\d{4}-\d{2}-\d{2}' | tr -d '(')
+        
+        if [ -n "$stopped_date" ]; then
+            local days_stopped=$(( ($(date +%s) - $(date -d "$stopped_date" +%s)) / 86400 ))
+            printf "  %s (%s) - %s - Stopped %dd ago\n" \
+                "$id" \
+                "${name:-No Name}" \
+                "$type" \
+                "$days_stopped"
+        fi
+    done
+}
+
+main() {
+    echo "================================================================"
+    echo "  Unused Resources Report - $(date +'%Y-%m-%d')"
+    echo "================================================================"
+    echo ""
+    
+    find_unattached_ebs_volumes
+    find_unused_elastic_ips
+    find_old_snapshots
+    find_stopped_instances
+    
+    echo ""
+    echo "================================================================"
+    echo "💡 Consider cleaning up these resources to reduce costs"
+    echo "================================================================"
+}
+
+main "$@"</code></pre>
+
+                <h2>🛠️ Patrón 5: Deployment Automation</h2>
+                
+                <h3>Script: Blue/Green Deployment Simple</h3>
+                <pre><code>#!/bin/bash
+# blue-green-deploy.sh - Simple blue/green deployment for EC2 + ALB
+
+set -euo pipefail
+
+readonly ALB_NAME="my-app-alb"
+readonly ASG_BLUE="my-app-asg-blue"
+readonly ASG_GREEN="my-app-asg-green"
+
+get_active_asg() {
+    # Determine which ASG is currently receiving traffic
+    local blue_capacity=$(aws autoscaling describe-auto-scaling-groups \
+        --auto-scaling-group-names "$ASG_BLUE" \
+        --query 'AutoScalingGroups[0].DesiredCapacity' \
+        --output text)
+    
+    [ "$blue_capacity" -gt 0 ] && echo "$ASG_BLUE" || echo "$ASG_GREEN"
+}
+
+get_inactive_asg() {
+    local active=$(get_active_asg)
+    [ "$active" = "$ASG_BLUE" ] && echo "$ASG_GREEN" || echo "$ASG_BLUE"
+}
+
+deploy_to_asg() {
+    local asg=$1
+    local ami_id=$2
+    
+    log "Updating launch template with new AMI: $ami_id"
+    
+    # Update launch template
+    aws ec2 create-launch-template-version \
+        --launch-template-name "$asg" \
+        --source-version '$Latest' \
+        --launch-template-data "{\"ImageId\":\"$ami_id\"}"
+    
+    log "Scaling up $asg..."
+    
+    # Scale up the inactive ASG
+    aws autoscaling update-auto-scaling-group \
+        --auto-scaling-group-name "$asg" \
+        --desired-capacity 2 \
+        --min-size 2
+    
+    log "Waiting for instances to be healthy..."
+    
+    # Wait for instances to be InService
+    local max_wait=600  # 10 minutes
+    local elapsed=0
+    
+    while [ $elapsed -lt $max_wait ]; do
+        local healthy=$(aws autoscaling describe-auto-scaling-groups \
+            --auto-scaling-group-names "$asg" \
+            --query 'AutoScalingGroups[0].Instances[?HealthStatus==`Healthy`] | length(@)' \
+            --output text)
+        
+        if [ "$healthy" -ge 2 ]; then
+            log "✓ $asg has $healthy healthy instances"
+            return 0
+        fi
+        
+        log "Waiting... ($healthy/2 healthy)"
+        sleep 30
+        elapsed=$((elapsed + 30))
+    done
+    
+    error "Timeout waiting for healthy instances"
+    return 1
+}
+
+switch_traffic() {
+    local new_asg=$1
+    local old_asg=$2
+    
+    log "Switching traffic from $old_asg to $new_asg..."
+    
+    # In a real scenario, you'd update ALB target group
+    # For this example, we just scale down the old ASG
+    
+    aws autoscaling update-auto-scaling-group \
+        --auto-scaling-group-name "$old_asg" \
+        --desired-capacity 0 \
+        --min-size 0
+    
+    log "✓ Traffic switched successfully"
+}
+
+main() {
+    local new_ami_id=${1:?AMI ID required}
+    
+    log "Starting blue/green deployment..."
+    
+    local active_asg=$(get_active_asg)
+    local inactive_asg=$(get_inactive_asg)
+    
+    log "Active ASG: $active_asg"
+    log "Deploying to: $inactive_asg"
+    
+    if deploy_to_asg "$inactive_asg" "$new_ami_id"; then
+        switch_traffic "$inactive_asg" "$active_asg"
+        log "✅ Deployment complete"
+    else
+        error "❌ Deployment failed"
+        exit 1
+    fi
+}
+
+main "$@"</code></pre>
+
+                <h2>💡 Mejores Prácticas</h2>
+                
+                <h3>1. Siempre Usa Error Handling</h3>
+                <pre><code># Mandatory header
+set -euo pipefail
+IFS=$'\n\t'</code></pre>
+
+                <h3>2. Logging Consistente</h3>
+                <pre><code>log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"; }
+error() { echo "[ERROR] $*" >&2; }</code></pre>
+
+                <h3>3. Dry-Run Support</h3>
+                <pre><code>readonly DRY_RUN=${DRY_RUN:-0}
+
+execute() {
+    if [ "$DRY_RUN" = "1" ]; then
+        echo "[DRY-RUN] Would execute: $*"
+    else
+        "$@"
+    fi
+}
+
+# Usage
+execute aws ec2 stop-instances --instance-ids i-xxx</code></pre>
+
+                <h3>4. Validación de Prerequisites</h3>
+                <pre><code>check_prerequisites() {
+    command -v aws >/dev/null || { error "AWS CLI not found"; exit 1; }
+    command -v jq >/dev/null || { error "jq not found"; exit 1; }
+    aws sts get-caller-identity &>/dev/null || { error "Not authenticated"; exit 1; }
+}</code></pre>
+
+                <div class="success-box">
+                    <strong>✅ Checklist para Scripts Production-Ready:</strong><br>
+                    • Error handling (<code>set -euo pipefail</code>)<br>
+                    • Logging con timestamps<br>
+                    • Validación de inputs<br>
+                    • Dry-run mode<br>
+                    • Help message (<code>--help</code>)<br>
+                    • Exit codes apropiados<br>
+                    • Comentarios en secciones complejas
+                </div>
+
+                <h2>📚 Recursos Útiles</h2>
+                <ul>
+                    <li><a href="https://docs.aws.amazon.com/cli/latest/reference/" target="_blank">AWS CLI Command Reference</a></li>
+                    <li><a href="https://jmespath.org/" target="_blank">JMESPath Tutorial</a></li>
+                    <li><a href="https://www.shellcheck.net/" target="_blank">ShellCheck</a> - Linter para bash</li>
+                </ul>
+
+                <h2>💭 Conclusión</h2>
+                <p>Bash + AWS CLI es una combinación poderosa para automatización rápida y efectiva. No necesitas frameworks complejos para muchas tareas. Con buenos patrones, error handling robusto y validaciones, puedes crear scripts confiables que ahorren horas de trabajo manual.</p>
+
+                <p>Los scripts en este post son ejemplos reales que uso (con adaptaciones). Úsalos como base para tus propias automatizaciones.</p>
+            </div>
+        </article>
+        <footer>
+            <p>© 2024 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a></p>
+        </footer>
+    </div>
+</body>
+</html>
+

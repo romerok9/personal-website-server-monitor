@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De Notebook Antigua a Servidor: Mi Home Lab DevOps | Kevin Romero</title>
+    <meta name="description" content="Cómo convertí una notebook vieja en un servidor DevOps 24/7 con Debian, Docker, n8n y monitoreo personalizado">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            line-height: 1.7;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .back-link {
+            display: inline-block;
+            color: #60a5fa;
+            text-decoration: none;
+            margin-bottom: 2rem;
+            transition: color 0.2s;
+        }
+        
+        .back-link:hover {
+            color: #93c5fd;
+        }
+        
+        article {
+            background: #111;
+            border: 1px solid #222;
+            padding: 3rem;
+            border-radius: 8px;
+        }
+        
+        .post-header {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #222;
+        }
+        
+        .series-badge {
+            display: inline-block;
+            background: #10b98120;
+            color: #10b981;
+            border: 1px solid #10b981;
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .post-date {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        
+        .post-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            background: #1a1a1a;
+            color: #60a5fa;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            border: 1px solid #333;
+        }
+        
+        .post-content {
+            color: #d0d0d0;
+        }
+        
+        h2 {
+            color: #fff;
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #333;
+        }
+        
+        h3 {
+            color: #e0e0e0;
+            font-size: 1.3rem;
+            margin: 1.5rem 0 1rem;
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        code {
+            background: #1a1a1a;
+            color: #60a5fa;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        pre {
+            background: #0d0d0d;
+            border: 1px solid #222;
+            border-radius: 6px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: #d0d0d0;
+            display: block;
+            line-height: 1.6;
+        }
+        
+        .highlight {
+            background: #1a1a1a;
+            border-left: 4px solid #60a5fa;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .highlight strong {
+            color: #60a5fa;
+        }
+        
+        a {
+            color: #60a5fa;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        a:hover {
+            color: #93c5fd;
+            text-decoration: underline;
+        }
+        
+        .info-box {
+            background: #0d1b2a;
+            border-left: 4px solid #60a5fa;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .warning-box {
+            background: #2a1a0d;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .resources-list {
+            background: #0a0a0a;
+            padding: 1.5rem;
+            border: 1px solid #222;
+            border-radius: 6px;
+            margin: 1.5rem 0;
+        }
+        
+        .resources-list h3 {
+            margin-top: 0;
+            color: #60a5fa;
+        }
+        
+        .resources-list ul {
+            margin-left: 1.5rem;
+        }
+        
+        footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #333;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" class="back-link">← Back to Blog</a>
+        
+        <article>
+            <div class="post-header">
+                <span class="series-badge">🏠 Mi Home Lab DevOps</span>
+                <div class="post-date">July 15, 2024</div>
+                <h1>De Notebook Antigua a Servidor: Mi Home Lab DevOps</h1>
+                <div class="post-tags">
+                    <span class="tag">homelab</span>
+                    <span class="tag">debian</span>
+                    <span class="tag">hardware</span>
+                    <span class="tag">docker</span>
+                </div>
+            </div>
+            
+            <div class="post-content">
+                <h2>📋 Contexto</h2>
+                <p>
+                    Como DevOps Engineer, siempre he querido tener un entorno de pruebas personal donde experimentar 
+                    con tecnologías sin limitaciones. Comprar un servidor dedicado o mantener instancias EC2 corriendo 24/7 
+                    puede ser costoso, especialmente para proyectos personales de aprendizaje.
+                </p>
+                <p>
+                    La solución: una notebook antigua que ya no usaba, con suficiente potencia para correr servicios 
+                    básicos pero sin valor comercial. Perfecto para convertirlo en mi home lab personal.
+                </p>
+
+                <h2>🎯 Objetivo</h2>
+                <p>Convertir una notebook antigua en un servidor funcional que pueda:</p>
+                <ul>
+                    <li>Correr 24/7 de forma confiable</li>
+                    <li>Alojar servicios en containers Docker</li>
+                    <li>Ser accesible desde internet de forma segura</li>
+                    <li>Servir como plataforma de aprendizaje y experimentación</li>
+                    <li>Consumir mínima energía eléctrica</li>
+                </ul>
+
+                <h2>🛠️ Hardware y Especificaciones</h2>
+                <h3>Notebook Base</h3>
+                <ul>
+                    <li><strong>Modelo:</strong> Lenovo (comprada a inicios del 2013, ~12 años de antigüedad)</li>
+                    <li><strong>CPU:</strong> Intel Celeron B970 (2 cores, 2.3 GHz, generación Sandy Bridge)</li>
+                    <li><strong>RAM:</strong> 4 GB DDR3</li>
+                    <li><strong>Storage:</strong> 512 GB SSD</li>
+                    <li><strong>Red:</strong> Ethernet 1 Gbps + WiFi</li>
+                </ul>
+
+                <div class="info-box">
+                    <strong>💡 Tip:</strong> No necesitas hardware potente para un home lab básico. 
+                    Aunque el Celeron B970 es un procesador modesto de la generación Sandy Bridge, 
+                    ofrece buen rendimiento para servicios en containers. Estas especificaciones 
+                    son más que suficientes para correr Docker, n8n, Nginx y monitoreo.
+                </div>
+
+                <h3>Preparación del Hardware</h3>
+                <ol>
+                    <li><strong>Limpieza física:</strong> Abrí la notebook, limpié ventiladores y apliqué pasta térmica nueva</li>
+                    <li><strong>Configuración BIOS:</strong> Activé "power on after power failure" para auto-start</li>
+                    <li><strong>Ventilación:</strong> Coloqué la notebook en posición elevada para mejor airflow</li>
+                    <li><strong>Red:</strong> Conexión por cable Ethernet (más estable que WiFi)</li>
+                </ol>
+
+                <h3>⚙️ Problema Crítico: Cierre de Tapa</h3>
+                <p>
+                    Un problema importante al usar una notebook como servidor: <strong>al cerrar la tapa, 
+                    Debian suspende el sistema automáticamente</strong> y todos los servicios dejan de funcionar. 
+                    Esto es un comportamiento por defecto en laptops, pero no deseable para un servidor.
+                </p>
+
+                <div class="warning-box">
+                    <strong>Síntoma:</strong> Al cerrar la tapa de la notebook, el sistema entra en suspensión 
+                    y el sitio web/servicios se vuelven inaccesibles hasta que vuelves a abrir la tapa.
+                </div>
+
+                <h4>Solución: Configurar systemd para Ignorar Cierre de Tapa</h4>
+                <pre><code># Editar configuración de systemd
+sudo nano /etc/systemd/logind.conf
+
+# Descomentar y modificar estas líneas:
+HandleLidSwitch=ignore
+HandleLidSwitchExternalPower=ignore
+HandleLidSwitchDocked=ignore
+
+# Guardar y reiniciar el servicio
+sudo systemctl restart systemd-logind</code></pre>
+
+                <p>
+                    Con esta configuración, puedes cerrar la tapa de la notebook y el servidor continúa 
+                    funcionando normalmente. La pantalla se apaga pero el sistema permanece activo.
+                </p>
+
+                <div class="info-box">
+                    <strong>💡 Tip de Temperatura:</strong> Durante los días frescos, cierro la tapa sin problemas. 
+                    En días calurosos de verano, dejo la tapa abierta para mejor ventilación y evitar que el 
+                    equipo se caliente. El hardware antiguo es más sensible a temperaturas elevadas.
+                </div>
+
+                <h2>💻 Instalación de Debian</h2>
+                <h3>¿Por qué Debian?</h3>
+                <ul>
+                    <li><strong>Estabilidad:</strong> Ideal para servidores que corren 24/7</li>
+                    <li><strong>Ligero:</strong> Sin GUI innecesaria, solo terminal</li>
+                    <li><strong>Soporte LTS:</strong> Actualizaciones de seguridad por años</li>
+                    <li><strong>Conocimiento transferible:</strong> Muy similar a Ubuntu Server</li>
+                </ul>
+
+                <h3>Proceso de Instalación</h3>
+                <pre><code># 1. Descarga de ISO
+# Debian 12 "Bookworm" - netinstall (imagen mínima)
+
+# 2. Crear USB booteable con Balena Etcher
+
+# 3. Instalación mínima:
+# - Sin entorno de escritorio
+# - SSH server: ✅
+# - Standard system utilities: ✅</code></pre>
+
+                <h3>Configuración Inicial Post-Instalación</h3>
+                <pre><code># Actualizar sistema
+sudo apt update && sudo apt upgrade -y
+
+# Instalar herramientas esenciales
+sudo apt install -y vim curl wget git htop net-tools
+
+# Configurar IP estática en router (reserva DHCP)
+# O configurar en /etc/network/interfaces
+
+# Instalar Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
+sudo usermod -aG docker $USER
+
+# Instalar Docker Compose
+sudo apt install docker-compose-plugin -y</code></pre>
+
+                <h2>🐳 Servicios Implementados</h2>
+                <h3>1. n8n - Plataforma de Automatización</h3>
+                <p>Mi primer servicio: n8n self-hosted para crear workflows de automatización.</p>
+                <pre><code># docker-compose.yml básico
+version: '3.8'
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=secure_password
+    volumes:
+      - n8n_data:/home/node/.n8n
+    restart: unless-stopped
+
+volumes:
+  n8n_data:</code></pre>
+
+                <h3>2. Nginx - Reverse Proxy</h3>
+                <p>Para servir mi sitio web personal y otros servicios HTTP.</p>
+
+                <h3>3. Sistema de Monitoreo Personalizado</h3>
+                <p>Script en Python (sysmon.py) para monitorear recursos del servidor en tiempo real.</p>
+
+                <h3>4. PostgreSQL</h3>
+                <p>Base de datos para n8n y futuros proyectos.</p>
+
+                <h2>🌐 Acceso Desde Internet: Cloudflare Tunnel</h2>
+                <p>
+                    En lugar de abrir puertos en el router (inseguro y problemático con IP dinámica), 
+                    usé <strong>Cloudflare Tunnel</strong> (anteriormente Argo Tunnel):
+                </p>
+
+                <h3>Ventajas de Cloudflare Tunnel</h3>
+                <ul>
+                    <li>✅ No requiere abrir puertos en el router</li>
+                    <li>✅ IP dinámica no es problema</li>
+                    <li>✅ SSL/TLS automático</li>
+                    <li>✅ DDoS protection incluido</li>
+                    <li>✅ Gratis para uso personal</li>
+                </ul>
+
+                <h3>Setup Básico</h3>
+                <pre><code># Instalar cloudflared
+curl -L --output cloudflared.deb \
+  https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+sudo dpkg -i cloudflared.deb
+
+# Autenticar
+cloudflared tunnel login
+
+# Crear tunnel
+cloudflared tunnel create homelab
+
+# Configurar routing
+cloudflared tunnel route dns homelab mytechzone.dev
+
+# Iniciar tunnel
+cloudflared tunnel run homelab</code></pre>
+
+                <div class="warning-box">
+                    <strong>⚠️ Seguridad:</strong> Aunque Cloudflare Tunnel es seguro, asegúrate de 
+                    implementar autenticación en todos tus servicios (basic auth, OAuth, etc.).
+                </div>
+
+                <h2>📊 Monitoreo y Mantenimiento</h2>
+                <h3>Dashboard de Monitoreo</h3>
+                <p>Creé un dashboard simple en HTML que muestra:</p>
+                <ul>
+                    <li>CPU, RAM, Disco en uso</li>
+                    <li>Estado de containers Docker</li>
+                    <li>Uptime del sistema</li>
+                    <li>Network I/O</li>
+                </ul>
+
+                <p>Script Python que actualiza el dashboard cada 30 segundos usando un servicio systemd.</p>
+
+                <h3>Mantenimiento Automatizado</h3>
+                <pre><code># Crontab para tareas automáticas
+# Actualizar sistema semanalmente
+0 3 * * 0 apt update && apt upgrade -y
+
+# Limpiar Docker images antiguas
+0 4 * * 0 docker system prune -af
+
+# Backup de volúmenes Docker
+0 2 * * * /home/user/scripts/backup_volumes.sh</code></pre>
+
+                <h2>💡 Consumo Eléctrico</h2>
+                <p>
+                    Una ventaja inesperada: el consumo eléctrico es mínimo comparado con un servidor tradicional. 
+                    El Celeron B970 es especialmente eficiente:
+                </p>
+                <ul>
+                    <li><strong>Notebook en idle:</strong> ~12-18W</li>
+                    <li><strong>Notebook bajo carga:</strong> ~30-40W</li>
+                    <li><strong>TDP del CPU:</strong> 35W (muy eficiente para 24/7)</li>
+                    <li><strong>Costo mensual:</strong> Aproximadamente $3-5 USD (dependiendo del precio de electricidad)</li>
+                </ul>
+
+                <div class="info-box">
+                    <strong>Comparación:</strong> Un servidor dedicado básico consume 50-150W y cuesta 
+                    $50-100/mes en hosting. Mi solución cuesta menos de $5/mes en electricidad. 
+                    El Celeron B970, aunque modesto, es ideal para este uso 24/7 por su bajo consumo.
+                </div>
+
+                <h2>🎓 Aprendizajes y Experimentos</h2>
+                <p>Este home lab me ha permitido experimentar con:</p>
+                <ul>
+                    <li>Docker y Docker Compose en un entorno real</li>
+                    <li>Nginx como reverse proxy</li>
+                    <li>Cloudflare Tunnel y CDN</li>
+                    <li>Systemd para servicios persistentes</li>
+                    <li>Scripting en Bash y Python para automatización</li>
+                    <li>Troubleshooting de networking y containers</li>
+                    <li>Monitoreo y observabilidad básica</li>
+                </ul>
+
+                <h2>🐛 Problemas Comunes y Soluciones</h2>
+                <h3>1. Notebook se suspende al cerrar la tapa (CRÍTICO)</h3>
+                <p><strong>Problema:</strong> Al cerrar la tapa de la notebook, Debian la suspende automáticamente y todos los servicios dejan de funcionar.</p>
+                <p><strong>Solución:</strong> Configurar systemd-logind para ignorar el cierre de tapa:</p>
+                <pre><code># Editar configuración de systemd-logind
+sudo nano /etc/systemd/logind.conf
+
+# Descomentar y modificar estas líneas:
+HandleLidSwitch=ignore
+HandleLidSwitchExternalPower=ignore
+HandleLidSwitchDocked=ignore
+
+# Reiniciar servicio
+sudo systemctl restart systemd-logind
+
+# Verificar configuración
+cat /etc/systemd/logind.conf | grep -i lid</code></pre>
+                
+                <div class="warning-box">
+                    <strong>⚠️ Gestión de temperatura:</strong> Cerrar la tapa puede aumentar la temperatura interna. 
+                    Recomendación: solo cerrar la tapa en días frescos. En verano o días calurosos, dejar la tapa 
+                    abierta para mejor ventilación y evitar sobrecalentamiento del equipo.
+                </div>
+
+                <h3>2. Servidor no responde después de un apagón</h3>
+                <p><strong>Solución:</strong> Configurar en BIOS "Restore on AC/Power Loss" a "Power On"</p>
+
+                <h3>3. IP cambia constantemente (DHCP)</h3>
+                <p><strong>Solución:</strong> Reservar IP en el router usando la MAC address del servidor</p>
+
+                <h3>4. Containers se detienen inesperadamente</h3>
+                <p><strong>Solución:</strong> Agregar <code>restart: unless-stopped</code> en docker-compose.yml</p>
+
+                <h3>5. Disco se llena rápidamente</h3>
+                <p><strong>Solución:</strong> Limpiar logs de Docker y configurar log rotation</p>
+                <pre><code># Configurar log rotation en /etc/docker/daemon.json
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  }
+}</code></pre>
+
+                <h2>✅ Resultado Final</h2>
+                <p>Después de varias semanas de configuración y ajustes, tengo un servidor funcional que:</p>
+                <ul>
+                    <li>✅ Corre 24/7 con uptime de ~99%</li>
+                    <li>✅ Aloja mi sitio web personal: <a href="https://mytechzone.dev" target="_blank">mytechzone.dev</a></li>
+                    <li>✅ Ejecuta n8n para automatizaciones personales</li>
+                    <li>✅ Tiene dashboard de monitoreo en tiempo real</li>
+                    <li>✅ Es accesible desde internet de forma segura</li>
+                    <li>✅ Cuesta menos de $5/mes en electricidad</li>
+                    <li>✅ Me sirve como laboratorio de aprendizaje continuo</li>
+                </ul>
+
+                <div class="highlight">
+                    <strong>URLs del proyecto:</strong><br>
+                    • Sitio web: <a href="https://mytechzone.dev">mytechzone.dev</a><br>
+                    • Server status: <a href="https://mytechzone.dev/status.html">mytechzone.dev/status.html</a><br>
+                    • n8n: <a href="https://n8n.mytechzone.dev">n8n.mytechzone.dev</a>
+                </div>
+
+                <div class="resources-list">
+                    <h3>📚 Recursos Útiles</h3>
+                    <ul>
+                        <li><a href="https://www.debian.org/releases/stable/amd64/" target="_blank">Debian Installation Guide</a></li>
+                        <li><a href="https://docs.docker.com/get-started/" target="_blank">Docker Documentation</a></li>
+                        <li><a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/" target="_blank">Cloudflare Tunnel Documentation</a></li>
+                        <li><a href="https://docs.n8n.io/hosting/" target="_blank">n8n Self-Hosting Guide</a></li>
+                        <li><a href="https://github.com/romerok9/personal-website-server-monitor" target="_blank">Mi proyecto en GitHub</a></li>
+                    </ul>
+                </div>
+
+                <h2>🚀 Próximos Pasos</h2>
+                <p>Mi home lab es un trabajo en progreso. Próximas mejoras planeadas:</p>
+                <ol>
+                    <li>Implementar Prometheus + Grafana para métricas avanzadas</li>
+                    <li>Agregar sistema de alertas vía Telegram</li>
+                    <li>Backups automatizados a AWS S3</li>
+                    <li>Experimentar con Kubernetes (k3s)</li>
+                    <li>CI/CD pipeline con GitHub Actions</li>
+                </ol>
+
+                <h2>💭 Conclusión</h2>
+                <p>
+                    Convertir una notebook antigua en un servidor home lab ha sido una de las mejores 
+                    decisiones para mi aprendizaje como DevOps Engineer. No solo me permite experimentar 
+                    con tecnologías sin costos significativos, sino que también me da experiencia práctica 
+                    en troubleshooting, administración de sistemas y arquitectura de servicios.
+                </p>
+                <p>
+                    Si estás considerando crear tu propio home lab, mi consejo es: <strong>empieza simple</strong>. 
+                    No necesitas hardware costoso ni configuraciones complejas. Una máquina vieja, Docker, 
+                    y ganas de aprender son suficientes para comenzar.
+                </p>
+                <p>
+                    En próximos posts, profundizaré en cada componente: instalación detallada de n8n, 
+                    sistema de monitoreo con Python, configuración de Cloudflare Tunnel, y más.
+                </p>
+            </div>
+        </article>
+        
+        <footer>
+            <p>© 2024 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a> | <a href="https://github.com/romerok9">GitHub</a></p>
+        </footer>
+    </div>
+</body>
+</html>
+

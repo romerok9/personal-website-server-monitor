@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS SSO: Gestión de Múltiples Cuentas con CLI | Kevin Romero</title>
+    <meta name="description" content="Configura AWS SSO para trabajar eficientemente con múltiples cuentas. Perfiles, login automatizado y scripts multi-cuenta.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        article { background: #111; border: 1px solid #222; padding: 3rem; border-radius: 8px; }
+        .series-badge { background: #f59e0b20; color: #f59e0b; border: 1px solid #f59e0b; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
+        h1 { font-size: 2.5rem; color: #fff; margin: 1rem 0; }
+        h2 { color: #fff; font-size: 1.8rem; margin: 2rem 0 1rem; border-bottom: 2px solid #333; padding-bottom: 0.5rem; }
+        h3 { color: #e0e0e0; font-size: 1.3rem; margin: 1.5rem 0 1rem; }
+        pre { background: #0d0d0d; border: 1px solid #222; padding: 1.5rem; border-radius: 6px; overflow-x: auto; margin: 1.5rem 0; }
+        code { background: #1a1a1a; color: #60a5fa; padding: 0.2rem 0.5rem; border-radius: 3px; font-family: 'Courier New', monospace; }
+        pre code { background: none; padding: 0; color: #d0d0d0; }
+        .info-box { background: #0d1b2a; border-left: 4px solid #60a5fa; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        .success-box { background: #0d2a1b; border-left: 4px solid #10b981; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        .warning-box { background: #2a1a0d; border-left: 4px solid #f59e0b; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        ul, ol { margin-left: 2rem; margin-top: 1rem; }
+        li { margin: 0.5rem 0; }
+        footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #333; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" style="color: #60a5fa; text-decoration: none;">← Back to Blog</a>
+        <article>
+            <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #222;">
+                <span class="series-badge">☁️ Automatización AWS</span>
+                <div style="color: #666; margin: 0.5rem 0;">October 22, 2024</div>
+                <h1>AWS SSO: Gestión de Múltiples Cuentas con CLI</h1>
+            </div>
+            
+            <div style="color: #d0d0d0;">
+                <h2>📋 Contexto</h2>
+                <p>Gestionar múltiples cuentas AWS con access keys es un dolor: credenciales por todos lados, rotación manual, riesgo de seguridad. AWS SSO (ahora llamado IAM Identity Center) resuelve esto con login centralizado y credenciales temporales. En este post, cómo configurarlo para máxima productividad.</p>
+
+                <h2>🎯 Problema: Multi-Account Sin SSO</h2>
+                <pre><code># Antes (nightmare mode)
+export AWS_ACCESS_KEY_ID="AKIA..." # Dev account
+export AWS_SECRET_ACCESS_KEY="..."
+aws s3 ls
+
+unset AWS_ACCESS_KEY_ID
+unset AWS_SECRET_ACCESS_KEY
+
+export AWS_ACCESS_KEY_ID="AKIA..." # Prod account
+export AWS_SECRET_ACCESS_KEY="..."
+aws s3 ls
+
+# Mantener keys sincronizadas en ~/.aws/credentials
+# Rotar manualmente cada 90 días
+# Keys en plain text en disco 😱</code></pre>
+
+                <h2>✅ Solución: AWS SSO</h2>
+                <p><strong>Ventajas:</strong></p>
+                <ul>
+                    <li>✅ Una sola autenticación para todas las cuentas</li>
+                    <li>✅ Credenciales temporales (se auto-refrescan)</li>
+                    <li>✅ MFA integrado</li>
+                    <li>✅ No más access keys en plain text</li>
+                    <li>✅ Fácil cambio entre cuentas/roles</li>
+                </ul>
+
+                <h2>🛠️ Setup Inicial</h2>
+                
+                <h3>Paso 1: Configurar SSO (Admin Task)</h3>
+                <p><em>Esto lo hace el admin de tu organización AWS, no tú:</em></p>
+                <ol>
+                    <li>Ir a AWS IAM Identity Center</li>
+                    <li>Enable SSO</li>
+                    <li>Crear grupos (Admins, Developers, ReadOnly)</li>
+                    <li>Asignar usuarios a grupos</li>
+                    <li>Asignar permission sets a cuentas</li>
+                </ol>
+
+                <div class="info-box">
+                    <strong>💡 Nota:</strong> Si no eres admin, pídele el SSO start URL y tus accesos.
+                </div>
+
+                <h3>Paso 2: Configurar AWS CLI</h3>
+                <pre><code># Install/update AWS CLI v2 (required for SSO)
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install --update
+
+# Verify version (must be 2.x)
+aws --version</code></pre>
+
+                <h3>Paso 3: Configurar Perfiles SSO</h3>
+                <pre><code>aws configure sso
+
+# Interactive prompts:
+SSO session name: my-company
+SSO start URL: https://d-1234567890.awsapps.com/start
+SSO region: us-east-1
+SSO registration scopes: sso:account:access
+
+# Browser opens → Login con tus credenciales → Aprueba el acceso
+
+# Luego selecciona:
+CLI default profile name: dev
+CLI default output format: json
+CLI default region: us-east-1</code></pre>
+
+                <h3>Resultado: ~/.aws/config</h3>
+                <pre><code>[profile dev]
+sso_session = my-company
+sso_account_id = 123456789012
+sso_role_name = DeveloperAccess
+region = us-east-1
+output = json
+
+[profile prod]
+sso_session = my-company
+sso_account_id = 987654321098
+sso_role_name = ReadOnlyAccess
+region = us-east-1
+output = json
+
+[profile staging]
+sso_session = my-company
+sso_account_id = 555666777888
+sso_role_name = DeveloperAccess
+region = us-east-1
+output = json
+
+[sso-session my-company]
+sso_start_url = https://d-1234567890.awsapps.com/start
+sso_region = us-east-1
+sso_registration_scopes = sso:account:access</code></pre>
+
+                <h2>🚀 Uso Diario</h2>
+                
+                <h3>Login SSO (Una Vez al Día)</h3>
+                <pre><code># Login opens browser once
+aws sso login --profile dev
+
+# Or login to session (all profiles)
+aws sso login --sso-session my-company
+
+# Credentials last ~8 hours
+# Re-login when expired</code></pre>
+
+                <h3>Usar Perfiles</h3>
+                <pre><code># Option 1: --profile flag
+aws s3 ls --profile dev
+aws s3 ls --profile prod
+
+# Option 2: Environment variable
+export AWS_PROFILE=dev
+aws s3 ls
+aws ec2 describe-instances
+
+# Switch profile
+export AWS_PROFILE=prod
+aws s3 ls</code></pre>
+
+                <h3>Verificar Identidad Actual</h3>
+                <pre><code>aws sts get-caller-identity
+
+# Output:
+{
+    "UserId": "AROA...:kevin.romero@company.com",
+    "Account": "123456789012",
+    "Arn": "arn:aws:sts::123456789012:assumed-role/DeveloperAccess/kevin.romero@company.com"
+}</code></pre>
+
+                <h2>💡 Scripts Multi-Account</h2>
+                
+                <h3>Patrón 1: Iterar Sobre Cuentas</h3>
+                <pre><code>#!/bin/bash
+# multi-account-report.sh
+
+set -euo pipefail
+
+readonly PROFILES=(dev staging prod)
+
+for profile in "${PROFILES[@]}"; do
+    echo "=== Account: $profile ==="
+    
+    # Get account ID
+    account_id=$(aws sts get-caller-identity \
+        --profile "$profile" \
+        --query 'Account' \
+        --output text)
+    
+    echo "Account ID: $account_id"
+    
+    # Count EC2 instances
+    instances=$(aws ec2 describe-instances \
+        --profile "$profile" \
+        --query 'length(Reservations[].Instances[])' \
+        --output text)
+    
+    echo "EC2 Instances: $instances"
+    
+    # Count S3 buckets
+    buckets=$(aws s3api list-buckets \
+        --profile "$profile" \
+        --query 'length(Buckets)' \
+        --output text)
+    
+    echo "S3 Buckets: $buckets"
+    echo ""
+done</code></pre>
+
+                <h3>Patrón 2: Función Helper</h3>
+                <pre><code>#!/bin/bash
+# aws-helpers.sh
+
+# Run command in all profiles
+run_in_all_profiles() {
+    local cmd=("$@")
+    local profiles=(dev staging prod)
+    
+    for profile in "${profiles[@]}"; do
+        echo "▶ Running in $profile..."
+        AWS_PROFILE=$profile "${cmd[@]}"
+        echo ""
+    done
+}
+
+# Usage
+run_in_all_profiles aws ec2 describe-instances \
+    --query 'Reservations[].Instances[].[InstanceId,State.Name]' \
+    --output table</code></pre>
+
+                <h3>Patrón 3: Parallel Execution</h3>
+                <pre><code>#!/bin/bash
+# parallel-multi-account.sh
+
+set -euo pipefail
+
+readonly PROFILES=(dev staging prod)
+
+check_account() {
+    local profile=$1
+    
+    echo "[$profile] Checking..."
+    
+    # Your checks here
+    local running=$(aws ec2 describe-instances \
+        --profile "$profile" \
+        --query 'length(Reservations[].Instances[?State.Name==`running`][])' \
+        --output text)
+    
+    echo "[$profile] Running instances: $running"
+}
+
+export -f check_account
+
+# Run in parallel (requires GNU parallel)
+printf '%s\n' "${PROFILES[@]}" | parallel -j 3 check_account
+
+# Or with xargs
+printf '%s\n' "${PROFILES[@]}" | xargs -P 3 -I {} bash -c 'check_account "$@"' _ {}</code></pre>
+
+                <h2>🔧 Aliases y Funciones Útiles</h2>
+                <pre><code># ~/.bashrc or ~/.zshrc
+
+# Quick profile switching
+alias awsp='export AWS_PROFILE='
+alias awsp-dev='export AWS_PROFILE=dev'
+alias awsp-prod='export AWS_PROFILE=prod'
+
+# Show current profile
+alias awswho='echo "Profile: $AWS_PROFILE" && aws sts get-caller-identity'
+
+# Login shortcut
+alias awsl='aws sso login --sso-session my-company'
+
+# Function to run command in specific profile
+awsrun() {
+    local profile=$1
+    shift
+    AWS_PROFILE=$profile "$@"
+}
+
+# Usage: awsrun dev aws s3 ls
+
+# Function to switch and show
+awsuse() {
+    export AWS_PROFILE=$1
+    echo "Switched to profile: $AWS_PROFILE"
+    aws sts get-caller-identity --query '[Account,Arn]' --output text
+}
+
+# Usage: awsuse prod</code></pre>
+
+                <h2>🐛 Troubleshooting</h2>
+                
+                <h3>Error: "Token has expired"</h3>
+                <pre><code># Solution: Re-login
+aws sso login --profile dev
+
+# Or login to session (updates all profiles)
+aws sso login --sso-session my-company</code></pre>
+
+                <h3>Error: "Unable to locate credentials"</h3>
+                <pre><code># Check profile exists
+cat ~/.aws/config | grep -A 5 "\[profile dev\]"
+
+# Verify SSO session
+aws sso login --sso-session my-company
+
+# Check environment
+echo $AWS_PROFILE
+unset AWS_ACCESS_KEY_ID
+unset AWS_SECRET_ACCESS_KEY</code></pre>
+
+                <h3>Browser No Abre en SSH</h3>
+                <pre><code># Option 1: Use --no-browser
+aws sso login --profile dev --no-browser
+
+# Copy the URL shown and open in your local browser
+
+# Option 2: Port forwarding
+ssh -L 8080:localhost:8080 user@server
+# Then login normally</code></pre>
+
+                <div class="warning-box">
+                    <strong>⚠️ Cache de Credenciales:</strong> SSO guarda tokens en <code>~/.aws/sso/cache/</code>. Estos archivos tienen permisos 600 pero ten cuidado al compartir tu home directory.
+                </div>
+
+                <h2>💼 Caso Real: Mi Setup</h2>
+                <pre><code># ~/.aws/config (mi configuración real)
+
+[profile work-dev]
+sso_session = work
+sso_account_id = 111111111111
+sso_role_name = PowerUserAccess
+region = us-east-1
+output = json
+
+[profile work-prod]
+sso_session = work
+sso_account_id = 222222222222
+sso_role_name = ReadOnlyAccess
+region = us-east-1
+output = json
+
+[profile personal]
+sso_session = personal
+sso_account_id = 333333333333
+sso_role_name = AdministratorAccess
+region = us-east-1
+output = json
+
+[sso-session work]
+sso_start_url = https://company.awsapps.com/start
+sso_region = us-east-1
+sso_registration_scopes = sso:account:access
+
+[sso-session personal]
+sso_start_url = https://personal.awsapps.com/start
+sso_region = us-east-1
+sso_registration_scopes = sso:account:access</code></pre>
+
+                <div class="success-box">
+                    <strong>✅ Mi workflow:</strong><br>
+                    8:00 AM → <code>aws sso login --sso-session work</code><br>
+                    Todo el día → <code>export AWS_PROFILE=work-dev</code> (default)<br>
+                    Cuando necesito prod → <code>awsuse work-prod</code><br>
+                    Personal projects → <code>awsuse personal</code>
+                </div>
+
+                <h2>📊 Comparación: Access Keys vs SSO</h2>
+                <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0;">
+                    <tr style="background: #1a1a1a;">
+                        <th style="padding: 0.75rem; border: 1px solid #333;">Aspecto</th>
+                        <th style="padding: 0.75rem; border: 1px solid #333;">Access Keys</th>
+                        <th style="padding: 0.75rem; border: 1px solid #333;">AWS SSO</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Seguridad</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">❌ Long-lived, plain text</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">✅ Temporary, auto-rotate</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Multi-account</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">❌ Keys per account</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">✅ Single login</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">MFA</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">🟡 Optional, complex</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">✅ Integrated</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Rotation</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">❌ Manual every 90d</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">✅ Automatic</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Setup</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">✅ Simple</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">🟡 Initial setup required</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Auditing</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">🟡 Per user</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">✅ Centralized</td>
+                    </tr>
+                </table>
+
+                <h2>💡 Best Practices</h2>
+                <ul>
+                    <li>✅ Usa SSO para todo (elimina access keys)</li>
+                    <li>✅ Nombra perfiles descriptivamente: <code>company-dev</code> no <code>dev</code></li>
+                    <li>✅ Agrupa perfiles por SSO session</li>
+                    <li>✅ Configura ReadOnly para prod por defecto</li>
+                    <li>✅ Usa MFA siempre</li>
+                    <li>✅ Login una vez por día (no por comando)</li>
+                    <li>✅ Verifica identidad antes de operaciones destructivas</li>
+                    <li>❌ No uses access keys si tienes SSO disponible</li>
+                    <li>❌ No compartas credenciales SSO</li>
+                </ul>
+
+                <h2>📚 Recursos</h2>
+                <ul>
+                    <li><a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html" target="_blank">AWS CLI SSO Configuration</a></li>
+                    <li><a href="https://docs.aws.amazon.com/singlesignon/latest/userguide/what-is.html" target="_blank">AWS IAM Identity Center</a></li>
+                </ul>
+
+                <h2>💭 Conclusión</h2>
+                <p>AWS SSO es un game-changer para gestionar múltiples cuentas. El setup inicial toma 15 minutos, pero después de eso, tu workflow es más simple, más seguro y más productivo. Si aún usas access keys con múltiples cuentas, este es el momento de migrar a SSO.</p>
+
+                <p>Mi experiencia: después de migrar a SSO, nunca volví a preocuparme por rotar keys manualmente o por tener credenciales en plain text. Es una de esas mejoras que te preguntas "¿por qué no lo hice antes?"</p>
+            </div>
+        </article>
+        <footer>
+            <p>© 2024 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a></p>
+        </footer>
+    </div>
+</body>
+</html>
+

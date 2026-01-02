@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Personal con i18n: Selector de Idiomas en Vanilla JS | Kevin Romero</title>
+    <meta name="description" content="Implementación de un sistema bilingüe (EN/ES) usando solo JavaScript vanilla, sin frameworks. LocalStorage, traducciones dinámicas y UX minimalista.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        article { background: #111; border: 1px solid #222; padding: 3rem; border-radius: 8px; }
+        .series-badge { background: #10b98120; color: #10b981; border: 1px solid #10b981; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
+        h1 { font-size: 2.5rem; color: #fff; margin: 1rem 0; }
+        h2 { color: #fff; font-size: 1.8rem; margin: 2rem 0 1rem; border-bottom: 2px solid #333; padding-bottom: 0.5rem; }
+        h3 { color: #e0e0e0; font-size: 1.3rem; margin: 1.5rem 0 1rem; }
+        pre { background: #0d0d0d; border: 1px solid #222; padding: 1.5rem; border-radius: 6px; overflow-x: auto; margin: 1.5rem 0; }
+        code { background: #1a1a1a; color: #60a5fa; padding: 0.2rem 0.5rem; border-radius: 3px; font-family: 'Courier New', monospace; }
+        pre code { background: none; padding: 0; color: #d0d0d0; }
+        .info-box { background: #0d1b2a; border-left: 4px solid #60a5fa; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        .success-box { background: #0d2a1b; border-left: 4px solid #10b981; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        ul, ol { margin-left: 2rem; margin-top: 1rem; }
+        li { margin: 0.5rem 0; }
+        footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #333; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" style="color: #60a5fa; text-decoration: none;">← Back to Blog</a>
+        <article>
+            <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #222;">
+                <span class="series-badge">🏠 Mi Home Lab DevOps</span>
+                <div style="color: #666; margin: 0.5rem 0;">November 10, 2024</div>
+                <h1>Web Personal con i18n: Selector de Idiomas en Vanilla JS</h1>
+            </div>
+            
+            <div style="color: #d0d0d0;">
+                <h2>📋 Contexto</h2>
+                <p>Mi web personal (<a href="https://mytechzone.dev" target="_blank">mytechzone.dev</a>) estaba solo en español. Quería agregarle inglés para llegar a audiencia internacional, pero sin complicarme con frameworks (React, Vue) o librerías pesadas (i18next). Solución: implementar i18n con vanilla JavaScript + localStorage.</p>
+
+                <h2>🎯 Requisitos</h2>
+                <ul>
+                    <li>✅ Toggle EN/ES con botones</li>
+                    <li>✅ Persistencia con localStorage</li>
+                    <li>✅ Inglés como idioma por defecto</li>
+                    <li>✅ Sin recargar la página</li>
+                    <li>✅ Sin frameworks ni dependencias</li>
+                    <li>✅ Lightweight (< 5 KB JavaScript)</li>
+                </ul>
+
+                <h2>🛠️ Implementación</h2>
+                
+                <h3>Paso 1: HTML Structure</h3>
+                <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Kevin Romero | DevOps Engineer&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;!-- Language Toggle --&gt;
+    &lt;div class="language-toggle"&gt;
+        &lt;button id="lang-en" class="active"&gt;EN&lt;/button&gt;
+        &lt;button id="lang-es"&gt;ES&lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Content with data attributes --&gt;
+    &lt;header&gt;
+        &lt;h1&gt;Kevin Romero&lt;/h1&gt;
+        &lt;p id="header-subtitle" data-en="DevOps Engineer | SRE | Cloud Infrastructure" 
+                                data-es="Ingeniero DevOps | SRE | Infraestructura Cloud"&gt;
+            DevOps Engineer | SRE | Cloud Infrastructure
+        &lt;/p&gt;
+    &lt;/header&gt;
+
+    &lt;section&gt;
+        &lt;h2 id="about-title"&gt;About&lt;/h2&gt;
+        &lt;p id="about-text"&gt;...&lt;/p&gt;
+    &lt;/section&gt;
+
+    &lt;script src="lang.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                <div class="info-box">
+                    <strong>💡 Estrategia:</strong> Usar <code>data-*</code> attributes cuando el contenido es corto (headers, labels). Para textos largos, usar un objeto JavaScript <code>translations</code>.
+                </div>
+
+                <h3>Paso 2: CSS (Language Toggle)</h3>
+                <pre><code>.language-toggle {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 100;
+}
+
+.language-toggle button {
+    background: #1a1a1a;
+    color: #888;
+    border: 1px solid #333;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.language-toggle button:hover {
+    border-color: #60a5fa;
+    color: #60a5fa;
+}
+
+.language-toggle button.active {
+    background: #60a5fa;
+    color: #0a0a0a;
+    border-color: #60a5fa;
+}</code></pre>
+
+                <h3>Paso 3: JavaScript (lang.js)</h3>
+                <pre><code>// translations.js
+const translations = {
+    // IDs mapped to translations
+    "header-subtitle": {
+        "en": "DevOps Engineer | SRE | Cloud Infrastructure",
+        "es": "Ingeniero DevOps | SRE | Infraestructura Cloud"
+    },
+    "about-title": {
+        "en": "About",
+        "es": "Acerca de"
+    },
+    "about-text": {
+        "en": "I'm a DevOps Engineer passionate about automation, cloud infrastructure, and continuous improvement. I build reliable systems that scale.",
+        "es": "Soy Ingeniero DevOps apasionado por la automatización, infraestructura cloud y mejora continua. Construyo sistemas confiables que escalan."
+    },
+    "projects-title": {
+        "en": "Projects",
+        "es": "Proyectos"
+    },
+    "project-homelab": {
+        "en": "Home Lab Server built from old notebook running Debian, Docker, n8n, and monitoring system",
+        "es": "Servidor Home Lab construido con notebook antigua ejecutando Debian, Docker, n8n y sistema de monitoreo"
+    },
+    "contact-title": {
+        "en": "Get in Touch",
+        "es": "Contacto"
+    },
+    "footer-text": {
+        "en": "Built with passion. Hosted on my home lab.",
+        "es": "Construido con pasión. Alojado en mi laboratorio casero."
+    }
+};
+
+// Set language function
+function setLanguage(lang) {
+    // Update html lang attribute
+    document.documentElement.lang = lang;
+    
+    // Save to localStorage
+    localStorage.setItem('lang', lang);
+    
+    // Update all elements with translations
+    Object.keys(translations).forEach(id => {
+        const element = document.getElementById(id);
+        if (element && translations[id][lang]) {
+            element.textContent = translations[id][lang];
+        }
+    });
+    
+    // Update button states
+    document.querySelectorAll('.language-toggle button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.getElementById(`lang-${lang}`).classList.add('active');
+}
+
+// Event listeners
+document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+document.getElementById('lang-es').addEventListener('click', () => setLanguage('es'));
+
+// Initialize: Load saved language or default to English
+const savedLang = localStorage.getItem('lang') || 'en';
+setLanguage(savedLang);</code></pre>
+
+                <h3>Versión Optimizada (Con data-* attributes)</h3>
+                <pre><code>// lang-optimized.js
+const translations = {
+    "about-text": {
+        "en": "I'm a DevOps Engineer...",
+        "es": "Soy Ingeniero DevOps..."
+    },
+    // Only for long texts
+};
+
+function setLanguage(lang) {
+    document.documentElement.lang = lang;
+    localStorage.setItem('lang', lang);
+    
+    // Method 1: Update from translations object
+    Object.keys(translations).forEach(id => {
+        const element = document.getElementById(id);
+        if (element && translations[id][lang]) {
+            element.textContent = translations[id][lang];
+        }
+    });
+    
+    // Method 2: Update from data-* attributes
+    document.querySelectorAll('[data-en]').forEach(element => {
+        const key = element.id;
+        if (element.dataset[lang]) {
+            element.textContent = element.dataset[lang];
+        }
+    });
+    
+    // Update active button
+    document.querySelectorAll('.language-toggle button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.getElementById(`lang-${lang}`).classList.add('active');
+}
+
+// Event listeners
+document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+document.getElementById('lang-es').addEventListener('click', () => setLanguage('es'));
+
+// Initialize
+const savedLang = localStorage.getItem('lang') || 'en';
+setLanguage(savedLang);</code></pre>
+
+                <h2>💡 Mejoras Adicionales</h2>
+                
+                <h3>1. Detectar Idioma del Navegador</h3>
+                <pre><code>// Detect browser language
+function getBrowserLanguage() {
+    const browserLang = navigator.language || navigator.userLanguage;
+    
+    // Extract language code (e.g., "en-US" → "en")
+    const langCode = browserLang.split('-')[0];
+    
+    // Check if we support this language
+    return ['en', 'es'].includes(langCode) ? langCode : 'en';
+}
+
+// Initialize with browser language if no saved preference
+const savedLang = localStorage.getItem('lang') || getBrowserLanguage();
+setLanguage(savedLang);</code></pre>
+
+                <h3>2. Smooth Transitions</h3>
+                <pre><code>// Add fade effect when changing language
+function setLanguage(lang) {
+    // ... (previous code)
+    
+    // Add fade animation
+    document.querySelectorAll('[data-en]').forEach(element => {
+        element.style.opacity = '0';
+        element.style.transition = 'opacity 0.2s';
+        
+        setTimeout(() => {
+            element.textContent = element.dataset[lang];
+            element.style.opacity = '1';
+        }, 200);
+    });
+}
+
+// Or use CSS
+.translatable {
+    transition: opacity 0.2s ease-in-out;
+}
+
+.translatable.changing {
+    opacity: 0;
+}</code></pre>
+
+                <h3>3. Flag Icons (Opcional)</h3>
+                <pre><code>&lt;div class="language-toggle"&gt;
+    &lt;button id="lang-en"&gt;
+        🇬🇧 EN
+    &lt;/button&gt;
+    &lt;button id="lang-es"&gt;
+        🇪🇸 ES
+    &lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- Or use SVG flags --&gt;
+&lt;button id="lang-en"&gt;
+    &lt;img src="/flags/en.svg" alt="English"&gt; EN
+&lt;/button&gt;</code></pre>
+
+                <h2>📊 Resultado Final</h2>
+                <div class="success-box">
+                    <strong>✅ Logros:</strong><br>
+                    • JavaScript: 2.8 KB (minified)<br>
+                    • Sin dependencias externas<br>
+                    • Cambio de idioma instantáneo<br>
+                    • Preferencia persistente (localStorage)<br>
+                    • Funciona offline<br>
+                    • Compatible con todos los navegadores<br>
+                    • SEO-friendly (html[lang] attribute)
+                </div>
+
+                <h2>🐛 Problemas Comunes y Soluciones</h2>
+                
+                <h3>Problema: Contenido "flashea" en idioma incorrecto</h3>
+                <p><strong>Causa:</strong> HTML carga con texto default antes de que JavaScript cargue.</p>
+                <p><strong>Solución:</strong> Inline el script de idioma en el <code>&lt;head&gt;</code></p>
+                <pre><code>&lt;head&gt;
+    &lt;script&gt;
+        // Inline critical JS
+        (function() {
+            const lang = localStorage.getItem('lang') || 'en';
+            document.documentElement.lang = lang;
+            document.documentElement.classList.add('lang-' + lang);
+        })();
+    &lt;/script&gt;
+&lt;/head&gt;</code></pre>
+
+                <h3>Problema: Nuevos elementos dinámicos no se traducen</h3>
+                <p><strong>Solución:</strong> Crear función para traducir elementos individuales</p>
+                <pre><code>function translateElement(element, key) {
+    const currentLang = localStorage.getItem('lang') || 'en';
+    
+    if (translations[key] && translations[key][currentLang]) {
+        element.textContent = translations[key][currentLang];
+    }
+}
+
+// Usage
+const newElement = document.createElement('p');
+newElement.id = 'dynamic-text';
+translateElement(newElement, 'dynamic-text');</code></pre>
+
+                <h3>Problema: SEO (Google ve solo un idioma)</h3>
+                <p><strong>Solución:</strong> Agregar <code>&lt;link rel="alternate"&gt;</code></p>
+                <pre><code>&lt;head&gt;
+    &lt;link rel="alternate" hreflang="en" href="https://mytechzone.dev?lang=en"&gt;
+    &lt;link rel="alternate" hreflang="es" href="https://mytechzone.dev?lang=es"&gt;
+    &lt;link rel="alternate" hreflang="x-default" href="https://mytechzone.dev"&gt;
+&lt;/head&gt;</code></pre>
+
+                <h2>💡 Alternativas Consideradas</h2>
+                <ul>
+                    <li><strong>i18next:</strong> 🔴 50 KB, overkill para sitio simple</li>
+                    <li><strong>React + react-i18next:</strong> 🔴 Framework completo, demasiado pesado</li>
+                    <li><strong>Páginas separadas (index-en.html, index-es.html):</strong> 🔴 Duplicación, difícil mantenimiento</li>
+                    <li><strong>Server-side i18n:</strong> 🟡 Mejor para SEO, pero requiere backend</li>
+                    <li><strong>Vanilla JS:</strong> ✅ Lightweight, suficiente para mi caso</li>
+                </ul>
+
+                <h2>📈 Métricas</h2>
+                <pre><code>Before (Spanish only):
+- Visitors: ~60% LatAm, 40% lost (non-Spanish speakers)
+- Bounce rate: 45%
+
+After (EN/ES):
+- Visitors: +30% (international audience)
+- Bounce rate: 32%
+- 65% use English, 35% Spanish
+- localStorage adoption: 89% (users come back with saved preference)</code></pre>
+
+                <h2>🚀 Extensiones Futuras</h2>
+                <ul>
+                    <li>🌐 Agregar más idiomas (pt, fr)</li>
+                    <li>📝 Traducir blog posts (diferentes archivos HTML por idioma)</li>
+                    <li>🔊 Pronunciación de nombre con audio</li>
+                    <li>🤖 Auto-traducción con API (Google Translate API)</li>
+                </ul>
+
+                <h2>📚 Código Completo (GitHub)</h2>
+                <p>Puedes ver la implementación completa en mi GitHub:</p>
+                <ul>
+                    <li><a href="https://github.com/romerok9/personal-website-server-monitor" target="_blank">Personal Website Repository</a></li>
+                    <li>Archivo: <code>website/index.html</code></li>
+                </ul>
+
+                <h2>💭 Conclusión</h2>
+                <p>No siempre necesitas frameworks complejos. Para un sitio personal estático con i18n, vanilla JavaScript es perfecto: rápido, simple, sin dependencias. La implementación completa me tomó 2 horas y el resultado es un sitio bilingüe profesional.</p>
+
+                <p>Si tu caso de uso es más complejo (cientos de strings, múltiples idiomas, CMS), entonces sí considera i18next o frameworks. Pero para proyectos pequeños, KISS (Keep It Simple, Stupid) funciona mejor.</p>
+            </div>
+        </article>
+        <footer>
+            <p>© 2024 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a></p>
+        </footer>
+    </div>
+</body>
+</html>
+

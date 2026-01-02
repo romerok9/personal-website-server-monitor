@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudflare Tunnel: Servicios Locales Sin Abrir Puertos | Kevin Romero</title>
+    <meta name="description" content="Expón servicios locales a internet de forma segura con Cloudflare Tunnel. Setup completo, troubleshooting del 404, y configuración de ingress rules.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        .back-link { display: inline-block; color: #60a5fa; text-decoration: none; margin-bottom: 2rem; transition: color 0.2s; }
+        .back-link:hover { color: #93c5fd; }
+        article { background: #111; border: 1px solid #222; padding: 3rem; border-radius: 8px; }
+        .post-header { margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #222; }
+        .series-badge { display: inline-block; background: #10b98120; color: #10b981; border: 1px solid #10b981; font-size: 0.85rem; padding: 0.25rem 0.75rem; border-radius: 4px; margin-bottom: 1rem; font-weight: 600; }
+        .post-date { color: #666; font-size: 0.95rem; margin-bottom: 1rem; }
+        h1 { font-size: 2.5rem; color: #fff; margin-bottom: 1rem; line-height: 1.2; }
+        .post-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .tag { background: #1a1a1a; color: #60a5fa; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; border: 1px solid #333; }
+        .post-content { color: #d0d0d0; }
+        h2 { color: #fff; font-size: 1.8rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #333; }
+        h3 { color: #e0e0e0; font-size: 1.3rem; margin: 1.5rem 0 1rem; }
+        p { margin-bottom: 1rem; }
+        ul, ol { margin-left: 1.5rem; margin-bottom: 1rem; }
+        li { margin-bottom: 0.5rem; }
+        code { background: #1a1a1a; color: #60a5fa; padding: 0.2rem 0.5rem; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 0.9rem; }
+        pre { background: #0d0d0d; border: 1px solid #222; border-radius: 6px; padding: 1.5rem; overflow-x: auto; margin: 1.5rem 0; }
+        pre code { background: none; padding: 0; color: #d0d0d0; display: block; line-height: 1.6; }
+        .highlight { background: #1a1a1a; border-left: 4px solid #10b981; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .highlight strong { color: #10b981; }
+        a { color: #60a5fa; text-decoration: none; transition: color 0.2s; }
+        a:hover { color: #93c5fd; text-decoration: underline; }
+        .info-box { background: #0d1b2a; border-left: 4px solid #60a5fa; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .warning-box { background: #2a1a0d; border-left: 4px solid #f59e0b; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .success-box { background: #0d2a1b; border-left: 4px solid #10b981; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .resources-list { background: #0a0a0a; padding: 1.5rem; border: 1px solid #222; border-radius: 6px; margin: 1.5rem 0; }
+        .resources-list h3 { margin-top: 0; color: #60a5fa; }
+        .resources-list ul { margin-left: 1.5rem; }
+        footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #333; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" class="back-link">← Back to Blog</a>
+        
+        <article>
+            <div class="post-header">
+                <span class="series-badge">🏠 Mi Home Lab DevOps</span>
+                <div class="post-date">September 28, 2024</div>
+                <h1>Cloudflare Tunnel: Servicios Locales Sin Abrir Puertos</h1>
+                <div class="post-tags">
+                    <span class="tag">cloudflare</span>
+                    <span class="tag">security</span>
+                    <span class="tag">networking</span>
+                    <span class="tag">tunnel</span>
+                </div>
+            </div>
+            
+            <div class="post-content">
+                <h2>📋 Contexto</h2>
+                <p>
+                    Exponer servicios locales a internet tradicionalmente requiere abrir puertos en el router, 
+                    configurar port forwarding, lidiar con IPs dinámicas, y preocuparse por seguridad. 
+                    Cloudflare Tunnel (anteriormente Argo Tunnel) elimina todos estos problemas.
+                </p>
+                <p>
+                    Con Cloudflare Tunnel, tus servicios son accesibles públicamente sin exponer tu IP real 
+                    ni abrir un solo puerto en el router. Todo el tráfico pasa por la red de Cloudflare, 
+                    obteniendo DDoS protection, SSL/TLS automático, y Web Application Firewall gratis.
+                </p>
+
+                <h2>🎯 Objetivo</h2>
+                <ul>
+                    <li>Exponer mi sitio web y n8n a internet de forma segura</li>
+                    <li>No abrir puertos en el router (seguridad y simplicidad)</li>
+                    <li>SSL/TLS automático con certificados de Cloudflare</li>
+                    <li>Múltiples servicios bajo diferentes subdominios</li>
+                    <li>DDoS protection incluido</li>
+                </ul>
+
+                <h2>🛠️ Implementación</h2>
+                
+                <h3>Prerequisitos</h3>
+                <ul>
+                    <li>Dominio registrado (el mío: mytechzone.dev)</li>
+                    <li>DNS gestionado por Cloudflare (gratis)</li>
+                    <li>Cuenta en Cloudflare (plan Free es suficiente)</li>
+                    <li>Servidor con servicios corriendo localmente</li>
+                </ul>
+
+                <h3>Paso 1: Instalar cloudflared</h3>
+                <pre><code># En Debian/Ubuntu
+curl -L --output cloudflared.deb \
+  https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+
+sudo dpkg -i cloudflared.deb
+
+# Verificar instalación
+cloudflared --version</code></pre>
+
+                <h3>Paso 2: Autenticar con Cloudflare</h3>
+                <pre><code># Este comando abre el navegador para login
+cloudflared tunnel login
+
+# Elige el dominio que quieres usar (mytechzone.dev)
+# Se guarda el cert en ~/.cloudflared/cert.pem</code></pre>
+
+                <h3>Paso 3: Crear el Tunnel</h3>
+                <pre><code># Crear tunnel con nombre descriptivo
+cloudflared tunnel create homelab
+
+# Output mostrará el Tunnel ID (guárdalo)
+# Tunnel credentials guardadas en ~/.cloudflared/UUID.json</code></pre>
+
+                <h3>Paso 4: Configurar DNS</h3>
+                <pre><code># Asociar dominio/subdominio al tunnel
+cloudflared tunnel route dns homelab mytechzone.dev
+cloudflared tunnel route dns homelab n8n.mytechzone.dev
+
+# Esto crea registros CNAME en Cloudflare DNS automáticamente</code></pre>
+
+                <h3>Paso 5: Archivo de Configuración</h3>
+                <p>Crear <code>/etc/cloudflared/config.yml</code>:</p>
+
+                <pre><code>tunnel: 50f67800-5704-41d7-b744-8c1660353215  # Tu Tunnel ID
+credentials-file: /root/.cloudflared/50f67800-5704-41d7-b744-8c1660353215.json
+
+ingress:
+  # Sitio web principal
+  - hostname: mytechzone.dev
+    service: http://localhost:8080
+    originRequest:
+      noTLSVerify: true
+  
+  # n8n automation
+  - hostname: n8n.mytechzone.dev
+    service: http://localhost:5678
+    originRequest:
+      noTLSVerify: true
+  
+  # Catch-all: regresa 404 para dominios no configurados
+  - service: http_status:404</code></pre>
+
+                <div class="info-box">
+                    <strong>💡 Explicación de la configuración:</strong><br>
+                    • <code>hostname</code>: El dominio/subdominio público<br>
+                    • <code>service</code>: A dónde redirigir el tráfico (puerto local)<br>
+                    • <code>originRequest.noTLSVerify</code>: Útil si tu servicio local usa HTTP (no HTTPS)<br>
+                    • <code>http_status:404</code>: Catch-all para dominios no configurados
+                </div>
+
+                <h3>Paso 6: Iniciar Tunnel Manualmente (Test)</h3>
+                <pre><code># Test en foreground para ver logs
+cloudflared tunnel --config /etc/cloudflared/config.yml run homelab
+
+# Deberías ver:
+# INF Connection registered
+# INF Route propagating...</code></pre>
+
+                <h3>Paso 7: Configurar como Servicio Systemd</h3>
+                <p>Para que inicie automáticamente con el servidor:</p>
+
+                <pre><code># Instalar como servicio
+sudo cloudflared service install
+
+# Habilitar y iniciar
+sudo systemctl enable cloudflared
+sudo systemctl start cloudflared
+
+# Verificar estado
+sudo systemctl status cloudflared</code></pre>
+
+                <h2>🐛 Troubleshooting: Error 404</h2>
+                <p>
+                    Durante mi setup inicial, <code>mytechzone.dev</code> devolvía 404 aunque el tunnel estaba corriendo. 
+                    Aquí están los problemas que enfrenté y cómo los resolví.
+                </p>
+
+                <h3>Problema 1: Archivo de Configuración en Ubicación Incorrecta</h3>
+                <p><strong>Síntoma:</strong> Tunnel corre pero ignora la configuración de ingress.</p>
+                <p><strong>Causa:</strong> Edité <code>~/.cloudflared/config.yml</code> pero el servicio systemd usa <code>/etc/cloudflared/config.yml</code>.</p>
+                <p><strong>Solución:</strong></p>
+                <pre><code># Copiar config a la ubicación correcta
+sudo cp ~/.cloudflared/config.yml /etc/cloudflared/
+
+# Copiar credentials también
+sudo cp ~/.cloudflared/*.json /root/.cloudflared/
+
+# Reiniciar servicio
+sudo systemctl restart cloudflared</code></pre>
+
+                <h3>Problema 2: Ingress Duplicado en config.yml</h3>
+                <p><strong>Síntoma:</strong> Error al iniciar: <code>mapping key "ingress" already defined</code></p>
+                <p><strong>Causa:</strong> Definí dos bloques <code>ingress:</code> en el mismo archivo.</p>
+                <p><strong>Solución:</strong> Un solo bloque ingress con múltiples hostnames:</p>
+                <pre><code># ❌ INCORRECTO
+ingress:
+  - hostname: mytechzone.dev
+    service: http://localhost:8080
+
+ingress:  # ← Duplicado!
+  - hostname: n8n.mytechzone.dev
+    service: http://localhost:5678
+
+# ✅ CORRECTO
+ingress:
+  - hostname: mytechzone.dev
+    service: http://localhost:8080
+  - hostname: n8n.mytechzone.dev
+    service: http://localhost:5678
+  - service: http_status:404</code></pre>
+
+                <h3>Problema 3: DNS No Propagado</h3>
+                <p><strong>Síntoma:</strong> <code>curl</code> devuelve <code>Could not resolve host</code>.</p>
+                <p><strong>Causa:</strong> Cambios DNS tardan en propagarse.</p>
+                <p><strong>Diagnóstico:</strong></p>
+                <pre><code># Verificar DNS desde diferentes servidores
+dig @1.1.1.1 mytechzone.dev
+nslookup mytechzone.dev 8.8.8.8
+
+# Ver si apunta a Cloudflare
+dig mytechzone.dev CNAME</code></pre>
+                <p><strong>Solución:</strong> Esperar 5-10 minutos o limpiar caché DNS local:</p>
+                <pre><code># En Mac
+sudo dscacheutil -flushcache
+sudo killall -HUP mDNSResponder
+
+# En Linux
+sudo systemd-resolve --flush-caches</code></pre>
+
+                <h3>Problema 4: Tipo de Registro DNS Incorrecto</h3>
+                <p><strong>Síntoma:</strong> <code>dig</code> muestra A record en lugar de CNAME.</p>
+                <p><strong>Causa:</strong> Creé manualmente un A record en lugar de CNAME al tunnel.</p>
+                <p><strong>Solución:</strong> En Cloudflare Dashboard:</p>
+                <ol>
+                    <li>DNS → Records</li>
+                    <li>Eliminar A record para mytechzone.dev</li>
+                    <li>Agregar CNAME: <code>mytechzone.dev → UUID.cfargotunnel.com</code></li>
+                    <li>O mejor aún, usar <code>cloudflared tunnel route dns</code></li>
+                </ol>
+
+                <h2>🔍 Verificación del Setup</h2>
+                <h3>1. Verificar Tunnel Está Conectado</h3>
+                <pre><code># Ver tunnels activos
+cloudflared tunnel list
+
+# Ver detalles del tunnel
+cloudflared tunnel info homelab
+
+# Ver conexiones
+sudo journalctl -u cloudflared -n 50</code></pre>
+
+                <h3>2. Test de Acceso Local</h3>
+                <pre><code># Verificar servicios locales responden
+curl http://localhost:8080
+curl http://localhost:5678/healthz</code></pre>
+
+                <h3>3. Test de Acceso Público</h3>
+                <pre><code># Desde cualquier máquina (fuera de tu red)
+curl -I https://mytechzone.dev
+curl -I https://n8n.mytechzone.dev
+
+# Deberías ver HTTP/2 200 (no 404, no 503)</code></pre>
+
+                <h2>✅ Ventajas de Cloudflare Tunnel</h2>
+                <div class="success-box">
+                    <strong>Seguridad:</strong><br>
+                    • Tu IP real permanece oculta<br>
+                    • No abres puertos en el router<br>
+                    • DDoS protection automático<br>
+                    • WAF (Web Application Firewall) incluido<br><br>
+                    
+                    <strong>Conveniencia:</strong><br>
+                    • SSL/TLS automático (no más Let's Encrypt manual)<br>
+                    • Funciona con IP dinámica<br>
+                    • CDN global (mejor latencia)<br>
+                    • Configuración centralizada en Cloudflare Dashboard<br><br>
+                    
+                    <strong>Costo:</strong><br>
+                    • Gratis para uso personal<br>
+                    • Unlimited bandwidth (en plan Free)
+                </div>
+
+                <h2>💡 Comparación: Tunnel vs Port Forwarding</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspecto</th>
+                            <th>Port Forwarding</th>
+                            <th>Cloudflare Tunnel</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>IP Expuesta</strong></td>
+                            <td>🔴 Sí (visible públicamente)</td>
+                            <td>🟢 No (oculta detrás de Cloudflare)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Configuración Router</strong></td>
+                            <td>🔴 Requerida (compleja)</td>
+                            <td>🟢 No necesaria</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IP Dinámica</strong></td>
+                            <td>🟡 Requiere DDNS</td>
+                            <td>🟢 Sin problema</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SSL/TLS</strong></td>
+                            <td>🟡 Manual (Let's Encrypt)</td>
+                            <td>🟢 Automático</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DDoS Protection</strong></td>
+                            <td>🔴 No</td>
+                            <td>🟢 Incluido</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Múltiples Servicios</strong></td>
+                            <td>🟡 Un puerto por servicio</td>
+                            <td>🟢 Ilimitados (subdominios)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>📊 Monitoring y Logs</h2>
+                <h3>Ver Logs del Tunnel</h3>
+                <pre><code># Logs en tiempo real
+sudo journalctl -u cloudflared -f
+
+# Últimas 100 líneas
+sudo journalctl -u cloudflared -n 100
+
+# Logs de errores
+sudo journalctl -u cloudflared -p err</code></pre>
+
+                <h3>Cloudflare Dashboard Analytics</h3>
+                <p>En el dashboard de Cloudflare puedes ver:</p>
+                <ul>
+                    <li>Requests por segundo</li>
+                    <li>Bandwidth usado</li>
+                    <li>Ataques bloqueados por WAF</li>
+                    <li>Cache hit rate</li>
+                    <li>Países de origen del tráfico</li>
+                </ul>
+
+                <div class="resources-list">
+                    <h3>📚 Recursos Útiles</h3>
+                    <ul>
+                        <li><a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/" target="_blank">Cloudflare Tunnel Official Docs</a></li>
+                        <li><a href="https://github.com/cloudflare/cloudflared" target="_blank">cloudflared GitHub Repository</a></li>
+                        <li><a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/routing-to-tunnel/" target="_blank">Routing Traffic to Tunnel</a></li>
+                        <li><a href="https://community.cloudflare.com/" target="_blank">Cloudflare Community Forum</a></li>
+                    </ul>
+                </div>
+
+                <h2>💭 Lecciones Aprendidas</h2>
+                <ul>
+                    <li><strong>Ubicación del config.yml importa:</strong> El servicio systemd usa <code>/etc/cloudflared/</code>, no <code>~/.cloudflared/</code>.</li>
+                    <li><strong>Un solo bloque ingress:</strong> No duplicar la clave <code>ingress:</code> en el YAML.</li>
+                    <li><strong>DNS tarda en propagar:</strong> Espera 5-10 minutos después de cambios DNS.</li>
+                    <li><strong>CNAME es el tipo correcto:</strong> No uses A records para tunnels, usa CNAME.</li>
+                    <li><strong>Logs son tu amigo:</strong> <code>journalctl -u cloudflared</code> tiene toda la información.</li>
+                </ul>
+
+                <h2>🚀 Configuraciones Avanzadas</h2>
+                <h3>Rate Limiting</h3>
+                <p>En Cloudflare Dashboard, puedes agregar rate limiting por IP:</p>
+                <pre><code># Ejemplo: Máximo 100 requests por minuto por IP
+Security → WAF → Rate limiting rules</code></pre>
+
+                <h3>Geoblocking</h3>
+                <p>Bloquear países específicos:</p>
+                <pre><code>Security → WAF → Custom rules
+→ Block if country is in {list}</code></pre>
+
+                <h3>Access Policies</h3>
+                <p>Agregar autenticación extra (OAuth, email OTP):</p>
+                <pre><code>Zero Trust → Access → Applications
+→ Add application → Self-hosted</code></pre>
+
+                <h2>✅ Resultado Final</h2>
+                <p>Mi setup actual:</p>
+                <div class="highlight">
+                    <strong>Servicios expuestos:</strong><br>
+                    • https://mytechzone.dev → Sitio web personal<br>
+                    • https://n8n.mytechzone.dev → Plataforma n8n<br>
+                    • https://mytechzone.dev/status.html → Server dashboard<br><br>
+                    
+                    <strong>Características:</strong><br>
+                    • 🔒 SSL/TLS automático<br>
+                    • 🛡️ DDoS protection activo<br>
+                    • 🌍 CDN global (mejor latencia)<br>
+                    • 🚫 IP real oculta<br>
+                    • 📊 Analytics detallado<br>
+                    • 💰 $0/mes de costo
+                </div>
+
+                <h2>💭 Conclusión</h2>
+                <p>
+                    Cloudflare Tunnel es una solución elegante para exponer servicios de home lab sin comprometer 
+                    seguridad. Aunque la configuración inicial tiene algunas trampas (especialmente con DNS y ubicación 
+                    de archivos), una vez funcionando es extremadamente estable.
+                </p>
+                <p>
+                    Lo mejor: es gratis, no requiere configuración de router, y obtienes todas las ventajas de la 
+                    red de Cloudflare (CDN, DDoS protection, WAF) sin costo adicional. Para cualquier proyecto 
+                    self-hosted, lo recomiendo 100%.
+                </p>
+            </div>
+        </article>
+        
+        <footer>
+            <p>© 2024 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a> | <a href="https://github.com/romerok9">GitHub</a></p>
+        </footer>
+    </div>
+</body>
+</html>
+

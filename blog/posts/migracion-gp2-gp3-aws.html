@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migración Masiva GP2 a GP3: Ahorrando Costos en AWS | Kevin Romero</title>
+    <meta name="description" content="Script automatizado para migrar volúmenes EBS de GP2 a GP3 en AWS. Ahorra hasta 20% en costos manteniendo o mejorando el rendimiento.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            line-height: 1.7;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .back-link {
+            display: inline-block;
+            color: #60a5fa;
+            text-decoration: none;
+            margin-bottom: 2rem;
+            transition: color 0.2s;
+        }
+        
+        .back-link:hover {
+            color: #93c5fd;
+        }
+        
+        article {
+            background: #111;
+            border: 1px solid #222;
+            padding: 3rem;
+            border-radius: 8px;
+        }
+        
+        .post-header {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #222;
+        }
+        
+        .series-badge {
+            display: inline-block;
+            background: #f59e0b20;
+            color: #f59e0b;
+            border: 1px solid #f59e0b;
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .post-date {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        
+        .post-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            background: #1a1a1a;
+            color: #60a5fa;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            border: 1px solid #333;
+        }
+        
+        .post-content {
+            color: #d0d0d0;
+        }
+        
+        h2 {
+            color: #fff;
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #333;
+        }
+        
+        h3 {
+            color: #e0e0e0;
+            font-size: 1.3rem;
+            margin: 1.5rem 0 1rem;
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        code {
+            background: #1a1a1a;
+            color: #60a5fa;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        pre {
+            background: #0d0d0d;
+            border: 1px solid #222;
+            border-radius: 6px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: #d0d0d0;
+            display: block;
+            line-height: 1.6;
+        }
+        
+        .highlight {
+            background: #1a1a1a;
+            border-left: 4px solid #10b981;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .highlight strong {
+            color: #10b981;
+        }
+        
+        a {
+            color: #60a5fa;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        a:hover {
+            color: #93c5fd;
+            text-decoration: underline;
+        }
+        
+        .info-box {
+            background: #0d1b2a;
+            border-left: 4px solid #60a5fa;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .warning-box {
+            background: #2a1a0d;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .success-box {
+            background: #0d2a1b;
+            border-left: 4px solid #10b981;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: #0a0a0a;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #222;
+        }
+        
+        th {
+            background: #1a1a1a;
+            color: #60a5fa;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #111;
+        }
+        
+        .resources-list {
+            background: #0a0a0a;
+            padding: 1.5rem;
+            border: 1px solid #222;
+            border-radius: 6px;
+            margin: 1.5rem 0;
+        }
+        
+        .resources-list h3 {
+            margin-top: 0;
+            color: #60a5fa;
+        }
+        
+        .resources-list ul {
+            margin-left: 1.5rem;
+        }
+        
+        footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #333;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" class="back-link">← Back to Blog</a>
+        
+        <article>
+            <div class="post-header">
+                <span class="series-badge">☁️ Automatización AWS</span>
+                <div class="post-date">July 28, 2024</div>
+                <h1>Migración Masiva GP2 a GP3: Ahorrando Costos en AWS</h1>
+                <div class="post-tags">
+                    <span class="tag">aws</span>
+                    <span class="tag">ebs</span>
+                    <span class="tag">cost-optimization</span>
+                    <span class="tag">bash</span>
+                </div>
+            </div>
+            
+            <div class="post-content">
+                <h2>📋 Contexto</h2>
+                <p>
+                    En 2020, AWS lanzó <strong>GP3 (General Purpose SSD)</strong>, la nueva generación de volúmenes EBS que 
+                    ofrece mejor rendimiento a menor costo que GP2. Sin embargo, muchas organizaciones siguen usando 
+                    GP2 por inercia o desconocimiento de los beneficios.
+                </p>
+                <p>
+                    Recientemente enfrenté el desafío de migrar decenas de volúmenes GP2 a GP3 de forma masiva, 
+                    minimizando downtime y riesgos. Este post documenta el proceso y comparte el script de automatización.
+                </p>
+
+                <div class="highlight">
+                    <strong>💰 Ahorro esperado:</strong> Aproximadamente 20% de reducción en costos de almacenamiento EBS, 
+                    manteniendo o mejorando el rendimiento.
+                </div>
+
+                <h2>🎯 Objetivo</h2>
+                <p>Crear un script bash que permita:</p>
+                <ul>
+                    <li>Identificar todos los volúmenes GP2 en una cuenta AWS</li>
+                    <li>Migrar volumes de forma segura y controlada</li>
+                    <li>Validar el estado antes y después de la migración</li>
+                    <li>Generar logs detallados de cada operación</li>
+                    <li>Manejar errores y permitir rollback si es necesario</li>
+                    <li>Minimizar impacto en servicios productivos</li>
+                </ul>
+
+                <h2>📊 GP2 vs GP3: Comparación Técnica</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Característica</th>
+                            <th>GP2</th>
+                            <th>GP3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Precio (por GB/mes)</strong></td>
+                            <td>$0.10</td>
+                            <td>$0.08 (-20%)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IOPS Base</strong></td>
+                            <td>3 IOPS por GB (mín 100)</td>
+                            <td>3,000 IOPS (fijos)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IOPS Máximo</strong></td>
+                            <td>16,000 IOPS</td>
+                            <td>16,000 IOPS (gratis)<br>Hasta 64,000 (pagando extra)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Throughput</strong></td>
+                            <td>Hasta 250 MB/s</td>
+                            <td>125 MB/s base<br>Hasta 1,000 MB/s (pagando extra)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Burst Performance</strong></td>
+                            <td>Sí (con créditos)</td>
+                            <td>No necesario (IOPS constantes)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="success-box">
+                    <strong>✅ Ventaja clave de GP3:</strong> IOPS y throughput son independientes del tamaño del volumen. 
+                    Un volumen GP3 de 10 GB tiene los mismos 3,000 IOPS base que uno de 1 TB.
+                </div>
+
+                <h2>🛠️ Implementación del Script</h2>
+                
+                <h3>Estructura del Script</h3>
+                <p>El script sigue esta lógica:</p>
+                <ol>
+                    <li>Validar permisos y perfil AWS</li>
+                    <li>Listar todos los volúmenes GP2</li>
+                    <li>Para cada volumen:
+                        <ul>
+                            <li>Verificar si está attached (en uso)</li>
+                            <li>Obtener configuración actual (size, IOPS, AZ)</li>
+                            <li>Calcular configuración GP3 equivalente</li>
+                            <li>Ejecutar modificación</li>
+                            <li>Validar resultado</li>
+                            <li>Log detallado</li>
+                        </ul>
+                    </li>
+                    <li>Generar reporte final (CSV)</li>
+                </ol>
+
+                <h3>Script Base (Simplificado)</h3>
+                <pre><code>#!/bin/bash
+# migrate_gp2_to_gp3.sh
+# Script para migración masiva de volúmenes EBS GP2 a GP3
+
+set -euo pipefail
+
+# Configuración
+AWS_PROFILE="${AWS_PROFILE:-default}"
+AWS_REGION="${AWS_REGION:-us-east-1}"
+LOG_FILE="migration_$(date +%Y%m%d_%H%M%S).log"
+REPORT_FILE="migration_report_$(date +%Y%m%d_%H%M%S).csv"
+
+# Colores para output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"
+}
+
+log_success() {
+    echo -e "${GREEN}✓${NC} $*" | tee -a "$LOG_FILE"
+}
+
+log_error() {
+    echo -e "${RED}✗${NC} $*" | tee -a "$LOG_FILE"
+}
+
+log_warning() {
+    echo -e "${YELLOW}⚠${NC} $*" | tee -a "$LOG_FILE"
+}
+
+# Verificar AWS CLI y permisos
+check_prerequisites() {
+    log "Verificando prerequisitos..."
+    
+    if ! command -v aws &> /dev/null; then
+        log_error "AWS CLI no encontrado"
+        exit 1
+    fi
+    
+    if ! aws sts get-caller-identity --profile "$AWS_PROFILE" &> /dev/null; then
+        log_error "No se puede autenticar con AWS"
+        exit 1
+    fi
+    
+    log_success "Prerequisites OK"
+}
+
+# Listar volúmenes GP2
+list_gp2_volumes() {
+    log "Listando volúmenes GP2 en $AWS_REGION..."
+    
+    aws ec2 describe-volumes \
+        --profile "$AWS_PROFILE" \
+        --region "$AWS_REGION" \
+        --filters "Name=volume-type,Values=gp2" \
+        --query 'Volumes[*].[VolumeId,Size,State,Attachments[0].InstanceId,AvailabilityZone]' \
+        --output text
+}
+
+# Migrar un volumen específico
+migrate_volume() {
+    local volume_id=$1
+    local current_size=$2
+    
+    log "Migrando volumen $volume_id ($current_size GB)..."
+    
+    # Calcular IOPS para GP3 (mínimo 3000, equivalente a GP2)
+    local gp2_iops=$((current_size * 3))
+    local gp3_iops=3000
+    
+    if [ $gp2_iops -gt 3000 ]; then
+        gp3_iops=$gp2_iops
+    fi
+    
+    # Limitar a 16000 IOPS (máximo gratuito de GP3)
+    if [ $gp3_iops -gt 16000 ]; then
+        gp3_iops=16000
+    fi
+    
+    # Ejecutar modificación
+    if aws ec2 modify-volume \
+        --profile "$AWS_PROFILE" \
+        --region "$AWS_REGION" \
+        --volume-id "$volume_id" \
+        --volume-type gp3 \
+        --iops "$gp3_iops" \
+        --output json > /dev/null; then
+        
+        log_success "Volumen $volume_id migrado (IOPS: $gp3_iops)"
+        echo "$volume_id,$current_size,SUCCESS,$gp3_iops" >> "$REPORT_FILE"
+        return 0
+    else
+        log_error "Error migrando volumen $volume_id"
+        echo "$volume_id,$current_size,FAILED,N/A" >> "$REPORT_FILE"
+        return 1
+    fi
+}
+
+# Verificar estado de modificación
+check_modification_status() {
+    local volume_id=$1
+    
+    aws ec2 describe-volumes-modifications \
+        --profile "$AWS_PROFILE" \
+        --region "$AWS_REGION" \
+        --volume-ids "$volume_id" \
+        --query 'VolumesModifications[0].ModificationState' \
+        --output text
+}
+
+# Main
+main() {
+    log "═══════════════════════════════════════"
+    log "  Migración GP2 → GP3"
+    log "  Región: $AWS_REGION"
+    log "  Perfil: $AWS_PROFILE"
+    log "═══════════════════════════════════════"
+    
+    check_prerequisites
+    
+    # Crear header del reporte
+    echo "VolumeID,Size(GB),Status,GP3_IOPS" > "$REPORT_FILE"
+    
+    # Listar y procesar volúmenes
+    local count=0
+    local success=0
+    local failed=0
+    
+    while IFS=$'\t' read -r vol_id size state instance_id az; do
+        count=$((count + 1))
+        
+        log ""
+        log "[$count] Volumen: $vol_id"
+        log "    Tamaño: ${size}GB"
+        log "    Estado: $state"
+        log "    Instancia: ${instance_id:-N/A}"
+        log "    AZ: $az"
+        
+        # Advertencia si está attached
+        if [ -n "$instance_id" ]; then
+            log_warning "Volumen attached a instancia. La migración es online."
+        fi
+        
+        # Confirmar antes de migrar
+        read -p "¿Migrar este volumen? (y/n): " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            if migrate_volume "$vol_id" "$size"; then
+                success=$((success + 1))
+            else
+                failed=$((failed + 1))
+            fi
+        else
+            log "Volumen $vol_id omitido"
+            echo "$vol_id,$size,SKIPPED,N/A" >> "$REPORT_FILE"
+        fi
+        
+    done < <(list_gp2_volumes)
+    
+    # Resumen final
+    log ""
+    log "═══════════════════════════════════════"
+    log "  RESUMEN DE MIGRACIÓN"
+    log "═══════════════════════════════════════"
+    log "Total procesados: $count"
+    log_success "Exitosos: $success"
+    if [ $failed -gt 0 ]; then
+        log_error "Fallidos: $failed"
+    fi
+    log ""
+    log "Reporte guardado en: $REPORT_FILE"
+    log "Log completo en: $LOG_FILE"
+}
+
+main</code></pre>
+
+                <div class="warning-box">
+                    <strong>⚠️ Importante:</strong> Este script es una versión simplificada para fines educativos. 
+                    En producción, agrega validaciones adicionales, manejo de errores más robusto, y pruebas en staging primero.
+                </div>
+
+                <h2>🚀 Uso del Script</h2>
+                <h3>Prerequisitos</h3>
+                <pre><code># Instalar AWS CLI
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+# Configurar credenciales
+aws configure
+# O usar AWS SSO
+aws sso login --profile my-profile</code></pre>
+
+                <h3>Ejecución</h3>
+                <pre><code># Hacer ejecutable
+chmod +x migrate_gp2_to_gp3.sh
+
+# Ejecutar en región específica
+AWS_REGION=us-east-1 ./migrate_gp2_to_gp3.sh
+
+# Con perfil específico
+AWS_PROFILE=production AWS_REGION=eu-west-1 ./migrate_gp2_to_gp3.sh
+
+# Modo dry-run (solo listar, sin modificar)
+# Comentar la línea de migrate_volume en el script</code></pre>
+
+                <h2>🐛 Troubleshooting</h2>
+                <h3>Problema 1: "VolumeInModification" Error</h3>
+                <p><strong>Causa:</strong> El volumen ya tiene una modificación en progreso.</p>
+                <p><strong>Solución:</strong> Esperar a que termine la modificación anterior (puede tomar horas).</p>
+                <pre><code># Ver modificaciones en progreso
+aws ec2 describe-volumes-modifications \
+    --volume-ids vol-xxxxx \
+    --query 'VolumesModifications[0].[ModificationState,Progress]'</code></pre>
+
+                <h3>Problema 2: "InvalidParameterValue" con IOPS</h3>
+                <p><strong>Causa:</strong> IOPS solicitados exceden el máximo para el tamaño del volumen.</p>
+                <p><strong>Solución:</strong> GP3 permite hasta 16,000 IOPS gratis. Para más, se paga extra.</p>
+
+                <h3>Problema 3: Downtime Durante Migración</h3>
+                <p><strong>Realidad:</strong> La migración GP2 → GP3 es <strong>online</strong>. No hay downtime.</p>
+                <p><strong>Nota:</strong> Puede haber ligera degradación de performance durante la migración (1-2 horas típicamente).</p>
+
+                <h2>📊 Resultados Reales</h2>
+                <p>En mi caso de uso, migré ~30 volúmenes con los siguientes resultados:</p>
+
+                <div class="success-box">
+                    <strong>Ahorro mensual:</strong> $180 USD (~20% de reducción)<br>
+                    <strong>Tiempo total:</strong> ~2 horas (incluyendo validaciones)<br>
+                    <strong>Downtime:</strong> 0 minutos<br>
+                    <strong>Problemas:</strong> 0 (después de testing en staging)
+                </div>
+
+                <h3>Métricas de Performance</h3>
+                <p>Monitoreando con CloudWatch después de la migración:</p>
+                <ul>
+                    <li>✅ <strong>Latencia:</strong> Sin cambios significativos</li>
+                    <li>✅ <strong>IOPS:</strong> Mejora en volúmenes pequeños (ahora tienen 3000 IOPS mínimos)</li>
+                    <li>✅ <strong>Throughput:</strong> Equivalente o mejor</li>
+                    <li>✅ <strong>Burst performance:</strong> Ya no necesaria (GP3 tiene IOPS constantes)</li>
+                </ul>
+
+                <h2>✅ Mejores Prácticas</h2>
+                <ol>
+                    <li><strong>Prueba primero en staging</strong> - Valida el script en entorno no productivo</li>
+                    <li><strong>Migra fuera de horas pico</strong> - Aunque el downtime es cero, reduce riesgo</li>
+                    <li><strong>Monitorea CloudWatch</strong> - Observa métricas antes y después</li>
+                    <li><strong>Documenta todo</strong> - Guarda logs y reportes para auditoría</li>
+                    <li><strong>Comunica al equipo</strong> - Avisa sobre la migración aunque sea transparente</li>
+                    <li><strong>Snapshots previos</strong> - Crea snapshots antes de migrar (extra seguridad)</li>
+                    <li><strong>Migración gradual</strong> - No migres todo a la vez, hazlo por lotes</li>
+                </ol>
+
+                <h2>💡 Lecciones Aprendidas</h2>
+                <ul>
+                    <li><strong>GP3 no siempre es mejor</strong> - Para volúmenes muy grandes (>5TB) con pocos IOPS, GP2 podía ser más económico (esto cambió en 2023)</li>
+                    <li><strong>Automatización es clave</strong> - Migrar manualmente 50+ volúmenes sería tedioso y propenso a errores</li>
+                    <li><strong>Validación constante</strong> - Verificar el estado de cada modificación antes de proceder con la siguiente</li>
+                    <li><strong>Logs detallados</strong> - Indispensables para troubleshooting y auditoría</li>
+                    <li><strong>Comunicación</strong> - Aunque no haya downtime, el equipo debe estar informado</li>
+                </ul>
+
+                <div class="resources-list">
+                    <h3>📚 Recursos Útiles</h3>
+                    <ul>
+                        <li><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html" target="_blank">AWS EBS Volume Types Documentation</a></li>
+                        <li><a href="https://aws.amazon.com/ebs/pricing/" target="_blank">AWS EBS Pricing</a></li>
+                        <li><a href="https://docs.aws.amazon.com/cli/latest/reference/ec2/modify-volume.html" target="_blank">AWS CLI: modify-volume</a></li>
+                        <li><a href="https://aws.amazon.com/blogs/storage/migrate-your-amazon-ebs-volumes-from-gp2-to-gp3-and-save-up-to-20-on-costs/" target="_blank">AWS Blog: GP2 to GP3 Migration</a></li>
+                    </ul>
+                </div>
+
+                <h2>🚀 Próximos Pasos</h2>
+                <p>Mejoras futuras para el script:</p>
+                <ul>
+                    <li>Integración con Terraform/CloudFormation para IaC</li>
+                    <li>Rollback automático en caso de error</li>
+                    <li>Estimación de ahorro antes de ejecutar</li>
+                    <li>Notificaciones vía SNS/Slack</li>
+                    <li>Dashboard de progreso con Lambda + DynamoDB</li>
+                </ul>
+
+                <h2>💭 Conclusión</h2>
+                <p>
+                    La migración de GP2 a GP3 es una de las optimizaciones de costo más fáciles y seguras 
+                    que puedes hacer en AWS. Con un script bien diseñado, puedes automatizar el proceso 
+                    y ahorrar significativamente sin afectar servicios productivos.
+                </p>
+                <p>
+                    Si aún tienes volúmenes GP2, considera migrarlos. El beneficio es claro: 
+                    <strong>menos costo, igual o mejor performance</strong>.
+                </p>
+                <p>
+                    En el próximo post, profundizaré en el uso avanzado de JMESPath para queries complejas 
+                    en AWS CLI, una habilidad esencial para cualquier DevOps Engineer.
+                </p>
+            </div>
+        </article>
+        
+        <footer>
+            <p>© 2024 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a> | <a href="https://github.com/romerok9">GitHub</a></p>
+        </footer>
+    </div>
+</body>
+</html>
+

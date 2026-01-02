@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS CLI Productivity Tips: 10 Trucos que Debes Conocer | Kevin Romero</title>
+    <meta name="description" content="10 tips y trucos para trabajar más rápido con AWS CLI. Desde aliases útiles hasta queries avanzadas y configuración óptima.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemBasically, sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        .back-link { display: inline-block; color: #60a5fa; text-decoration: none; margin-bottom: 2rem; }
+        article { background: #111; border: 1px solid #222; padding: 3rem; border-radius: 8px; }
+        .post-header { margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #222; }
+        .series-badge { display: inline-block; background: #ef444420; color: #f87171; border: 1px solid #ef4444; font-size: 0.85rem; padding: 0.25rem 0.75rem; border-radius: 4px; margin-bottom: 1rem; font-weight: 600; }
+        h1 { font-size: 2.5rem; color: #fff; margin-bottom: 1rem; }
+        .tag { background: #1a1a1a; color: #60a5fa; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; border: 1px solid #333; }
+        h2 { color: #fff; font-size: 1.8rem; margin: 2rem 0 1rem; border-bottom: 2px solid #333; padding-bottom: 0.5rem; }
+        h3 { color: #e0e0e0; font-size: 1.3rem; margin: 1.5rem 0 1rem; }
+        code { background: #1a1a1a; color: #60a5fa; padding: 0.2rem 0.5rem; border-radius: 3px; font-family: 'Courier New', monospace; }
+        pre { background: #0d0d0d; border: 1px solid #222; padding: 1.5rem; border-radius: 6px; overflow-x: auto; margin: 1.5rem 0; }
+        pre code { background: none; padding: 0; color: #d0d0d0; }
+        .info-box { background: #0d1b2a; border-left: 4px solid #60a5fa; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #333; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" class="back-link">← Back to Blog</a>
+        <article>
+            <div class="post-header">
+                <span class="series-badge">🛠️ AWS CLI Mastery</span>
+                <div style="color: #666; margin: 0.5rem 0;">July 20, 2024</div>
+                <h1>AWS CLI Productivity Tips: 10 Trucos que Debes Conocer</h1>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <span class="tag">aws-cli</span>
+                    <span class="tag">productivity</span>
+                    <span class="tag">tips</span>
+                    <span class="tag">bash</span>
+                </div>
+            </div>
+            
+            <div style="color: #d0d0d0;">
+                <h2>📋 Contexto</h2>
+                <p>AWS CLI es una herramienta poderosa, pero sin configuración adecuada puede ser tedioso escribir comandos largos repetitivamente. Después de años trabajando con AWS, estos son los 10 trucos que uso diariamente para ser más productivo.</p>
+
+                <h2>💡 Tip 1: Aliases para Comandos Comunes</h2>
+                <p>Agrega a tu <code>~/.bashrc</code> o <code>~/.zshrc</code>:</p>
+                <pre><code># AWS CLI aliases
+alias awsl='aws ec2 describe-instances --output table'
+alias awss3='aws s3 ls --human-readable'
+alias awslogs='aws logs tail --follow'
+alias awslogin='aws sso login --profile'
+
+# Con argumentos
+awsip() {
+    aws ec2 describe-instances \
+        --query "Reservations[*].Instances[*].[InstanceId,PublicIpAddress,PrivateIpAddress,Tags[?Key=='Name'].Value|[0]]" \
+        --output table
+}
+
+awsstop() {
+    aws ec2 stop-instances --instance-ids "$1" --output json
+}</code></pre>
+
+                <h2>💡 Tip 2: Configurar Output por Defecto</h2>
+                <pre><code># ~/.aws/config
+[default]
+region = us-east-1
+output = json  # o 'table' para visual, 'text' para scripting
+
+[profile production]
+region = us-east-1
+output = table
+sso_start_url = https://mycompany.awsapps.com/start
+sso_region = us-east-1
+sso_account_id = 123456789012
+sso_role_name = DevOpsRole</code></pre>
+
+                <h2>💡 Tip 3: Auto-completion</h2>
+                <pre><code># Para bash
+echo "complete -C '/usr/local/bin/aws_completer' aws" >> ~/.bashrc
+
+# Para zsh
+echo "autoload bashcompinit && bashcompinit" >> ~/.zshrc
+echo "complete -C '/usr/local/bin/aws_completer' aws" >> ~/.zshrc
+
+# Reiniciar shell
+source ~/.bashrc  # o ~/.zshrc</code></pre>
+
+                <h2>💡 Tip 4: Usar --query para Filtrar</h2>
+                <p>En lugar de parsear con grep/awk, usa <code>--query</code>:</p>
+                <pre><code># Listar solo IPs públicas de instancias corriendo
+aws ec2 describe-instances \
+    --filters "Name=instance-state-name,Values=running" \
+    --query "Reservations[*].Instances[*].PublicIpAddress" \
+    --output text
+
+# Nombres y estados de buckets S3
+aws s3api list-buckets \
+    --query "Buckets[*].[Name,CreationDate]" \
+    --output table
+
+# Instancias con tag específico
+aws ec2 describe-instances \
+    --filters "Name=tag:Environment,Values=production" \
+    --query "Reservations[*].Instances[*].[InstanceId,Tags[?Key=='Name'].Value|[0]]"</code></pre>
+
+                <h2>💡 Tip 5: Variables de Entorno</h2>
+                <pre><code># Evita escribir --region y --profile en cada comando
+export AWS_DEFAULT_REGION=us-east-1
+export AWS_PROFILE=production
+export AWS_PAGER=""  # Desactiva paginación automática
+
+# Temporal para un script
+AWS_PROFILE=dev aws s3 ls
+
+# Debug mode
+AWS_DEBUG=true aws ec2 describe-instances</code></pre>
+
+                <h2>💡 Tip 6: Guardar Queries Complejas en Scripts</h2>
+                <pre><code>#!/bin/bash
+# ec2-inventory.sh - Inventario de instancias EC2
+
+aws ec2 describe-instances \
+    --query 'Reservations[*].Instances[*].[
+        InstanceId,
+        InstanceType,
+        State.Name,
+        PublicIpAddress,
+        PrivateIpAddress,
+        Tags[?Key==`Name`].Value | [0],
+        LaunchTime
+    ]' \
+    --output table \
+    | grep -v "^|" \
+    | awk 'NR > 1 {print}'</code></pre>
+
+                <h2>💡 Tip 7: Usar --dry-run para Validar</h2>
+                <pre><code># Verificar permisos sin ejecutar cambios
+aws ec2 terminate-instances --instance-ids i-1234567890abcdef0 --dry-run
+
+# Si tienes permisos, verás error específico de DryRun
+# Si no tienes permisos, verás UnauthorizedOperation</code></pre>
+
+                <h2>💡 Tip 8: Parametrizar con envsubst</h2>
+                <pre><code># template.json
+{
+  "ImageId": "${AMI_ID}",
+  "InstanceType": "${INSTANCE_TYPE}",
+  "KeyName": "${KEY_NAME}",
+  "TagSpecifications": [{
+    "ResourceType": "instance",
+    "Tags": [{"Key": "Name", "Value": "${INSTANCE_NAME}"}]
+  }]
+}
+
+# Script de deployment
+export AMI_ID=ami-0123456789
+export INSTANCE_TYPE=t3.micro
+export KEY_NAME=my-key
+export INSTANCE_NAME=webserver-01
+
+cat template.json | envsubst | aws ec2 run-instances --cli-input-json file:///dev/stdin</code></pre>
+
+                <h2>💡 Tip 9: Logging y Auditoría</h2>
+                <pre><code># Log todos los comandos AWS para auditoría
+aws_logged() {
+    echo "[$(date)] aws $*" >> ~/.aws_history.log
+    aws "$@"
+}
+
+# Usar en lugar de aws directamente
+aws_logged ec2 stop-instances --instance-ids i-xxx
+
+# O agregar a función wrapper
+aws() {
+    echo "[$(date)] AWS CLI: $*" | logger -t aws-cli
+    command aws "$@"
+}</code></pre>
+
+                <h2>💡 Tip 10: Bulk Operations con xargs</h2>
+                <pre><code># Detener todas las instancias con tag específico
+aws ec2 describe-instances \
+    --filters "Name=tag:Environment,Values=dev" \
+    --query "Reservations[*].Instances[*].InstanceId" \
+    --output text \
+    | xargs -n 1 aws ec2 stop-instances --instance-ids
+
+# Eliminar snapshots viejos (más de 30 días)
+aws ec2 describe-snapshots --owner-ids self \
+    --query "Snapshots[?StartTime<='$(date -d '30 days ago' --iso-8601)'].SnapshotId" \
+    --output text \
+    | xargs -n 1 -P 5 aws ec2 delete-snapshot --snapshot-id</code></pre>
+
+                <div class="info-box">
+                    <strong>⚠️ Precaución con Bulk Operations:</strong><br>
+                    • Siempre usa <code>--dry-run</code> primero<br>
+                    • Agrega confirmación manual para operaciones destructivas<br>
+                    • Usa <code>-P</code> en xargs con cuidado (rate limiting de AWS)
+                </div>
+
+                <h2>🎯 Bonus: Script de Setup Completo</h2>
+                <pre><code>#!/bin/bash
+# aws-cli-setup.sh - Configuración productiva de AWS CLI
+
+echo "Configurando AWS CLI para máxima productividad..."
+
+# 1. Install AWS CLI v2 si no existe
+if ! command -v aws &> /dev/null; then
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    unzip awscliv2.zip
+    sudo ./aws/install
+    rm -rf aws awscliv2.zip
+fi
+
+# 2. Configurar auto-completion
+if [ -n "$BASH_VERSION" ]; then
+    echo "complete -C '/usr/local/bin/aws_completer' aws" >> ~/.bashrc
+elif [ -n "$ZSH_VERSION" ]; then
+    echo "autoload bashcompinit && bashcompinit" >> ~/.zshrc
+    echo "complete -C '/usr/local/bin/aws_completer' aws" >> ~/.zshrc
+fi
+
+# 3. Agregar aliases útiles
+cat >> ~/.bash_aliases << 'EOF'
+# AWS CLI Aliases
+alias awsl='aws ec2 describe-instances --output table'
+alias awss3='aws s3 ls --human-readable'
+alias awslogs='aws logs tail --follow'
+
+awsip() {
+    aws ec2 describe-instances \
+        --query "Reservations[*].Instances[*].[InstanceId,PublicIpAddress,Tags[?Key=='Name'].Value|[0]]" \
+        --output table
+}
+EOF
+
+# 4. Configurar variables de entorno por defecto
+cat >> ~/.bashrc << 'EOF'
+export AWS_PAGER=""
+export AWS_DEFAULT_OUTPUT=json
+EOF
+
+echo "✓ Setup completado. Reinicia tu terminal."</code></pre>
+
+                <h2>📚 Recursos Adicionales</h2>
+                <ul>
+                    <li><a href="https://docs.aws.amazon.com/cli/latest/userguide/">AWS CLI Official Documentation</a></li>
+                    <li><a href="https://jmespath.org/">JMESPath Tutorial</a></li>
+                    <li><a href="https://github.com/aws/aws-cli">AWS CLI GitHub</a></li>
+                </ul>
+
+                <h2>💭 Conclusión</h2>
+                <p>Estos 10 tips transformarán tu experiencia con AWS CLI. La diferencia entre escribir comandos de 150 caracteres vs usar un alias de 5 caracteres es enorme cuando lo haces 50 veces al día. Invierte 30 minutos en configurar tu entorno y ahorra horas cada semana.</p>
+            </div>
+        </article>
+        <footer>
+            <p>© 2024 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a> | <a href="https://github.com/romerok9">GitHub</a></p>
+        </footer>
+    </div>
+</body>
+</html>
+

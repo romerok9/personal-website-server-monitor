@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog | Kevin Romero - DevOps Engineer</title>
+    <meta name="description" content="Technical blog about DevOps, AWS automation, AI agents, and home lab experiments">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            padding: 2rem 0;
+            border-bottom: 1px solid #333;
+            margin-bottom: 3rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #888;
+            font-size: 1.1rem;
+        }
+        
+        .back-link {
+            display: inline-block;
+            color: #60a5fa;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            transition: color 0.2s;
+        }
+        
+        .back-link:hover {
+            color: #93c5fd;
+        }
+        
+        .series-filter {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #888;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+        
+        .filter-btn:hover {
+            border-color: #60a5fa;
+            color: #60a5fa;
+        }
+        
+        .filter-btn.active {
+            background: #60a5fa;
+            color: #0a0a0a;
+            border-color: #60a5fa;
+            font-weight: 600;
+        }
+        
+        .post-card {
+            background: #111;
+            border: 1px solid #222;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .post-card:hover {
+            border-color: #60a5fa;
+            transform: translateY(-2px);
+        }
+        
+        .post-date {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .post-card h2 {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+        
+        .post-card h2 a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .post-card h2 a:hover {
+            color: #60a5fa;
+        }
+        
+        .post-excerpt {
+            color: #aaa;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        
+        .post-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            background: #1a1a1a;
+            color: #60a5fa;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            border: 1px solid #333;
+        }
+        
+        .series-badge {
+            display: inline-block;
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .series-homelab {
+            background: #10b98120;
+            color: #10b981;
+            border: 1px solid #10b981;
+        }
+        
+        .series-aws {
+            background: #f59e0b20;
+            color: #f59e0b;
+            border: 1px solid #f59e0b;
+        }
+        
+        .series-ai {
+            background: #8b5cf620;
+            color: #a78bfa;
+            border: 1px solid #8b5cf6;
+        }
+        
+        .series-awscli {
+            background: #ef444420;
+            color: #f87171;
+            border: 1px solid #ef4444;
+        }
+        
+        footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid #333;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Home</a>
+        
+        <header>
+            <h1>Technical Blog</h1>
+            <p class="subtitle">DevOps, AWS, AI, and Home Lab Adventures</p>
+        </header>
+        
+        <div class="series-filter">
+            <button class="filter-btn active" data-series="all">All Posts</button>
+            <button class="filter-btn" data-series="homelab">🏠 Home Lab</button>
+            <button class="filter-btn" data-series="aws">☁️ AWS Automation</button>
+            <button class="filter-btn" data-series="ai">🤖 AI Agents</button>
+            <button class="filter-btn" data-series="awscli">🛠️ AWS CLI</button>
+        </div>
+        
+        <div id="posts-container">
+            <!-- Posts will be rendered here by JavaScript -->
+        </div>
+        
+        <footer>
+            <p>© 2024 Kevin Romero | DevOps Engineer</p>
+        </footer>
+    </div>
+    
+    <script>
+        const posts = [
+            {
+                title: "Caso Real: Debugging con Asistencia de IA",
+                date: "2024-12-12",
+                series: "ai",
+                seriesName: "Agentes de IA en DevOps",
+                excerpt: "Un caso práctico de cómo usar agentes de IA para resolver un bug complejo en Docker Compose. Proceso paso a paso, prompts efectivos y lecciones aprendidas.",
+                tags: ["ai", "troubleshooting", "real-world", "docker"],
+                slug: "debugging-con-ia"
+            },
+            {
+                title: "Error Handling en Scripts AWS: Patrones y Mejores Prácticas",
+                date: "2024-12-18",
+                series: "awscli",
+                seriesName: "AWS CLI Mastery",
+                excerpt: "Cómo manejar errores correctamente en scripts de AWS CLI. Validaciones, rollbacks, logs y patrones que todo DevOps debe conocer.",
+                tags: ["aws-cli", "bash", "error-handling", "best-practices"],
+                slug: "error-handling-aws-scripts"
+            },
+            {
+                title: "Scripts de Backup: S3 + Lifecycle Policies",
+                date: "2024-12-05",
+                series: "aws",
+                seriesName: "Automatización AWS",
+                excerpt: "Automatización de backups con AWS S3, políticas de ciclo de vida, y scripts bash para mantener tus datos seguros sin costos excesivos.",
+                tags: ["aws", "s3", "backup", "automation"],
+                slug: "backups-s3-lifecycle"
+            },
+            {
+                title: "Systemd Services: De Script Bash a Daemon Profesional",
+                date: "2024-11-25",
+                series: "homelab",
+                seriesName: "Mi Home Lab DevOps",
+                excerpt: "Convierte tus scripts bash en servicios profesionales con systemd. Aprende a crear archivos .service, manejar logs con journalctl y configurar auto-restart.",
+                tags: ["linux", "systemd", "automation", "bash"],
+                slug: "systemd-services-daemon"
+            },
+            {
+                title: "Web Personal con i18n: Selector de Idiomas en Vanilla JS",
+                date: "2024-11-10",
+                series: "homelab",
+                seriesName: "Mi Home Lab DevOps",
+                excerpt: "Implementación de un sistema bilingüe (EN/ES) usando solo JavaScript vanilla, sin frameworks. LocalStorage, traducciones dinámicas y UX minimalista.",
+                tags: ["javascript", "i18n", "frontend", "vanilla-js"],
+                slug: "web-i18n-vanilla-js"
+            },
+            {
+                title: "Flujos de Trabajo Eficientes con AWS CLI y Bash",
+                date: "2024-11-02",
+                series: "awscli",
+                seriesName: "AWS CLI Mastery",
+                excerpt: "Optimiza tu productividad con aliases, funciones bash, y scripts reutilizables para tareas comunes en AWS. Workflow real de un DevOps Engineer.",
+                tags: ["aws-cli", "bash", "workflow", "productivity"],
+                slug: "workflows-aws-cli-bash"
+            },
+            {
+                title: "Lo Que la IA NO Puede Hacer en DevOps: Limitaciones Reales",
+                date: "2024-10-25",
+                series: "ai",
+                seriesName: "Agentes de IA en DevOps",
+                excerpt: "Las limitaciones, riesgos y casos donde la IA falla. Una perspectiva realista después de 6 meses usando agentes de IA en producción.",
+                tags: ["ai", "security", "limitations", "best-practices"],
+                slug: "limitaciones-ia-devops"
+            },
+            {
+                title: "AWS SSO: Gestión de Múltiples Cuentas con CLI",
+                date: "2024-10-22",
+                series: "aws",
+                seriesName: "Automatización AWS",
+                excerpt: "Configura AWS SSO para trabajar eficientemente con múltiples cuentas. Perfiles, login automatizado y scripts multi-cuenta.",
+                tags: ["aws", "sso", "security", "multi-account"],
+                slug: "aws-sso-multiples-cuentas"
+            },
+            {
+                title: "JMESPath: Queries Avanzadas en AWS CLI",
+                date: "2024-10-08",
+                series: "awscli",
+                seriesName: "AWS CLI Mastery",
+                excerpt: "Domina JMESPath para filtrar y transformar outputs de AWS CLI. Queries complejas, proyecciones y ejemplos prácticos.",
+                tags: ["aws-cli", "jmespath", "productivity", "queries"],
+                slug: "jmespath-queries-aws"
+            },
+            {
+                title: "Cloudflare Tunnel: Servicios Locales Sin Abrir Puertos",
+                date: "2024-09-28",
+                series: "homelab",
+                seriesName: "Mi Home Lab DevOps",
+                excerpt: "Expón servicios locales a internet de forma segura con Cloudflare Tunnel. Setup completo, troubleshooting del 404, y configuración de ingress rules.",
+                tags: ["cloudflare", "security", "networking", "tunnel"],
+                slug: "cloudflare-tunnel-setup"
+            },
+            {
+                title: "Prompt Engineering para SysAdmins: Técnicas Prácticas",
+                date: "2024-09-18",
+                series: "ai",
+                seriesName: "Agentes de IA en DevOps",
+                excerpt: "Cómo escribir prompts efectivos para obtener mejores resultados de agentes de IA. Técnicas, ejemplos y anti-patrones a evitar.",
+                tags: ["ai", "prompts", "best-practices", "productivity"],
+                slug: "prompt-engineering-sysadmins"
+            },
+            {
+                title: "Monitoreo Ligero con Python: Sin Prometheus ni Grafana",
+                date: "2024-09-05",
+                series: "homelab",
+                seriesName: "Mi Home Lab DevOps",
+                excerpt: "Construye tu propio sistema de monitoreo con Python, psutil y curses. Dashboard web dinámico sin frameworks pesados.",
+                tags: ["python", "monitoring", "systemd", "psutil"],
+                slug: "monitoreo-python-ligero"
+            },
+            {
+                title: "Bash + AWS CLI: Automatización de Infraestructura",
+                date: "2024-08-25",
+                series: "aws",
+                seriesName: "Automatización AWS",
+                excerpt: "Scripts bash robustos para automatizar tareas en AWS. Manejo de errores, validaciones y patrones de diseño para infraestructura como código.",
+                tags: ["bash", "aws-cli", "scripting", "iac"],
+                slug: "bash-aws-automatizacion"
+            },
+            {
+                title: "n8n Self-Hosted: Instalación Completa con Docker Compose",
+                date: "2024-08-12",
+                series: "homelab",
+                seriesName: "Mi Home Lab DevOps",
+                excerpt: "Guía completa para instalar n8n con Docker Compose, PostgreSQL y Nginx. Troubleshooting de la conexión ECONNREFUSED y configuración óptima.",
+                tags: ["n8n", "docker", "automation", "postgres"],
+                slug: "n8n-docker-compose-instalacion"
+            },
+            {
+                title: "IA en DevOps: Cómo los Agentes Cambiaron Mi Flujo de Trabajo",
+                date: "2024-08-08",
+                series: "ai",
+                seriesName: "Agentes de IA en DevOps",
+                excerpt: "Mi experiencia usando agentes de IA para tareas DevOps. Casos de uso reales, productividad ganada y cómo integrarlos en tu workflow diario.",
+                tags: ["ai", "devops", "productivity", "workflow"],
+                slug: "ia-devops-cambio-workflow"
+            },
+            {
+                title: "Migración Masiva GP2 a GP3: Ahorrando Costos en AWS",
+                date: "2024-07-28",
+                series: "aws",
+                seriesName: "Automatización AWS",
+                excerpt: "Script automatizado para migrar volúmenes EBS de GP2 a GP3. Ahorra hasta 20% en costos manteniendo o mejorando el rendimiento. Incluye validaciones y rollback.",
+                tags: ["aws", "ebs", "cost-optimization", "bash"],
+                slug: "migracion-gp2-gp3-aws"
+            },
+            {
+                title: "AWS CLI Productivity Tips: 10 Trucos que Debes Conocer",
+                date: "2024-07-20",
+                series: "awscli",
+                seriesName: "AWS CLI Mastery",
+                excerpt: "10 tips y trucos para trabajar más rápido con AWS CLI. Desde aliases útiles hasta queries avanzadas y configuración óptima.",
+                tags: ["aws-cli", "productivity", "tips", "bash"],
+                slug: "aws-cli-productivity-tips"
+            },
+            {
+                title: "De Notebook Antigua a Servidor: Mi Home Lab DevOps",
+                date: "2024-07-15",
+                series: "homelab",
+                seriesName: "Mi Home Lab DevOps",
+                excerpt: "Cómo convertí una notebook vieja en un servidor DevOps 24/7. Desde la instalación de Debian hasta los servicios en producción: n8n, monitoreo, web personal y más.",
+                tags: ["homelab", "debian", "hardware", "docker"],
+                slug: "notebook-a-servidor-homelab"
+            },
+            {
+                title: "Bash + AWS CLI: Automatización de Infraestructura",
+                date: "2024-08-25",
+                series: "aws",
+                seriesName: "Automatización AWS",
+                excerpt: "Scripts bash robustos para automatizar tareas en AWS. Manejo de errores, validaciones y patrones de diseño para infraestructura como código.",
+                tags: ["bash", "aws-cli", "scripting", "iac"],
+                slug: "bash-aws-automatizacion"
+            },
+            {
+                title: "JMESPath: Queries Avanzadas en AWS CLI",
+                date: "2024-10-08",
+                series: "awscli",
+                seriesName: "AWS CLI Mastery",
+                excerpt: "Domina JMESPath para filtrar y transformar outputs de AWS CLI. Queries complejas, proyecciones y ejemplos prácticos.",
+                tags: ["aws-cli", "jmespath", "productivity", "queries"],
+                slug: "jmespath-queries-aws"
+            },
+            {
+                title: "AWS SSO: Gestión de Múltiples Cuentas con CLI",
+                date: "2024-10-22",
+                series: "aws",
+                seriesName: "Automatización AWS",
+                excerpt: "Configura AWS SSO para trabajar eficientemente con múltiples cuentas. Perfiles, login automatizado y scripts multi-cuenta.",
+                tags: ["aws", "sso", "security", "multi-account"],
+                slug: "aws-sso-multiples-cuentas"
+            },
+            {
+                title: "Web Personal con i18n: Selector de Idiomas en Vanilla JS",
+                date: "2024-11-10",
+                series: "homelab",
+                seriesName: "Mi Home Lab DevOps",
+                excerpt: "Implementación de un sistema bilingüe (EN/ES) usando solo JavaScript vanilla, sin frameworks. LocalStorage, traducciones dinámicas y UX minimalista.",
+                tags: ["javascript", "i18n", "frontend", "vanilla-js"],
+                slug: "web-i18n-vanilla-js"
+            },
+            {
+                title: "Systemd Services: De Script Bash a Daemon Profesional",
+                date: "2024-11-25",
+                series: "homelab",
+                seriesName: "Mi Home Lab DevOps",
+                excerpt: "Convierte tus scripts bash en servicios profesionales con systemd. Aprende a crear archivos .service, manejar logs con journalctl y configurar auto-restart.",
+                tags: ["linux", "systemd", "automation", "bash"],
+                slug: "systemd-services-daemon"
+            },
+            {
+                title: "Scripts de Backup: S3 + Lifecycle Policies",
+                date: "2024-12-05",
+                series: "aws",
+                seriesName: "Automatización AWS",
+                excerpt: "Automatización de backups con AWS S3, políticas de ciclo de vida, y scripts bash para mantener tus datos seguros sin costos excesivos.",
+                tags: ["aws", "s3", "backup", "automation"],
+                slug: "backups-s3-lifecycle"
+            }
+        ];
+        
+        const postsContainer = document.getElementById('posts-container');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        
+        function renderPosts(filter = 'all') {
+            const filteredPosts = filter === 'all' 
+                ? posts 
+                : posts.filter(post => post.series === filter);
+            
+            postsContainer.innerHTML = filteredPosts.map(post => {
+                const seriesClass = `series-${post.series}`;
+                return `
+                    <article class="post-card" data-series="${post.series}">
+                        <span class="series-badge ${seriesClass}">${post.seriesName}</span>
+                        <div class="post-date">${new Date(post.date).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})}</div>
+                        <h2><a href="/blog/posts/${post.slug}.html">${post.title}</a></h2>
+                        <p class="post-excerpt">${post.excerpt}</p>
+                        <div class="post-tags">
+                            ${post.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+        
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderPosts(btn.dataset.series);
+            });
+        });
+        
+        // Initial render
+        renderPosts();
+    </script>
+</body>
+</html>
+

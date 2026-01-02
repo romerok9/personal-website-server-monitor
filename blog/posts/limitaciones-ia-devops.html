@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lo Que la IA NO Puede Hacer en DevOps: Limitaciones Reales | Kevin Romero</title>
+    <meta name="description" content="Las limitaciones, riesgos y casos donde la IA falla. Una perspectiva realista después de 6 meses usando agentes de IA en producción.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        article { background: #111; border: 1px solid #222; padding: 3rem; border-radius: 8px; }
+        .series-badge { background: #8b5cf620; color: #a78bfa; border: 1px solid #8b5cf6; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
+        h1 { font-size: 2.5rem; color: #fff; margin: 1rem 0; }
+        h2 { color: #fff; font-size: 1.8rem; margin: 2rem 0 1rem; border-bottom: 2px solid #333; padding-bottom: 0.5rem; }
+        h3 { color: #e0e0e0; font-size: 1.3rem; margin: 1.5rem 0 1rem; }
+        pre { background: #0d0d0d; border: 1px solid #222; padding: 1.5rem; border-radius: 6px; overflow-x: auto; margin: 1.5rem 0; }
+        code { background: #1a1a1a; color: #60a5fa; padding: 0.2rem 0.5rem; border-radius: 3px; font-family: 'Courier New', monospace; }
+        pre code { background: none; padding: 0; color: #d0d0d0; }
+        .warning-box { background: #2a1a0d; border-left: 4px solid #f59e0b; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        .danger-box { background: #2a0d0d; border-left: 4px solid #ef4444; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        .info-box { background: #0d1b2a; border-left: 4px solid #60a5fa; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        ul, ol { margin-left: 2rem; margin-top: 1rem; }
+        li { margin: 0.5rem 0; }
+        footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #333; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" style="color: #60a5fa; text-decoration: none;">← Back to Blog</a>
+        <article>
+            <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #222;">
+                <span class="series-badge">🤖 Agentes de IA en DevOps</span>
+                <div style="color: #666; margin: 0.5rem 0;">October 25, 2024</div>
+                <h1>Lo Que la IA NO Puede Hacer en DevOps: Limitaciones Reales</h1>
+            </div>
+            
+            <div style="color: #d0d0d0;">
+                <h2>📋 Contexto</h2>
+                <p>Después de 6 meses usando IA intensivamente, he visto tanto sus fortalezas como sus debilidades. Este post es el contrapeso necesario a todo el entusiasmo: las cosas que la IA hace mal, los riesgos reales, y por qué tu experiencia sigue siendo irremplazable.</p>
+
+                <div class="warning-box">
+                    <strong>⚠️ Disclaimer:</strong> Este post no es anti-IA. Uso IA diariamente y me encanta. Pero es crítico entender sus limitaciones para usarla responsablemente.
+                </div>
+
+                <h2>🚫 Limitación 1: No Entiende Tu Contexto de Negocio</h2>
+                
+                <h3>El Problema</h3>
+                <p>IA te da soluciones técnicamente correctas, pero sin entender:</p>
+                <ul>
+                    <li>Presupuesto disponible</li>
+                    <li>Políticas de la empresa</li>
+                    <li>Compliance y regulaciones de tu industria</li>
+                    <li>Deuda técnica existente</li>
+                    <li>Cultura del equipo</li>
+                </ul>
+
+                <h3>Ejemplo Real</h3>
+                <pre><code>Yo: "¿Cómo mejorar la disponibilidad de mi app?"
+
+IA: "Implementa multi-region en AWS con failover automático,
+RDS Multi-AZ, CloudFront global, y Route53 health checks"
+
+Reality check:
+- Presupuesto: $500/mes (la solución cuesta $5000/mes)
+- SLA necesario: 99% (no 99.99%)
+- Equipo: 1 persona (yo)
+- Tiempo: necesito algo en 2 semanas, no 3 meses
+
+La solución es perfecta técnicamente, pero inviable en mi contexto.</code></pre>
+
+                <div class="info-box">
+                    <strong>Lección:</strong> Siempre filtra las sugerencias de IA a través de tus restricciones reales (presupuesto, tiempo, recursos, skills del equipo).
+                </div>
+
+                <h2>🚫 Limitación 2: Hallucinations (Inventa Cosas)</h2>
+                
+                <h3>Ejemplos Reales que Vi</h3>
+                <ul>
+                    <li><strong>APIs inexistentes:</strong> "Usa <code>aws ec2 get-instance-metrics</code>" (no existe)</li>
+                    <li><strong>Flags incorrectos:</strong> Sugiere <code>--no-verify-ssl</code> cuando es <code>--no-verify</code></li>
+                    <li><strong>Versiones mezcladas:</strong> Mezcla sintaxis de Docker Compose v2 y v3</li>
+                    <li><strong>Packages que no existen:</strong> "Instala <code>python3-awstools</code>" (inventado)</li>
+                </ul>
+
+                <h3>Caso Real: Incidente Evitado</h3>
+                <pre><code>IA sugirió:
+aws ec2 delete-snapshots --older-than 30 --confirm
+
+Yo ejecuté:
+aws ec2 help | grep delete-snapshots
+→ Ese comando no existe
+
+Si hubiera confiado ciegamente, habría pegado un comando
+que no hace nada (en el mejor caso) o causa un error
+que interrumpe mi script.</code></pre>
+
+                <div class="danger-box">
+                    <strong>🚨 Regla de Oro:</strong> SIEMPRE verifica comandos destructivos antes de ejecutar. Usa <code>--dry-run</code> cuando esté disponible.
+                </div>
+
+                <h2>🚫 Limitación 3: No Puede Ejecutar ni Validar Código</h2>
+                <p>IA te da código que "se ve bien" pero no puede garantizar que funcione:</p>
+
+                <ul>
+                    <li>No detecta typos en nombres de variables</li>
+                    <li>No valida que las dependencias estén instaladas</li>
+                    <li>No puede testear contra tu ambiente real</li>
+                    <li>No detecta race conditions o issues de concurrencia</li>
+                </ul>
+
+                <h3>Ejemplo</h3>
+                <pre><code>IA generó este script bash que "se ve bien":
+
+#!/bin/bash
+INSTANCE_ID=$(aws ec2 describe-instances \
+    --filters "Name=tag:Name,Values=$INSTANCE_NAME" \
+    --query 'Reservations[0].Instances[0].InstanceId' \
+    --output text)
+
+aws ec2 stop-instances --instance-ids $INSTANCE_ID
+
+Problemas reales:
+1. ¿Qué pasa si no encuentra instancia? → $INSTANCE_ID está vacío
+2. Falta validación de variable $INSTANCE_NAME
+3. No hay error handling
+4. Si hay múltiples instancias con ese nombre, solo toma la primera
+
+IA no detecta estos edge cases porque no puede ejecutar el código.</code></pre>
+
+                <h2>🚫 Limitación 4: Información Desactualizada</h2>
+                <p>El conocimiento de IA tiene un "cutoff date". Ejemplo:</p>
+
+                <ul>
+                    <li>AWS lanza nuevo tipo de instancia (graviton4) → IA no lo conoce</li>
+                    <li>Kubernetes cambia API en v1.29 → IA sugiere sintaxis deprecada</li>
+                    <li>Herramienta nueva (2024) → IA nunca la vio</li>
+                </ul>
+
+                <div class="warning-box">
+                    <strong>Para información crítica:</strong> Siempre contrasta con documentación oficial actual.
+                </div>
+
+                <h2>🚫 Limitación 5: Malas Recomendaciones de Seguridad</h2>
+                
+                <h3>Errores Comunes de IA</h3>
+                <pre><code>IA sugiere:
+1. "Usa chmod 777 para solucionar permisos"
+2. "Disable SSL verification si falla el certificado"
+3. "Hardcodea la password temporalmente"
+4. "Usa sudo sin validación"
+5. "Expone puerto directamente sin firewall para testear"
+
+NUNCA sigas estas sugerencias sin entender las implicaciones.</code></pre>
+
+                <h3>Caso Real: Pull Request Rechazado</h3>
+                <pre><code>IA generó un script de deployment con:
+
+export AWS_ACCESS_KEY_ID="AKIA..."
+export AWS_SECRET_ACCESS_KEY="..."
+
+Code review humano:
+"¿Estás loco? Esto commitea credenciales en Git"
+
+IA no entiende:
+- Git history es permanente
+- Secrets en repos son una vulnerabilidad crítica
+- Mejores prácticas de secrets management</code></pre>
+
+                <div class="danger-box">
+                    <strong>🚨 NUNCA confíes en IA para:</strong><br>
+                    • Configuración de seguridad crítica<br>
+                    • Manejo de secrets<br>
+                    • Configuración de firewalls<br>
+                    • Políticas de IAM en AWS<br>
+                    <br>
+                    Siempre valida con un humano experto en seguridad.
+                </div>
+
+                <h2>🚫 Limitación 6: No Puede Debuggear Incidentes Complejos</h2>
+                <p>IA es útil para debugging rutinario, pero falla en:</p>
+
+                <ul>
+                    <li><strong>Issues intermitentes:</strong> "A veces falla, a veces no"</li>
+                    <li><strong>Race conditions:</strong> Requiere entender flujo temporal complejo</li>
+                    <li><strong>Issues de infraestructura:</strong> Problemas de red, latencia, DNS</li>
+                    <li><strong>Performance degradation:</strong> "Antes era rápido, ahora lento"</li>
+                </ul>
+
+                <h3>Ejemplo Real</h3>
+                <pre><code>Incidente: App lenta cada martes a las 3 AM
+
+IA sugiere:
+- Revisar logs (ya lo hice, nada obvio)
+- Aumentar recursos (no es el problema)
+- Optimizar queries (ya están optimizadas)
+
+Root cause real (encontrado por humano con experiencia):
+- Backup automático de DB se ejecuta martes 3 AM
+- Locks en tabla principal durante backup
+- No se ve en logs de app, solo en logs de DB
+
+IA no tiene la intuición para conectar estos puntos.</code></pre>
+
+                <h2>🚫 Limitación 7: No Entiende Trade-offs</h2>
+                <p>IA sugiere "la mejor práctica" sin entender que todo tiene trade-offs:</p>
+
+                <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0;">
+                    <tr style="background: #1a1a1a;">
+                        <th style="padding: 0.75rem; border: 1px solid #333;">Sugerencia de IA</th>
+                        <th style="padding: 0.75rem; border: 1px solid #333;">Trade-off No Mencionado</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">"Usa Kubernetes"</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Complejidad, curva de aprendizaje, overhead</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">"Implementa microservices"</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Latencia de red, complejidad debugging, overhead operativo</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">"Agrega caching en Redis"</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Cache invalidation, consistencia, nueva pieza que mantener</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">"Multi-region setup"</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Costo 3-5x mayor, complejidad deployment</td>
+                    </tr>
+                </table>
+
+                <h2>🚫 Limitación 8: No Puede Tomar Decisiones de Arquitectura</h2>
+                <p>Decisiones que requieren juicio humano:</p>
+
+                <ul>
+                    <li><strong>Build vs Buy:</strong> ¿Desarrollo in-house o uso SaaS?</li>
+                    <li><strong>Timing:</strong> ¿Migro ahora o espero?</li>
+                    <li><strong>Priorización:</strong> ¿Qué feature desarrollo primero?</li>
+                    <li><strong>Risk assessment:</strong> ¿Vale la pena el riesgo de esta migración?</li>
+                </ul>
+
+                <h2>🚫 Limitación 9: No Aprende de Tus Errores</h2>
+                <p>Cada conversación es independiente (en la mayoría de los casos):</p>
+
+                <ul>
+                    <li>No recuerda que ya probaste esa solución y no funcionó</li>
+                    <li>No aprende de tus preferencias</li>
+                    <li>No se adapta a tu stack específico automáticamente</li>
+                </ul>
+
+                <h2>🚫 Limitación 10: Puede Generar Código Inseguro o Ineficiente</h2>
+                <pre><code>Ejemplos reales de código que IA generó:
+
+1. Loop ineficiente:
+for i in $(aws ec2 describe-instances ...); do
+    # Llama API una vez por instancia (n queries)
+done
+# Debería: Una query, parsear resultado local
+
+2. Sin rate limiting:
+while true; do
+    aws s3 ls  # Sin sleep, puede causar throttling
+done
+
+3. SQL injection vulnerable:
+query="SELECT * FROM users WHERE name='$USER_INPUT'"
+# Falta sanitización
+
+4. Regex con ReDoS vulnerability:
+grep -E '(a+)+$' file.txt  # Puede causar DoS</code></pre>
+
+                <div class="warning-box">
+                    <strong>Code review humano es OBLIGATORIO</strong> para código generado por IA, especialmente si:
+                    <ul>
+                        <li>Va a producción</li>
+                        <li>Procesa datos sensibles</li>
+                        <li>Tiene acceso a AWS/cloud</li>
+                        <li>Es público o user-facing</li>
+                    </ul>
+                </div>
+
+                <h2>✅ Entonces, ¿Cuándo SÍ Usar IA?</h2>
+                <p>IA es excelente para:</p>
+                <ul>
+                    <li>✅ Boilerplate code (estructura básica)</li>
+                    <li>✅ Explicar errores comunes</li>
+                    <li>✅ Generar documentación draft</li>
+                    <li>✅ Troubleshooting de problemas estándar</li>
+                    <li>✅ Aprender nuevas tecnologías</li>
+                    <li>✅ Refactoring de código existente</li>
+                    <li>✅ Generar test cases</li>
+                </ul>
+
+                <h2>❌ Cuándo NO Usar (o Usar con Extrema Precaución)</h2>
+                <ul>
+                    <li>❌ Decisiones de arquitectura críticas</li>
+                    <li>❌ Configuración de seguridad</li>
+                    <li>❌ Debugging de incidentes productivos complejos</li>
+                    <li>❌ Código que maneja dinero o datos sensibles</li>
+                    <li>❌ Políticas de IAM en AWS</li>
+                    <li>❌ Disaster recovery procedures</li>
+                    <li>❌ Compliance y regulaciones</li>
+                </ul>
+
+                <h2>📝 Checklist: Uso Responsable de IA</h2>
+                <p>Antes de usar código/configs generados por IA:</p>
+
+                <ul>
+                    <li>☐ Revisé línea por línea (no copiar/pegar ciego)</li>
+                    <li>☐ Entiendo qué hace cada parte</li>
+                    <li>☐ Validé sintaxis con <code>--dry-run</code> o en ambiente de test</li>
+                    <li>☐ Busqué en docs oficiales para confirmar</li>
+                    <li>☐ Consideré edge cases</li>
+                    <li>☐ Agregué error handling si falta</li>
+                    <li>☐ Verifiqué que no hay secrets hardcodeados</li>
+                    <li>☐ Evalué impacto si algo sale mal</li>
+                    <li>☐ Testé en ambiente no productivo primero</li>
+                </ul>
+
+                <h2>💭 Mi Postura Final</h2>
+                <p>IA es una herramienta increíblemente poderosa que me hace 40% más productivo. Pero es exactamente eso: una <strong>herramienta</strong>.</p>
+
+                <p><strong>IA no reemplaza:</strong></p>
+                <ul>
+                    <li>Tu experiencia y juicio</li>
+                    <li>Tu entendimiento del contexto de negocio</li>
+                    <li>Tu intuición al debuggear</li>
+                    <li>Tu capacidad de evaluar trade-offs</li>
+                    <li>Tu responsabilidad por el código que produces</li>
+                </ul>
+
+                <div class="info-box">
+                    <strong>Analogía:</strong> IA es como tener un junior developer muy rápido y con buena memoria, pero sin experiencia real. Le das tareas, revisas su trabajo, y aprendes a aprovechar sus fortalezas mientras compensas sus debilidades.
+                </div>
+
+                <h2>🎯 Balance Correcto</h2>
+                <p>Usa IA para:</p>
+                <ul>
+                    <li>🚀 Acelerar lo rutinario</li>
+                    <li>📚 Aprender más rápido</li>
+                    <li>💡 Generar ideas y alternativas</li>
+                    <li>🔍 Primera línea de debugging</li>
+                </ul>
+
+                <p>Confía en ti mismo para:</p>
+                <ul>
+                    <li>🎯 Decisiones críticas</li>
+                    <li>🔒 Seguridad</li>
+                    <li>🏗️ Arquitectura</li>
+                    <li>🚨 Incidentes de producción</li>
+                </ul>
+
+                <h2>💭 Conclusión</h2>
+                <p>No te creas el hype de "IA reemplazará a los DevOps". IA potencia a buenos DevOps, pero no reemplaza la experiencia, el juicio, y la responsabilidad.</p>
+
+                <p>Usa IA con inteligencia. Conoce sus limitaciones. Verifica su trabajo. Y mantén tu cerebro encendido.</p>
+
+                <div class="danger-box">
+                    <strong>Última advertencia:</strong> El día que confíes 100% en IA sin verificar, es el día que cometerás tu peor error. Yo lo sé porque casi lo hice, y solo mi instinto de "esto se ve raro" me salvó de borrar datos productivos.
+                </div>
+            </div>
+        </article>
+        <footer>
+            <p>© 2024 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a></p>
+        </footer>
+    </div>
+</body>
+</html>
+

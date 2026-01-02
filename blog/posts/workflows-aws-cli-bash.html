@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flujos de Trabajo Eficientes con AWS CLI y Bash | Kevin Romero</title>
+    <meta name="description" content="Optimiza tu productividad con funciones bash, scripts reutilizables para tareas comunes en AWS. Workflow real de un DevOps Engineer.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        article { background: #111; border: 1px solid #222; padding: 3rem; border-radius: 8px; }
+        .series-badge { background: #ef444420; color: #f87171; border: 1px solid #ef4444; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
+        h1 { font-size: 2.5rem; color: #fff; margin: 1rem 0; }
+        h2 { color: #fff; font-size: 1.8rem; margin: 2rem 0 1rem; border-bottom: 2px solid #333; padding-bottom: 0.5rem; }
+        h3 { color: #e0e0e0; font-size: 1.3rem; margin: 1.5rem 0 1rem; }
+        pre { background: #0d0d0d; border: 1px solid #222; padding: 1.5rem; border-radius: 6px; overflow-x: auto; margin: 1.5rem 0; }
+        code { background: #1a1a1a; color: #60a5fa; padding: 0.2rem 0.5rem; border-radius: 3px; font-family: 'Courier New', monospace; }
+        pre code { background: none; padding: 0; color: #d0d0d0; }
+        .info-box { background: #0d1b2a; border-left: 4px solid #60a5fa; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #333; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" style="color: #60a5fa; text-decoration: none;">← Back to Blog</a>
+        <article>
+            <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #222;">
+                <span class="series-badge">🛠️ AWS CLI Mastery</span>
+                <div style="color: #666; margin: 0.5rem 0;">November 2, 2024</div>
+                <h1>Flujos de Trabajo Eficientes con AWS CLI y Bash</h1>
+            </div>
+            
+            <div style="color: #d0d0d0;">
+                <h2>📋 Contexto</h2>
+                <p>Como DevOps Engineer, tengo workflows que repito constantemente: deployments, backups, limpieza de recursos, troubleshooting. En lugar de ejecutar 10 comandos manualmente cada vez, creo funciones y scripts reutilizables que automatizan estas tareas.</p>
+
+                <h2>🎯 Workflows Comunes</h2>
+                
+                <h3>1. Deployment de Aplicación</h3>
+                <pre><code>#!/bin/bash
+# deploy.sh - Deploy application to EC2
+
+set -euo pipefail
+
+APP_NAME="${1:-myapp}"
+ENVIRONMENT="${2:-dev}"
+REGION="${AWS_REGION:-us-east-1}"
+
+echo "Deploying $APP_NAME to $ENVIRONMENT..."
+
+# 1. Get target instances
+INSTANCES=$(aws ec2 describe-instances \
+    --region "$REGION" \
+    --filters \
+        "Name=tag:App,Values=$APP_NAME" \
+        "Name=tag:Environment,Values=$ENVIRONMENT" \
+        "Name=instance-state-name,Values=running" \
+    --query "Reservations[*].Instances[*].InstanceId" \
+    --output text)
+
+if [ -z "$INSTANCES" ]; then
+    echo "No instances found"
+    exit 1
+fi
+
+# 2. Upload new version to S3
+echo "Uploading artifacts..."
+aws s3 cp ./dist "s3://deployments-$APP_NAME/$(date +%Y%m%d-%H%M%S)/" --recursive
+
+# 3. Trigger deployment via SSM
+for instance in $INSTANCES; do
+    echo "Deploying to $instance..."
+    aws ssm send-command \
+        --instance-ids "$instance" \
+        --document-name "AWS-RunShellScript" \
+        --parameters 'commands=[
+            "cd /var/www/app",
+            "aws s3 sync s3://deployments-'$APP_NAME'/latest ./",
+            "npm install --production",
+            "pm2 restart app"
+        ]' \
+        --output text
+done
+
+echo "✓ Deployment completed"</code></pre>
+
+                <h3>2. Backup Automático de RDS</h3>
+                <pre><code>#!/bin/bash
+# rds-backup.sh - Create RDS snapshot with retention
+
+DB_INSTANCE="${1:?DB instance required}"
+RETENTION_DAYS=${2:-7}
+
+SNAPSHOT_ID="$DB_INSTANCE-$(date +%Y%m%d-%H%M%S)"
+
+echo "Creating snapshot: $SNAPSHOT_ID"
+
+# Create snapshot
+aws rds create-db-snapshot \
+    --db-instance-identifier "$DB_INSTANCE" \
+    --db-snapshot-identifier "$SNAPSHOT_ID"
+
+# Wait for completion
+aws rds wait db-snapshot-available \
+    --db-snapshot-identifier "$SNAPSHOT_ID"
+
+echo "✓ Snapshot created: $SNAPSHOT_ID"
+
+# Delete old snapshots
+echo "Cleaning old snapshots (>$RETENTION_DAYS days)..."
+CUTOFF_DATE=$(date -d "$RETENTION_DAYS days ago" +%Y-%m-%d)
+
+aws rds describe-db-snapshots \
+    --db-instance-identifier "$DB_INSTANCE" \
+    --query "DBSnapshots[?SnapshotCreateTime<'$CUTOFF_DATE'].DBSnapshotIdentifier" \
+    --output text \
+    | xargs -n1 -I{} aws rds delete-db-snapshot --db-snapshot-identifier {}
+
+echo "✓ Cleanup completed"</code></pre>
+
+                <h3>3. Cost Optimization: Detener Instancias Fuera de Horario</h3>
+                <pre><code>#!/bin/bash
+# schedule-instances.sh - Start/stop instances by schedule
+
+ACTION="${1:-stop}"  # start or stop
+ENVIRONMENT="${2:-dev}"
+
+echo "[$ACTION] instances in $ENVIRONMENT environment..."
+
+# Get instances with Schedule tag
+INSTANCES=$(aws ec2 describe-instances \
+    --filters \
+        "Name=tag:Environment,Values=$ENVIRONMENT" \
+        "Name=tag:Schedule,Values=business-hours" \
+        "Name=instance-state-name,Values=$([ "$ACTION" = "stop" ] && echo "running" || echo "stopped")" \
+    --query "Reservations[*].Instances[*].[InstanceId,Tags[?Key=='Name'].Value|[0]]" \
+    --output text)
+
+if [ -z "$INSTANCES" ]; then
+    echo "No instances found"
+    exit 0
+fi
+
+echo "$INSTANCES" | while read -r instance_id name; do
+    echo "  $ACTION $name ($instance_id)"
+    aws ec2 "${ACTION}-instances" --instance-ids "$instance_id" --output text > /dev/null
+done
+
+# Count instances
+COUNT=$(echo "$INSTANCES" | wc -l)
+echo "✓ ${ACTION}ped $COUNT instances"
+
+# Calculate savings
+HOURLY_COST=0.10  # Average t3.medium cost
+if [ "$ACTION" = "stop" ]; then
+    echo "💰 Estimated savings: \$$(echo "$COUNT * $HOURLY_COST * 12" | bc)/day (12h stopped)"
+fi</code></pre>
+
+                <h3>4. Security Audit: Recursos Sin Tags</h3>
+                <pre><code>#!/bin/bash
+# audit-tags.sh - Find resources without required tags
+
+REQUIRED_TAGS=("Environment" "Owner" "Project")
+
+echo "Auditing EC2 instances for required tags..."
+
+aws ec2 describe-instances \
+    --query 'Reservations[*].Instances[*].[InstanceId,Tags]' \
+    --output json | jq -r '.[][] | 
+        select(.Tags != null) | 
+        {id: .[0], tags: (.[1] | map(.Key))} |
+        select([.tags[] | select(. == "Environment" or . == "Owner" or . == "Project")] | length < 3) |
+        "\(.id) - Missing: \(["Environment","Owner","Project"] - .tags | join(", "))"'
+
+echo ""
+echo "Auditing S3 buckets..."
+
+aws s3api list-buckets --query 'Buckets[*].Name' --output text | while read bucket; do
+    TAGS=$(aws s3api get-bucket-tagging --bucket "$bucket" 2>/dev/null | jq -r '.TagSet | map(.Key)' || echo "[]")
+    
+    MISSING=$(echo "$TAGS" | jq -r --argjson req '["Environment","Owner","Project"]' \
+        '$req - . | if length > 0 then join(", ") else empty end')
+    
+    if [ -n "$MISSING" ]; then
+        echo "$bucket - Missing: $MISSING"
+    fi
+done</code></pre>
+
+                <h3>5. Cleanup: Recursos Huérfanos</h3>
+                <pre><code>#!/bin/bash
+# cleanup-orphans.sh - Find and delete unused AWS resources
+
+echo "Finding unattached EBS volumes..."
+aws ec2 describe-volumes \
+    --filters "Name=status,Values=available" \
+    --query 'Volumes[*].[VolumeId,Size,CreateTime]' \
+    --output table
+
+read -p "Delete these volumes? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    aws ec2 describe-volumes \
+        --filters "Name=status,Values=available" \
+        --query 'Volumes[*].VolumeId' \
+        --output text \
+        | xargs -n1 aws ec2 delete-volume --volume-id
+    echo "✓ Volumes deleted"
+fi
+
+echo ""
+echo "Finding old snapshots (>90 days, no AMI)..."
+CUTOFF=$(date -d '90 days ago' --iso-8601)
+aws ec2 describe-snapshots --owner-ids self \
+    --query "Snapshots[?StartTime<='$CUTOFF'].[SnapshotId,StartTime,VolumeSize]" \
+    --output table
+
+read -p "Delete these snapshots? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    aws ec2 describe-snapshots --owner-ids self \
+        --query "Snapshots[?StartTime<='$CUTOFF'].SnapshotId" \
+        --output text \
+        | xargs -n1 -P5 aws ec2 delete-snapshot --snapshot-id
+    echo "✓ Snapshots deleted"
+fi</code></pre>
+
+                <h2>🔧 Funciones Bash Reutilizables</h2>
+                <p>Agrega a tu <code>~/.bashrc</code>:</p>
+
+                <pre><code># aws-functions.sh - Funciones AWS reutilizables
+
+# Get instance IP by name
+aws-ip() {
+    local name=$1
+    aws ec2 describe-instances \
+        --filters "Name=tag:Name,Values=$name" "Name=instance-state-name,Values=running" \
+        --query 'Reservations[0].Instances[0].PublicIpAddress' \
+        --output text
+}
+
+# SSH to instance by name
+aws-ssh() {
+    local name=$1
+    local ip=$(aws-ip "$name")
+    [ -n "$ip" ] && ssh -i ~/.ssh/my-key.pem ec2-user@"$ip" || echo "Instance not found"
+}
+
+# Get cost estimate for current month
+aws-cost() {
+    local start=$(date -d "$(date +%Y-%m-01)" +%Y-%m-%d)
+    local end=$(date +%Y-%m-%d)
+    
+    aws ce get-cost-and-usage \
+        --time-period Start=$start,End=$end \
+        --granularity MONTHLY \
+        --metrics BlendedCost \
+        --output json | jq -r '.ResultsByTime[0].Total.BlendedCost | 
+            "Current month cost: $" + (.Amount | tonumber | round)'
+}
+
+# List running instances with cost estimate
+aws-running() {
+    aws ec2 describe-instances \
+        --filters "Name=instance-state-name,Values=running" \
+        --query 'Reservations[*].Instances[*].[
+            Tags[?Key==`Name`].Value|[0],
+            InstanceType,
+            LaunchTime,
+            InstanceId
+        ]' \
+        --output table
+}
+
+# Quick S3 sync with progress
+aws-s3sync() {
+    local source=$1
+    local bucket=$2
+    aws s3 sync "$source" "s3://$bucket" \
+        --delete \
+        --exact-timestamps \
+        --storage-class INTELLIGENT_TIERING \
+        | pv -lep -s $(find "$source" -type f | wc -l)
+}</code></pre>
+
+                <h2>📊 Template de Script Robusto</h2>
+                <p>Base para todos tus scripts AWS:</p>
+
+                <pre><code>#!/bin/bash
+# script-template.sh - Template con mejores prácticas
+
+set -euo pipefail  # Exit on error, undefined vars, pipe failures
+IFS=$'\n\t'        # Safer word splitting
+
+# Colors
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly NC='\033[0m'
+
+# Functions
+log() { echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')]${NC} $*"; }
+error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
+warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
+
+cleanup() {
+    # Cleanup code aquí
+    log "Cleaning up..."
+}
+trap cleanup EXIT
+
+usage() {
+    cat << EOF
+Usage: $0 [OPTIONS]
+
+Options:
+    -e, --environment ENV    Environment (dev|staging|prod)
+    -r, --region REGION      AWS Region
+    -h, --help               Show this help
+    
+Examples:
+    $0 --environment prod --region us-east-1
+EOF
+    exit 1
+}
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -e|--environment) ENVIRONMENT="$2"; shift 2 ;;
+        -r|--region) REGION="$2"; shift 2 ;;
+        -h|--help) usage ;;
+        *) error "Unknown option: $1"; usage ;;
+    esac
+done
+
+# Validations
+: "${ENVIRONMENT:?Environment required}"
+: "${REGION:=${AWS_REGION:-us-east-1}}"
+
+# Main logic
+main() {
+    log "Starting script..."
+    log "Environment: $ENVIRONMENT"
+    log "Region: $REGION"
+    
+    # Your code here
+    
+    log "✓ Completed successfully"
+}
+
+main "$@"</code></pre>
+
+                <div class="info-box">
+                    <strong>💡 Mejores Prácticas:</strong><br>
+                    • <code>set -euo pipefail</code> para detección temprana de errores<br>
+                    • Funciones de logging con timestamps<br>
+                    • Trap para cleanup automático<br>
+                    • Validación de argumentos<br>
+                    • Help message claro
+                </div>
+
+                <h2>🚀 Automatización con Cron</h2>
+                <pre><code># crontab -e
+
+# Backup RDS diario a las 2 AM
+0 2 * * * /home/devops/scripts/rds-backup.sh prod-db 7
+
+# Detener instancias dev a las 7 PM
+0 19 * * 1-5 /home/devops/scripts/schedule-instances.sh stop dev
+
+# Iniciar instancias dev a las 8 AM
+0 8 * * 1-5 /home/devops/scripts/schedule-instances.sh start dev
+
+# Cleanup semanal de snapshots
+0 3 * * 0 /home/devops/scripts/cleanup-orphans.sh
+
+# Reporte de costos mensual
+0 9 1 * * /home/devops/scripts/cost-report.sh | mail -s "AWS Cost Report" admin@example.com</code></pre>
+
+                <h2>💭 Conclusión</h2>
+                <p>Estos workflows me ahorran horas cada semana. La clave es identificar tareas repetitivas, invertir tiempo en escribir un script robusto una vez, y reutilizarlo constantemente. Un buen script de 100 líneas puede ahorrarte 30 minutos cada día.</p>
+            </div>
+        </article>
+        <footer>
+            <p>© 2024 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a></p>
+        </footer>
+    </div>
+</body>
+</html>
+

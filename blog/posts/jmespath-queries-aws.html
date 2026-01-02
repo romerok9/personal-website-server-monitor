@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JMESPath: Queries Avanzadas en AWS CLI | Kevin Romero</title>
+    <meta name="description" content="Domina JMESPath para filtrar y transformar outputs de AWS CLI. Queries complejas, proyecciones y ejemplos prácticos.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        article { background: #111; border: 1px solid #222; padding: 3rem; border-radius: 8px; }
+        .series-badge { background: #ef444420; color: #f87171; border: 1px solid #ef4444; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
+        h1 { font-size: 2.5rem; color: #fff; margin: 1rem 0; }
+        h2 { color: #fff; font-size: 1.8rem; margin: 2rem 0 1rem; border-bottom: 2px solid #333; padding-bottom: 0.5rem; }
+        h3 { color: #e0e0e0; font-size: 1.3rem; margin: 1.5rem 0 1rem; }
+        pre { background: #0d0d0d; border: 1px solid #222; padding: 1.5rem; border-radius: 6px; overflow-x: auto; margin: 1.5rem 0; }
+        code { background: #1a1a1a; color: #60a5fa; padding: 0.2rem 0.5rem; border-radius: 3px; font-family: 'Courier New', monospace; }
+        pre code { background: none; padding: 0; color: #d0d0d0; }
+        .info-box { background: #0d1b2a; border-left: 4px solid #60a5fa; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        .success-box { background: #0d2a1b; border-left: 4px solid #10b981; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        ul, ol { margin-left: 2rem; margin-top: 1rem; }
+        li { margin: 0.5rem 0; }
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+        th, td { padding: 0.75rem; text-align: left; border: 1px solid #222; }
+        th { background: #1a1a1a; color: #60a5fa; }
+        footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #333; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" style="color: #60a5fa; text-decoration: none;">← Back to Blog</a>
+        <article>
+            <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #222;">
+                <span class="series-badge">🛠️ AWS CLI Mastery</span>
+                <div style="color: #666; margin: 0.5rem 0;">October 8, 2024</div>
+                <h1>JMESPath: Queries Avanzadas en AWS CLI</h1>
+            </div>
+            
+            <div style="color: #d0d0d0;">
+                <h2>📋 Contexto</h2>
+                <p>JMESPath es el lenguaje de query que usa AWS CLI con el parámetro <code>--query</code>. Dominar JMESPath transforma AWS CLI de "herramienta básica" a "súper poder de automatización". En este post, las queries que más uso y patrones avanzados.</p>
+
+                <h2>🎯 ¿Qué es JMESPath?</h2>
+                <p>JMESPath es un lenguaje de query para JSON, similar a:</p>
+                <ul>
+                    <li><strong>XPath:</strong> para XML</li>
+                    <li><strong>SQL SELECT:</strong> para bases de datos</li>
+                    <li><strong>jq:</strong> para JSON en CLI</li>
+                </ul>
+
+                <p><strong>Ejemplo básico:</strong></p>
+                <pre><code># JSON
+{
+  "Users": [
+    {"Name": "Alice", "Age": 30},
+    {"Name": "Bob", "Age": 25}
+  ]
+}
+
+# Query
+Users[0].Name
+
+# Output
+"Alice"</code></pre>
+
+                <h2>💡 Sintaxis Básica</h2>
+                
+                <h3>1. Acceder a Campos</h3>
+                <pre><code># Dot notation
+aws ec2 describe-instances --query 'Reservations[0].Instances[0].InstanceId'
+
+# Output
+"i-1234567890abcdef0"</code></pre>
+
+                <h3>2. Wildcard (Todas las Instancias)</h3>
+                <pre><code># Get all instance IDs
+aws ec2 describe-instances --query 'Reservations[*].Instances[*].InstanceId'
+
+# Flatten (remove nested arrays)
+aws ec2 describe-instances --query 'Reservations[].Instances[].InstanceId'</code></pre>
+
+                <h3>3. Proyecciones (Seleccionar Múltiples Campos)</h3>
+                <pre><code># Multi-field projection
+aws ec2 describe-instances --query 'Reservations[].Instances[].[InstanceId,InstanceType,State.Name]'
+
+# Output (array of arrays)
+[
+  ["i-111", "t3.micro", "running"],
+  ["i-222", "t3.small", "stopped"]
+]</code></pre>
+
+                <h3>4. Filtros</h3>
+                <pre><code># Filter running instances
+aws ec2 describe-instances --query 'Reservations[].Instances[?State.Name==`running`].InstanceId'
+
+# Multiple conditions (AND)
+aws ec2 describe-instances --query 'Reservations[].Instances[?State.Name==`running` && InstanceType==`t3.micro`]'
+
+# OR condition
+aws ec2 describe-instances --query 'Reservations[].Instances[?State.Name==`running` || State.Name==`stopped`]'</code></pre>
+
+                <div class="info-box">
+                    <strong>💡 Nota:</strong> En JMESPath, los valores literales van con backticks: <code>`running`</code> no <code>'running'</code>
+                </div>
+
+                <h2>🚀 Queries Prácticas (Casos Reales)</h2>
+                
+                <h3>EC2: Instancias con Tags</h3>
+                <pre><code># Get Name tag value
+aws ec2 describe-instances --query 'Reservations[].Instances[].[InstanceId,Tags[?Key==`Name`].Value|[0]]'
+
+# Filter by Environment tag
+aws ec2 describe-instances --query 'Reservations[].Instances[?Tags[?Key==`Environment` && Value==`production`]]'
+
+# Get all instances WITHOUT a specific tag
+aws ec2 describe-instances --query 'Reservations[].Instances[?!Tags[?Key==`Owner`]]'</code></pre>
+
+                <h3>EBS: Volúmenes No Adjuntos</h3>
+                <pre><code># Unattached volumes
+aws ec2 describe-volumes --query 'Volumes[?State==`available`].[VolumeId,Size,VolumeType,CreateTime]'
+
+# Volumes older than X (requires external date comparison)
+aws ec2 describe-volumes --query 'Volumes[?State==`available`]|[?CreateTime<`2024-01-01`]'</code></pre>
+
+                <h3>S3: Buckets con Tamaño</h3>
+                <pre><code># List buckets with creation date
+aws s3api list-buckets --query 'Buckets[].[Name,CreationDate]' --output table
+
+# Get bucket sizes (requires CloudWatch)
+aws cloudwatch get-metric-statistics \
+    --namespace AWS/S3 \
+    --metric-name BucketSizeBytes \
+    --dimensions Name=BucketName,Value=my-bucket Name=StorageType,Value=StandardStorage \
+    --start-time 2024-12-01T00:00:00Z \
+    --end-time 2024-12-30T23:59:59Z \
+    --period 86400 \
+    --statistics Average \
+    --query 'Datapoints|[0].Average'</code></pre>
+
+                <h3>IAM: Usuarios sin MFA</h3>
+                <pre><code># Get users without MFA enabled
+aws iam get-credential-report --query 'Content' --output text | base64 -d | \
+    awk -F, '$4=="false" {print $1}'
+
+# Using JMESPath (if data is JSON)
+aws iam list-users --query 'Users[?!MfaActive].[UserName,CreateDate]'</code></pre>
+
+                <h3>RDS: Instancias Públicamente Accesibles</h3>
+                <pre><code># Find public RDS instances
+aws rds describe-db-instances --query 'DBInstances[?PubliclyAccessible==`true`].[DBInstanceIdentifier,Engine,DBInstanceClass]'</code></pre>
+
+                <h2>🔥 Queries Avanzadas</h2>
+                
+                <h3>1. sort_by() - Ordenar Resultados</h3>
+                <pre><code># Sort instances by launch time (newest first)
+aws ec2 describe-instances --query 'reverse(sort_by(Reservations[].Instances[], &LaunchTime))[].[InstanceId,LaunchTime]'
+
+# Sort by name tag
+aws ec2 describe-instances --query 'sort_by(Reservations[].Instances[], &Tags[?Key==`Name`].Value|[0])[]'</code></pre>
+
+                <h3>2. length() - Contar Elementos</h3>
+                <pre><code># Count running instances
+aws ec2 describe-instances --query 'length(Reservations[].Instances[?State.Name==`running`][])'
+
+# Count security groups
+aws ec2 describe-security-groups --query 'length(SecurityGroups)'</code></pre>
+
+                <h3>3. contains() - Buscar Strings</h3>
+                <pre><code># Instances with "prod" in name
+aws ec2 describe-instances --query 'Reservations[].Instances[?contains(Tags[?Key==`Name`].Value|[0], `prod`)]'
+
+# Security groups with port 22 open
+aws ec2 describe-security-groups --query 'SecurityGroups[?IpPermissions[?contains(ToPort, `22`)]]'</code></pre>
+
+                <h3>4. max_by() / min_by() - Máximo/Mínimo</h3>
+                <pre><code># Largest EBS volume
+aws ec2 describe-volumes --query 'max_by(Volumes, &Size).[VolumeId,Size]'
+
+# Most recently launched instance
+aws ec2 describe-instances --query 'max_by(Reservations[].Instances[], &LaunchTime).[InstanceId,LaunchTime]'</code></pre>
+
+                <h3>5. Nested Projections</h3>
+                <pre><code># Complex nested query
+aws ec2 describe-instances --query 'Reservations[].{
+    InstanceId: Instances[0].InstanceId,
+    Name: Instances[0].Tags[?Key==`Name`].Value|[0],
+    Type: Instances[0].InstanceType,
+    State: Instances[0].State.Name,
+    SecurityGroups: Instances[0].SecurityGroups[].GroupName,
+    PrivateIP: Instances[0].PrivateIpAddress
+}'</code></pre>
+
+                <h3>6. Pipe Expressions (Procesamiento en Cadena)</h3>
+                <pre><code># Filter, then sort, then project
+aws ec2 describe-instances \
+    --query 'Reservations[].Instances[?State.Name==`running`] | [].{
+        ID: InstanceId, 
+        Type: InstanceType
+    } | sort_by(@, &Type)'</code></pre>
+
+                <h2>📊 Formato de Output</h2>
+                
+                <h3>JSON (default)</h3>
+                <pre><code>aws ec2 describe-instances --query 'Reservations[].Instances[].[InstanceId,State.Name]' --output json</code></pre>
+
+                <h3>Table (legible)</h3>
+                <pre><code>aws ec2 describe-instances --query 'Reservations[].Instances[].[InstanceId,InstanceType,State.Name]' --output table
+
+# Output:
+---------------------------------------------------------
+|              DescribeInstances                       |
++-------------------+--------------+--------------------+
+|  i-1234567890     |  t3.micro    |  running           |
+|  i-0987654321     |  t3.small    |  stopped           |
++-------------------+--------------+--------------------+</code></pre>
+
+                <h3>Text (para scripts)</h3>
+                <pre><code>aws ec2 describe-instances --query 'Reservations[].Instances[].InstanceId' --output text
+
+# Output (tab-separated):
+i-1234567890    i-0987654321</code></pre>
+
+                <h2>🛠️ Testing JMESPath Queries</h2>
+                
+                <h3>jpterm (Interactive)</h3>
+                <pre><code># Install
+pip install jmespath-terminal
+
+# Use
+aws ec2 describe-instances | jpterm
+
+# Interactively test queries with autocomplete</code></pre>
+
+                <h3>jmespath.org (Online)</h3>
+                <p>Visita <a href="https://jmespath.org/" target="_blank">jmespath.org</a> para testear queries con tu propio JSON.</p>
+
+                <h3>Python (Scripting)</h3>
+                <pre><code>import json
+import jmespath
+
+data = json.loads(aws_output)
+result = jmespath.search('Reservations[].Instances[].InstanceId', data)
+print(result)</code></pre>
+
+                <h2>💡 Tips y Trucos</h2>
+                
+                <h3>1. Flatten Arrays con []</h3>
+                <pre><code># Con [*] (nested arrays)
+[
+  ["i-111"],
+  ["i-222"]
+]
+
+# Con [] (flattened)
+[
+  "i-111",
+  "i-222"
+]</code></pre>
+
+                <h3>2. Default Values con ||</h3>
+                <pre><code># Si Name tag no existe, usa "N/A"
+aws ec2 describe-instances --query 'Reservations[].Instances[].[InstanceId, Tags[?Key==`Name`].Value|[0] || `N/A`]'</code></pre>
+
+                <h3>3. First Element con [0]</h3>
+                <pre><code># Get first running instance
+aws ec2 describe-instances --query 'Reservations[].Instances[?State.Name==`running`][0].InstanceId'</code></pre>
+
+                <h3>4. Combining Filters</h3>
+                <pre><code># Running t3.micro instances in production
+aws ec2 describe-instances --query 'Reservations[].Instances[?
+    State.Name==`running` && 
+    InstanceType==`t3.micro` && 
+    Tags[?Key==`Environment` && Value==`production`]
+]'</code></pre>
+
+                <h2>📚 Cheat Sheet</h2>
+                <table>
+                    <tr>
+                        <th>Operation</th>
+                        <th>Syntax</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td>Field access</td>
+                        <td><code>.</code></td>
+                        <td><code>Users[0].Name</code></td>
+                    </tr>
+                    <tr>
+                        <td>Array index</td>
+                        <td><code>[0]</code></td>
+                        <td><code>Users[0]</code></td>
+                    </tr>
+                    <tr>
+                        <td>Wildcard</td>
+                        <td><code>[*]</code></td>
+                        <td><code>Users[*].Name</code></td>
+                    </tr>
+                    <tr>
+                        <td>Flatten</td>
+                        <td><code>[]</code></td>
+                        <td><code>Users[].Name</code></td>
+                    </tr>
+                    <tr>
+                        <td>Filter</td>
+                        <td><code>[?expr]</code></td>
+                        <td><code>Users[?Age>`25`]</code></td>
+                    </tr>
+                    <tr>
+                        <td>Projection</td>
+                        <td><code>{key:value}</code></td>
+                        <td><code>{Name:Name,Age:Age}</code></td>
+                    </tr>
+                    <tr>
+                        <td>Pipe</td>
+                        <td><code>|</code></td>
+                        <td><code>Users[] | [0]</code></td>
+                    </tr>
+                    <tr>
+                        <td>Sort</td>
+                        <td><code>sort_by()</code></td>
+                        <td><code>sort_by(Users, &Age)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Length</td>
+                        <td><code>length()</code></td>
+                        <td><code>length(Users)</code></td>
+                    </tr>
+                    <tr>
+                        <td>Max/Min</td>
+                        <td><code>max_by()</code></td>
+                        <td><code>max_by(Users, &Age)</code></td>
+                    </tr>
+                </table>
+
+                <h2>🎯 Caso Real: Script Completo</h2>
+                <pre><code>#!/bin/bash
+# ec2-report.sh - Comprehensive EC2 report using JMESPath
+
+set -euo pipefail
+
+echo "=== EC2 Instances Report ==="
+echo ""
+
+# Running instances count
+running=$(aws ec2 describe-instances \
+    --query 'length(Reservations[].Instances[?State.Name==`running`][])' \
+    --output text)
+echo "Running instances: $running"
+
+# Stopped instances count
+stopped=$(aws ec2 describe-instances \
+    --query 'length(Reservations[].Instances[?State.Name==`stopped`][])' \
+    --output text)
+echo "Stopped instances: $stopped"
+
+echo ""
+echo "=== By Instance Type ==="
+aws ec2 describe-instances \
+    --query 'Reservations[].Instances[].[InstanceType] | [*] | group_by(@, &[0])' \
+    --output table
+
+echo ""
+echo "=== Production Instances ==="
+aws ec2 describe-instances \
+    --query 'Reservations[].Instances[?Tags[?Key==`Environment` && Value==`production`]].[
+        InstanceId,
+        InstanceType,
+        State.Name,
+        Tags[?Key==`Name`].Value|[0],
+        PrivateIpAddress
+    ]' \
+    --output table
+
+echo ""
+echo "=== Instances Without Name Tag ==="
+aws ec2 describe-instances \
+    --query 'Reservations[].Instances[?!Tags[?Key==`Name`]].[InstanceId,InstanceType]' \
+    --output table</code></pre>
+
+                <div class="success-box">
+                    <strong>✅ Resultado:</strong> Un reporte completo de EC2 con una sola herramienta (AWS CLI + JMESPath), sin necesidad de jq, awk o Python.
+                </div>
+
+                <h2>📚 Recursos</h2>
+                <ul>
+                    <li><a href="https://jmespath.org/" target="_blank">JMESPath Official Site</a> - Playground y docs</li>
+                    <li><a href="https://jmespath.org/tutorial.html" target="_blank">JMESPath Tutorial</a></li>
+                    <li><a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-usage-filter.html" target="_blank">AWS CLI Filtering</a></li>
+                </ul>
+
+                <h2>💭 Conclusión</h2>
+                <p>JMESPath transforma AWS CLI de herramienta de consulta a lenguaje de automatización. Invertir tiempo en aprender JMESPath paga dividendos inmediatos: scripts más simples, menos dependencias (adiós jq/awk), y outputs exactamente como los necesitas.</p>
+
+                <p>Mi consejo: practica con <code>jpterm</code> hasta que las queries complejas se vuelvan segunda naturaleza. Es una habilidad que usarás todos los días.</p>
+            </div>
+        </article>
+        <footer>
+            <p>© 2024 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a></p>
+        </footer>
+    </div>
+</body>
+</html>
+

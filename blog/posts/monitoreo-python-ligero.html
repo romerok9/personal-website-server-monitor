@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"="width=device-width, initial-scale=1.0">
+    <title>Monitoreo Ligero con Python: Sin Prometheus ni Grafana | Kevin Romero</title>
+    <meta name="description" content="Construye tu propio sistema de monitoreo con Python, psutil y curses. Dashboard web dinámico sin frameworks pesados.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        .back-link { display: inline-block; color: #60a5fa; text-decoration: none; margin-bottom: 2rem; transition: color 0.2s; }
+        .back-link:hover { color: #93c5fd; }
+        article { background: #111; border: 1px solid #222; padding: 3rem; border-radius: 8px; }
+        .post-header { margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #222; }
+        .series-badge { display: inline-block; background: #10b98120; color: #10b981; border: 1px solid #10b981; font-size: 0.85rem; padding: 0.25rem 0.75rem; border-radius: 4px; margin-bottom: 1rem; font-weight: 600; }
+        .post-date { color: #666; font-size: 0.95rem; margin-bottom: 1rem; }
+        h1 { font-size: 2.5rem; color: #fff; margin-bottom: 1rem; line-height: 1.2; }
+        .post-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .tag { background: #1a1a1a; color: #60a5fa; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; border: 1px solid #333; }
+        .post-content { color: #d0d0d0; }
+        h2 { color: #fff; font-size: 1.8rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #333; }
+        h3 { color: #e0e0e0; font-size: 1.3rem; margin: 1.5rem 0 1rem; }
+        p { margin-bottom: 1rem; }
+        ul, ol { margin-left: 1.5rem; margin-bottom: 1rem; }
+        li { margin-bottom: 0.5rem; }
+        code { background: #1a1a1a; color: #60a5fa; padding: 0.2rem 0.5rem; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 0.9rem; }
+        pre { background: #0d0d0d; border: 1px solid #222; border-radius: 6px; padding: 1.5rem; overflow-x: auto; margin: 1.5rem 0; }
+        pre code { background: none; padding: 0; color: #d0d0d0; display: block; line-height: 1.6; }
+        .highlight { background: #1a1a1a; border-left: 4px solid #10b981; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .highlight strong { color: #10b981; }
+        a { color: #60a5fa; text-decoration: none; transition: color 0.2s; }
+        a:hover { color: #93c5fd; text-decoration: underline; }
+        .info-box { background: #0d1b2a; border-left: 4px solid #60a5fa; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .warning-box { background: #2a1a0d; border-left: 4px solid #f59e0b; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .success-box { background: #0d2a1b; border-left: 4px solid #10b981; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .resources-list { background: #0a0a0a; padding: 1.5rem; border: 1px solid #222; border-radius: 6px; margin: 1.5rem 0; }
+        .resources-list h3 { margin-top: 0; color: #60a5fa; }
+        .resources-list ul { margin-left: 1.5rem; }
+        footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #333; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" class="back-link">← Back to Blog</a>
+        
+        <article>
+            <div class="post-header">
+                <span class="series-badge">🏠 Mi Home Lab DevOps</span>
+                <div class="post-date">September 5, 2024</div>
+                <h1>Monitoreo Ligero con Python: Sin Prometheus ni Grafana</h1>
+                <div class="post-tags">
+                    <span class="tag">python</span>
+                    <span class="tag">monitoring</span>
+                    <span class="tag">systemd</span>
+                    <span class="tag">psutil</span>
+                </div>
+            </div>
+            
+            <div class="post-content">
+                <h2>📋 Contexto</h2>
+                <p>
+                    Prometheus + Grafana es el stack estándar para monitoreo en DevOps, pero para un home lab con recursos 
+                    limitados puede ser overkill. Prometheus consume ~200-400 MB RAM, Grafana otros ~200 MB, más configuración 
+                    compleja y mantenimiento.
+                </p>
+                <p>
+                    Para mi servidor (notebook con 8GB RAM), quería algo más ligero: un dashboard simple que muestre CPU, 
+                    RAM, disco, red, y estado de containers Docker, todo con menos de 20 MB de RAM.
+                </p>
+
+                <h2>🎯 Objetivo</h2>
+                <ul>
+                    <li>Monitoreo en tiempo real de recursos del sistema</li>
+                    <li>Dashboard terminal (TUI) para SSH</li>
+                    <li>Dashboard web accesible desde navegador</li>
+                    <li>Monitoreo de containers Docker</li>
+                    <li>Consumo mínimo de recursos (<20 MB RAM)</li>
+                    <li>Sin dependencias pesadas (no frameworks web)</li>
+                </ul>
+
+                <h2>🛠️ Implementación</h2>
+                
+                <h3>Herramientas Utilizadas</h3>
+                <ul>
+                    <li><code>psutil</code>: Biblioteca Python para métricas del sistema</li>
+                    <li><code>curses</code>: TUI (Terminal User Interface) nativa de Python</li>
+                    <li><code>docker</code>: Docker SDK para Python</li>
+                    <li><code>systemd</code>: Para ejecutar el monitor como servicio</li>
+                </ul>
+
+                <h3>Script 1: Monitor Terminal (sysmon.py)</h3>
+                <p>Monitor interactivo para usar vía SSH:</p>
+
+                <pre><code>#!/usr/bin/env python3
+import psutil
+import curses
+import time
+from datetime import datetime
+
+def bytes_to_human(bytes_val):
+    """Convierte bytes a formato legible"""
+    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        if bytes_val < 1024.0:
+            return f"{bytes_val:.2f} {unit}"
+        bytes_val /= 1024.0
+
+def draw_bar(stdscr, y, x, label, percent, color_pair=1):
+    """Dibuja barra de progreso"""
+    bar_width = 50
+    filled = int(bar_width * percent / 100)
+    bar = '█' * filled + '░' * (bar_width - filled)
+    stdscr.addstr(y, x, f"{label:&lt;20} [{bar}] {percent:.1f}%", 
+                  curses.color_pair(color_pair))
+
+def main(stdscr):
+    # Configurar colores
+    curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+    curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    curses.init_pair(4, curses.COLOR_CYAN, curses.COLOR_BLACK)
+    
+    curses.curs_set(0)  # Ocultar cursor
+    stdscr.nodelay(1)   # Non-blocking input
+    
+    while True:
+        stdscr.clear()
+        y = 0
+        
+        # Header
+        stdscr.addstr(y, 0, "═" * 70, curses.color_pair(4))
+        y += 1
+        stdscr.addstr(y, 0, "  SysDevOps-Pro v2.1: Monitor Sistema + Docker/n8n", 
+                     curses.A_BOLD | curses.color_pair(4))
+        y += 1
+        stdscr.addstr(y, 0, f"  {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", 
+                     curses.color_pair(2))
+        y += 2
+        
+        # CPU
+        cpu_percent = psutil.cpu_percent(interval=0.5)
+        color = 1 if cpu_percent > 80 else 3 if cpu_percent > 50 else 2
+        draw_bar(stdscr, y, 0, "CPU", cpu_percent, color)
+        y += 2
+        
+        # RAM
+        mem = psutil.virtual_memory()
+        draw_bar(stdscr, y, 0, "RAM", mem.percent, 4)
+        y += 1
+        stdscr.addstr(y, 0, 
+                     f"  Total: {bytes_to_human(mem.total)} | "
+                     f"Usado: {bytes_to_human(mem.used)} | "
+                     f"Disponible: {bytes_to_human(mem.available)}", 
+                     curses.color_pair(2))
+        y += 2
+        
+        # Disco
+        disk = psutil.disk_usage('/')
+        draw_bar(stdscr, y, 0, "Disco (Root)", disk.percent, 1)
+        y += 1
+        stdscr.addstr(y, 0, 
+                     f"  Total: {bytes_to_human(disk.total)} | "
+                     f"Usado: {bytes_to_human(disk.used)} | "
+                     f"Disponible: {bytes_to_human(disk.free)}", 
+                     curses.color_pair(2))
+        y += 2
+        
+        # Network I/O
+        net = psutil.net_io_counters()
+        stdscr.addstr(y, 0, "Network I/O:", curses.A_BOLD)
+        y += 1
+        stdscr.addstr(y, 0, 
+                     f"  ↑ Sent: {bytes_to_human(net.bytes_sent)} | "
+                     f"↓ Recv: {bytes_to_human(net.bytes_recv)}", 
+                     curses.color_pair(2))
+        y += 2
+        
+        # Uptime
+        boot_time = datetime.fromtimestamp(psutil.boot_time())
+        uptime = datetime.now() - boot_time
+        days, remainder = divmod(uptime.total_seconds(), 86400)
+        hours, remainder = divmod(remainder, 3600)
+        minutes, _ = divmod(remainder, 60)
+        stdscr.addstr(y, 0, 
+                     f"Uptime: {int(days)}d {int(hours)}h {int(minutes)}m", 
+                     curses.color_pair(3))
+        y += 2
+        
+        # Footer
+        stdscr.addstr(y, 0, "Presiona 'q' para salir", curses.color_pair(3))
+        
+        stdscr.refresh()
+        
+        # Check for quit
+        key = stdscr.getch()
+        if key == ord('q'):
+            break
+        
+        time.sleep(1)
+
+if __name__ == "__main__":
+    curses.wrapper(main)</code></pre>
+
+                <div class="info-box">
+                    <strong>💡 Por qué psutil es perfecto:</strong><br>
+                    • Multiplataforma (Linux, Windows, Mac)<br>
+                    • Lightweight (sin dependencias C pesadas)<br>
+                    • API simple y Pythonic<br>
+                    • Mantenido activamente<br>
+                    • Documentación excelente
+                </div>
+
+                <h3>Script 2: Monitor Web (sysmon_web.py)</h3>
+                <p>Genera HTML estático que se actualiza cada 30 segundos:</p>
+
+                <pre><code>#!/usr/bin/env python3
+import psutil
+import docker
+import time
+from datetime import datetime
+
+UPDATE_INTERVAL = 30
+OUTPUT_FILE = "/var/www/html/status.html"
+
+def bytes_to_human(bytes_val):
+    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        if bytes_val < 1024.0:
+            return f"{bytes_val:.2f} {unit}"
+        bytes_val /= 1024.0
+
+def get_docker_stats():
+    try:
+        client = docker.from_env()
+        containers = client.containers.list()
+        stats = []
+        for container in containers:
+            stats.append({
+                'name': container.name,
+                'status': container.status,
+                'image': container.image.tags[0] if container.image.tags else 'none'
+            })
+        return stats
+    except:
+        return []
+
+def generate_html():
+    cpu = psutil.cpu_percent(interval=1)
+    mem = psutil.virtual_memory()
+    disk = psutil.disk_usage('/')
+    net = psutil.net_io_counters()
+    boot_time = datetime.fromtimestamp(psutil.boot_time())
+    uptime = datetime.now() - boot_time
+    docker_containers = get_docker_stats()
+    
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>Server Status - MyTechZone</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="30">
+    <style>
+        body {{ font-family: monospace; background: #0a0a0a; color: #e0e0e0; padding: 2rem; }}
+        .container {{ max-width: 800px; margin: 0 auto; }}
+        .metric {{ background: #111; padding: 1rem; margin: 1rem 0; border-radius: 8px; }}
+        .bar {{ background: #222; height: 30px; border-radius: 4px; overflow: hidden; }}
+        .bar-fill {{ height: 100%; transition: width 0.3s; }}
+        .cpu {{ background: #ef4444; }}
+        .ram {{ background: #60a5fa; }}
+        .disk {{ background: #f59e0b; }}
+        .status-ok {{ color: #10b981; }}
+        .status-error {{ color: #ef4444; }}
+        h1 {{ color: #60a5fa; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Server Status</h1>
+        <p>Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC</p>
+        <p class="status-ok">● System Online</p>
+        
+        <div class="metric">
+            <h3>CPU Usage: {cpu:.1f}%</h3>
+            <div class="bar">
+                <div class="bar-fill cpu" style="width: {cpu}%"></div>
+            </div>
+        </div>
+        
+        <div class="metric">
+            <h3>RAM: {mem.percent:.1f}% ({bytes_to_human(mem.used)} / {bytes_to_human(mem.total)})</h3>
+            <div class="bar">
+                <div class="bar-fill ram" style="width: {mem.percent}%"></div>
+            </div>
+        </div>
+        
+        <div class="metric">
+            <h3>Disk: {disk.percent:.1f}% ({bytes_to_human(disk.used)} / {bytes_to_human(disk.total)})</h3>
+            <div class="bar">
+                <div class="bar-fill disk" style="width: {disk.percent}%"></div>
+            </div>
+        </div>
+        
+        <div class="metric">
+            <h3>Docker Containers ({len(docker_containers)})</h3>
+            <ul>
+"""
+    
+    for container in docker_containers:
+        status_class = "status-ok" if container['status'] == 'running' else "status-error"
+        html += f"<li class='{status_class}'>{container['name']} - {container['status']}</li>\n"
+    
+    html += f"""
+            </ul>
+        </div>
+        
+        <div class="metric">
+            <h3>Network & Uptime</h3>
+            <p>Total Sent ↑ {bytes_to_human(net.bytes_sent)}</p>
+            <p>Total Received ↓ {bytes_to_human(net.bytes_recv)}</p>
+            <p>System Uptime: {int(uptime.days)}d {int(uptime.seconds//3600)}h {int((uptime.seconds//60)%60)}m</p>
+        </div>
+        
+        <a href="/" style="color: #60a5fa;">← Back to Home</a>
+    </div>
+</body>
+</html>"""
+    
+    return html
+
+def main():
+    print(f"Starting sysmon_web...")
+    print(f"Output: {OUTPUT_FILE}")
+    print(f"Update interval: {UPDATE_INTERVAL}s")
+    
+    while True:
+        try:
+            html = generate_html()
+            with open(OUTPUT_FILE, 'w') as f:
+                f.write(html)
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] ✓ Status updated")
+            time.sleep(UPDATE_INTERVAL)
+        except KeyboardInterrupt:
+            print("\nStopping sysmon_web...")
+            break
+        except Exception as e:
+            print(f"Error: {e}")
+            time.sleep(UPDATE_INTERVAL)
+
+if __name__ == "__main__":
+    main()</code></pre>
+
+                <h3>Servicio Systemd</h3>
+                <p>Para que el monitor web corra automáticamente:</p>
+
+                <pre><code># /etc/systemd/system/sysmon-web.service
+[Unit]
+Description=SysDevOps Web Monitor
+After=network.target docker.service
+
+[Service]
+Type=simple
+User=mytechzone
+WorkingDirectory=/home/mytechzone/scripts
+ExecStart=/usr/bin/python3 /home/mytechzone/scripts/sysmon_web.py
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+
+                <pre><code># Habilitar y iniciar
+sudo systemctl daemon-reload
+sudo systemctl enable sysmon-web
+sudo systemctl start sysmon-web
+
+# Ver logs
+sudo journalctl -u sysmon-web -f</code></pre>
+
+                <h2>📊 Comparación: Custom vs Prometheus+Grafana</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspecto</th>
+                            <th>Custom (Python)</th>
+                            <th>Prometheus+Grafana</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>RAM Consumida</strong></td>
+                            <td>~15-20 MB</td>
+                            <td>~400-600 MB</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Setup Time</strong></td>
+                            <td>30 minutos</td>
+                            <td>2-3 horas</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Métricas Históricas</strong></td>
+                            <td>❌ No (solo actual)</td>
+                            <td>✅ Sí (configurable)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Alertas</strong></td>
+                            <td>⚠️ Requiere script adicional</td>
+                            <td>✅ Built-in</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dashboards</strong></td>
+                            <td>⚠️ Básico</td>
+                            <td>✅ Avanzado</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Escalabilidad</strong></td>
+                            <td>❌ Un servidor</td>
+                            <td>✅ Multi-servidor</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="success-box">
+                    <strong>Cuándo usar cada uno:</strong><br>
+                    • <strong>Custom Python:</strong> Home labs, servidores únicos, recursos limitados<br>
+                    • <strong>Prometheus+Grafana:</strong> Producción, múltiples servidores, métricas históricas críticas
+                </div>
+
+                <h2>🚀 Mejoras Opcionales</h2>
+                
+                <h3>1. Monitoreo de Temperatura del CPU ✅ Implementado (v2.0)</h3>
+                
+                <div class="info-box">
+                    <strong>🎉 Update (Enero 2025):</strong> Esta feature fue implementada en <code>sysmon_web v2.0</code> y está corriendo en producción en mytechzone.dev/status.html
+                </div>
+                
+                <p>El monitoreo de temperatura es crucial para hardware antiguo (como mi Lenovo 2013 con Celeron B970). Implementé lectura desde <code>/sys/class/thermal/</code> con fallback a psutil:</p>
+                
+                <pre><code>def get_cpu_temperature():
+    """Obtener temperatura del CPU."""
+    try:
+        # Método 1: Leer desde /sys/class/thermal (más confiable)
+        thermal_zones = glob.glob('/sys/class/thermal/thermal_zone*/temp')
+        if thermal_zones:
+            temps = []
+            for zone in thermal_zones:
+                try:
+                    with open(zone, 'r') as f:
+                        # Convertir de milidegrees a degrees
+                        temp = int(f.read().strip()) / 1000.0
+                        temps.append(temp)
+                except:
+                    continue
+            
+            if temps:
+                return max(temps)  # Retornar la más alta
+        
+        # Método 2: Usar psutil (fallback)
+        temps = psutil.sensors_temperatures()
+        if temps:
+            for name, entries in temps.items():
+                if 'coretemp' in name.lower() or 'cpu' in name.lower():
+                    if entries:
+                        return entries[0].current
+        
+        return None
+    except Exception as e:
+        return None</code></pre>
+
+                <p><strong>Sistema de alertas por color implementado:</strong></p>
+                <ul>
+                    <li>🟢 < 60°C: OK (verde)</li>
+                    <li>🟡 60-69°C: Warm (amarillo)</li>
+                    <li>🟠 70-79°C: Warning (naranja)</li>
+                    <li>🔴 ≥ 80°C: Critical (rojo)</li>
+                </ul>
+
+                <p>Si la temperatura alcanza ≥ 75°C, el dashboard muestra automáticamente:</p>
+                <pre><code>⚠️ High temperature - Consider opening lid for ventilation</code></pre>
+
+                <p><strong>Impacto en performance:</strong></p>
+                <ul>
+                    <li>CPU adicional: < 0.1%</li>
+                    <li>RAM adicional: ~1-2 KB</li>
+                    <li>I/O: 1 lectura cada 30 segundos</li>
+                    <li>Resultado: Impacto prácticamente nulo ✅</li>
+                </ul>
+
+                <div class="success-box">
+                    <strong>En producción desde Enero 2025:</strong> Monitoreo de temperatura activo en <a href="https://mytechzone.dev/status.html">mytechzone.dev/status.html</a>. Me ayuda a decidir cuándo abrir/cerrar la tapa de la notebook según el clima.
+                </div>
+
+                <h3>2. Alertas por Email</h3>
+                <pre><code>import smtplib
+from email.message import EmailMessage
+
+def send_alert(subject, body):
+    msg = EmailMessage()
+    msg['Subject'] = subject
+    msg['From'] = 'monitor@mytechzone.dev'
+    msg['To'] = 'admin@example.com'
+    msg.set_content(body)
+    
+    with smtplib.SMTP('localhost') as s:
+        s.send_message(msg)
+
+# Usar en el loop
+if cpu_percent > 90:
+    send_alert("CPU Alert", f"CPU at {cpu_percent}%")</code></pre>
+
+                <h3>3. Métricas Históricas con SQLite</h3>
+                <pre><code>import sqlite3
+
+def save_metrics(cpu, ram, disk):
+    conn = sqlite3.connect('metrics.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS metrics
+                 (timestamp TEXT, cpu REAL, ram REAL, disk REAL)''')
+    c.execute("INSERT INTO metrics VALUES (datetime('now'), ?, ?, ?)",
+              (cpu, ram, disk))
+    conn.commit()
+    conn.close()</code></pre>
+
+                <div class="resources-list">
+                    <h3>📚 Recursos Útiles</h3>
+                    <ul>
+                        <li><a href="https://psutil.readthedocs.io/" target="_blank">psutil Official Documentation</a></li>
+                        <li><a href="https://docs.python.org/3/library/curses.html" target="_blank">Python curses Module</a></li>
+                        <li><a href="https://docker-py.readthedocs.io/" target="_blank">Docker SDK for Python</a></li>
+                        <li><a href="https://www.freedesktop.org/software/systemd/man/systemd.service.html" target="_blank">systemd Service Manual</a></li>
+                    </ul>
+                </div>
+
+                <h2>💡 Lecciones Aprendidas</h2>
+                <ul>
+                    <li><strong>psutil es suficiente:</strong> Para 90% de casos de uso, no necesitas Prometheus.</li>
+                    <li><strong>HTML estático es rápido:</strong> Generar HTML cada 30s es más eficiente que un servidor web con templating.</li>
+                    <li><strong>Systemd hace el trabajo pesado:</strong> Auto-restart, logging, y startup automático gratis.</li>
+                    <li><strong>Menos es más:</strong> 200 líneas de Python vs configurar 3 servicios complejos.</li>
+                    <li><strong>Docker SDK es fácil:</strong> Integrar métricas de containers es trivial con docker-py.</li>
+                </ul>
+
+                <h2>✅ Resultado Final</h2>
+                <div class="highlight">
+                    <strong>Mi dashboard:</strong> <a href="https://mytechzone.dev/status.html">mytechzone.dev/status.html</a><br><br>
+                    
+                    <strong>Características (v2.0 - Enero 2025):</strong><br>
+                    • Actualización cada 30 segundos<br>
+                    • CPU, RAM, Disco, Red, Uptime<br>
+                    • 🌡️ <strong>Temperatura del CPU</strong> con alertas por color (NUEVO)<br>
+                    • Estado de 4 containers Docker (nginx, n8n, postgres, cloudflared)<br>
+                    • Servicio systemd estable<br>
+                    • ~15-18 MB de RAM consumidos<br>
+                    • 0 downtime en 60+ días<br>
+                    • Warning automático si temperatura ≥ 75°C
+                </div>
+
+                <h2>💭 Conclusión</h2>
+                <p>
+                    Para un home lab, un monitor custom con Python es perfecto: ligero, simple, y hace exactamente 
+                    lo que necesitas sin overhead innecesario. No necesitas Prometheus+Grafana hasta que tengas 
+                    múltiples servidores o requisitos de métricas históricas avanzadas.
+                </p>
+                <p>
+                    Este proyecto me enseñó que a veces la mejor solución es la más simple. 200 líneas de Python 
+                    bien escritas pueden reemplazar un stack complejo de monitoreo para casos de uso básicos.
+                </p>
+            </div>
+        </article>
+        
+        <footer>
+            <p>© 2024 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a> | <a href="https://github.com/romerok9">GitHub</a></p>
+        </footer>
+    </div>
+</body>
+</html>
+

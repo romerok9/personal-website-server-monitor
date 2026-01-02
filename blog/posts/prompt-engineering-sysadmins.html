@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Engineering para SysAdmins: Técnicas Prácticas | Kevin Romero</title>
+    <meta name="description" content="Cómo escribir prompts efectivos para obtener mejores resultados de agentes de IA. Técnicas, ejemplos y anti-patrones a evitar.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        article { background: #111; border: 1px solid #222; padding: 3rem; border-radius: 8px; }
+        .series-badge { background: #8b5cf620; color: #a78bfa; border: 1px solid #8b5cf6; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
+        h1 { font-size: 2.5rem; color: #fff; margin: 1rem 0; }
+        h2 { color: #fff; font-size: 1.8rem; margin: 2rem 0 1rem; border-bottom: 2px solid #333; padding-bottom: 0.5rem; }
+        h3 { color: #e0e0e0; font-size: 1.3rem; margin: 1.5rem 0 1rem; }
+        pre { background: #0d0d0d; border: 1px solid #222; padding: 1.5rem; border-radius: 6px; overflow-x: auto; margin: 1.5rem 0; }
+        code { background: #1a1a1a; color: #60a5fa; padding: 0.2rem 0.5rem; border-radius: 3px; font-family: 'Courier New', monospace; }
+        pre code { background: none; padding: 0; color: #d0d0d0; }
+        .info-box { background: #0d1b2a; border-left: 4px solid #60a5fa; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        .warning-box { background: #2a1a0d; border-left: 4px solid #f59e0b; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        .example-bad { background: #2a0d0d; border-left: 4px solid #ef4444; padding: 1rem 1.5rem; margin: 1rem 0; }
+        .example-good { background: #0d2a1b; border-left: 4px solid #10b981; padding: 1rem 1.5rem; margin: 1rem 0; }
+        footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #333; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" style="color: #60a5fa; text-decoration: none;">← Back to Blog</a>
+        <article>
+            <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #222;">
+                <span class="series-badge">🤖 Agentes de IA en DevOps</span>
+                <div style="color: #666; margin: 0.5rem 0;">September 18, 2024</div>
+                <h1>Prompt Engineering para SysAdmins: Técnicas Prácticas</h1>
+            </div>
+            
+            <div style="color: #d0d0d0;">
+                <h2>📋 Contexto</h2>
+                <p>La diferencia entre "mi script no funciona" y obtener una solución útil de IA en 30 segundos está en cómo formulas tu pregunta. Después de cientos de interacciones con agentes de IA, identifiqué patrones que consistentemente dan mejores resultados.</p>
+
+                <h2>🎯 Anatomía de un Buen Prompt</h2>
+                <p>Un prompt efectivo tiene 5 componentes:</p>
+                <ol>
+                    <li><strong>Contexto:</strong> Qué estás haciendo, stack tecnológico</li>
+                    <li><strong>Problema:</strong> Error específico, síntomas</li>
+                    <li><strong>Lo que intentaste:</strong> Troubleshooting previo</li>
+                    <li><strong>Código/Configs:</strong> Información relevante</li>
+                    <li><strong>Pregunta específica:</strong> Qué necesitas exactamente</li>
+                </ol>
+
+                <h2>💡 Técnica 1: Contexto Rico</h2>
+                
+                <div class="example-bad">
+                    <strong>❌ Prompt Malo:</strong><br>
+                    "Mi contenedor Docker no arranca"
+                </div>
+
+                <div class="example-good">
+                    <strong>✅ Prompt Bueno:</strong><br>
+                    <pre><code>Contexto: Estoy usando Docker Compose para n8n + PostgreSQL en Debian 12
+Problema: Contenedor n8n no arranca, error: ECONNREFUSED ::1:5432
+Stack:
+- n8n: imagen oficial latest
+- PostgreSQL: 14
+- Docker Compose version: 2.x
+
+docker-compose.yml:
+[pegar configuración completa]
+
+.env:
+[pegar variables (sin passwords reales)]
+
+Logs de n8n:
+[pegar últimas 20 líneas]
+
+Logs de PostgreSQL:
+[pegar últimas 20 líneas]
+
+¿Qué causa este error y cómo lo soluciono?</code></pre>
+                </div>
+
+                <h2>💡 Técnica 2: Be Specific</h2>
+
+                <div class="example-bad">
+                    <strong>❌ Malo:</strong> "Crea un script de backup"
+                </div>
+
+                <div class="example-good">
+                    <strong>✅ Bueno:</strong><br>
+                    <pre><code>"Crea un script bash que:
+1. Haga backup de volúmenes Docker a tar.gz
+2. Suba el backup a S3 (bucket: backups-prod)
+3. Mantenga últimos 7 backups, elimine viejos
+4. Envíe notificación por email si falla
+5. Incluya logs con timestamps
+6. Use error handling robusto (set -e)
+7. Valide que Docker esté corriendo antes de iniciar
+
+Formato de nombre de backup: backup_YYYYMMDD_HHMMSS.tar.gz"</code></pre>
+                </div>
+
+                <h2>💡 Técnica 3: Iteración Progresiva</h2>
+                <p>No esperes el resultado perfecto en un prompt. Itera:</p>
+
+                <pre><code>Prompt 1: "Crea script bash para listar instancias EC2"
+→ IA da script básico
+
+Prompt 2: "Agrega filtro por tag Environment=production"
+→ IA mejora el script
+
+Prompt 3: "Formatea output como tabla con columnas: Name, IP, State"
+→ IA refina el formato
+
+Prompt 4: "Agrega opción --csv para export"
+→ Script final production-ready</code></pre>
+
+                <h2>💡 Técnica 4: Role-Playing</h2>
+                <p>Define el rol que quieres que la IA asuma:</p>
+
+                <div class="example-good">
+                    <strong>Ejemplo:</strong><br>
+                    <pre><code>"Actúa como un Senior DevOps Engineer con 10 años de experiencia en AWS.
+Revisa este script de deployment y sugiere:
+- Mejoras de seguridad
+- Edge cases no contemplados
+- Optimizaciones de performance
+- Mejores prácticas que no estoy siguiendo
+
+[pegar script]"</code></pre>
+                </div>
+
+                <h2>💡 Técnica 5: Formato Estructurado</h2>
+                <p>Pide respuestas en formato específico:</p>
+
+                <pre><code>"Explica cómo funcionan los health checks en Docker Compose.
+
+Formato de respuesta:
+1. Concepto básico (2-3 líneas)
+2. Sintaxis YAML con ejemplo comentado
+3. Parámetros disponibles (tabla)
+4. Caso de uso real
+5. Anti-patrones a evitar"</code></pre>
+
+                <h2>💡 Técnica 6: Proporciona Ejemplos</h2>
+                <p>Si quieres un formato específico, da un ejemplo:</p>
+
+                <pre><code>"Genera funciones bash para tareas AWS comunes.
+
+Ejemplo del formato que quiero:
+
+# aws-ip: Get instance IP by name
+aws-ip() {
+    local name=$1
+    aws ec2 describe-instances \
+        --filters "Name=tag:Name,Values=$name" \
+        --query 'Reservations[0].Instances[0].PublicIpAddress' \
+        --output text
+}
+
+Genera 5 funciones similares para:
+- Listar buckets S3 con tamaño
+- Detener instancia por nombre
+- Ver últimos logs de CloudWatch
+- Costos del mes actual
+- Snapshots sin AMI asociado"</code></pre>
+
+                <h2>💡 Técnica 7: Debugging Guiado</h2>
+                <p>Pide diagnóstico paso a paso:</p>
+
+                <pre><code>"Tengo este error: [error específico]
+
+Por favor:
+1. Explica qué significa este error
+2. Lista las 3 causas más comunes
+3. Para cada causa, dame comandos de diagnóstico
+4. Sugiere solución para cada escenario
+
+Formato: Causa → Diagnóstico → Solución"</code></pre>
+
+                <h2>🚫 Anti-Patrones a Evitar</h2>
+
+                <h3>1. Prompts Vagos</h3>
+                <div class="example-bad">
+                    ❌ "No funciona"<br>
+                    ❌ "Ayuda con AWS"<br>
+                    ❌ "Tengo un error"<br>
+                    ❌ "Mejora este código" (sin especificar qué mejorar)
+                </div>
+
+                <h3>2. Sin Contexto Técnico</h3>
+                <div class="example-bad">
+                    ❌ "Mi servidor está lento"<br>
+                    (Falta: qué servidor, qué SO, métricas, logs, qué cambió recientemente)
+                </div>
+
+                <h3>3. Múltiples Preguntas en Una</h3>
+                <div class="example-bad">
+                    ❌ "Explica Docker, Kubernetes, y cómo se relacionan con microservicios. También quiero saber sobre CI/CD y Terraform"<br>
+                    (Divide en 5 preguntas separadas)
+                </div>
+
+                <h3>4. Asumir Conocimiento del Contexto</h3>
+                <div class="example-bad">
+                    ❌ "El problema persiste" (sin haber explicado cuál problema)<br>
+                    ❌ "Igual que antes" (IA no recuerda conversaciones previas necesariamente)
+                </div>
+
+                <h2>📚 Templates Útiles</h2>
+
+                <h3>Template: Debugging</h3>
+                <pre><code>**Contexto:**
+Sistema: [OS, versión]
+Aplicación: [nombre, versión]
+Entorno: [dev/staging/prod]
+
+**Problema:**
+Síntomas: [descripción detallada]
+Error exacto: [mensaje de error completo]
+Cuándo empezó: [timeline]
+
+**Lo que intenté:**
+1. [acción 1] → [resultado]
+2. [acción 2] → [resultado]
+
+**Código/Configs relevantes:**
+[pegar código/configs]
+
+**Logs:**
+[pegar logs relevantes]
+
+**Pregunta:** ¿Cuál es la causa root y cómo lo soluciono?</code></pre>
+
+                <h3>Template: Code Review</h3>
+                <pre><code>Revisa este [script/config] para [propósito específico]:
+
+[pegar código]
+
+Enfócate en:
+- Seguridad: [vulnerabilidades, secrets expuestos]
+- Bugs: [edge cases, race conditions]
+- Performance: [optimizaciones posibles]
+- Mejores prácticas: [qué estoy haciendo mal]
+- Testing: [qué debería testear]
+
+Dame feedback estructurado con ejemplos de código mejorado.</code></pre>
+
+                <h3>Template: Learning</h3>
+                <pre><code>Explica [concepto] como si fuera un [tu nivel de experiencia].
+
+Incluye:
+1. Definición simple (ELI5)
+2. Cómo funciona técnicamente
+3. Caso de uso real en [tu contexto]
+4. Comparación con [alternativas]
+5. Cuándo usar vs cuándo NO usar
+6. Recursos para profundizar
+
+Usa analogías y ejemplos prácticos.</code></pre>
+
+                <h2>🎯 Técnicas Avanzadas</h2>
+
+                <h3>Chain of Thought</h3>
+                <p>Pide que la IA "piense en voz alta":</p>
+                <pre><code>"Antes de responder, explica tu razonamiento paso a paso:
+1. Identifica el problema
+2. Lista posibles causas
+3. Descarta causas improbables
+4. Propón solución para la causa más probable
+5. Sugiere cómo validar la solución"</code></pre>
+
+                <h3>Constraint-Based</h3>
+                <p>Define limitaciones claramente:</p>
+                <pre><code>"Crea un script de monitoring con estas restricciones:
+- Solo bash (no Python/Ruby)
+- Sin dependencias externas (solo coreutils)
+- Debe correr en Alpine Linux
+- Menos de 100 líneas
+- No puede usar curl/wget (firewall bloqueado)"</code></pre>
+
+                <h3>Output Formatting</h3>
+                <pre><code>"Genera la respuesta en formato JSON:
+{
+  "diagnosis": "...",
+  "root_cause": "...",
+  "solution": ["step1", "step2", "step3"],
+  "commands": ["cmd1", "cmd2"],
+  "references": ["url1", "url2"]
+}"</code></pre>
+
+                <div class="info-box">
+                    <strong>💡 Pro Tip:</strong> Guarda tus mejores prompts en un archivo <code>prompts.md</code> para reutilizarlos. Yo tengo ~20 templates que uso semanalmente.
+                </div>
+
+                <h2>📊 Checklist: Prompt Efectivo</h2>
+                <p>Antes de enviar, verifica:</p>
+                <ul>
+                    <li>☐ Incluí contexto técnico (versiones, SO, stack)</li>
+                    <li>☐ Describí el problema específicamente</li>
+                    <li>☐ Pegué código/configs/logs relevantes</li>
+                    <li>☐ Mencioné lo que ya intenté</li>
+                    <li>☐ La pregunta es clara y específica</li>
+                    <li>☐ Eliminé información sensible (passwords, IPs prod)</li>
+                    <li>☐ Especifiqué formato de respuesta si es importante</li>
+                </ul>
+
+                <h2>💭 Conclusión</h2>
+                <p>Prompt engineering no es magia, es comunicación efectiva. Un prompt bien estructurado te ahorra múltiples iteraciones y te da resultados útiles en el primer intento. Invierte 2 minutos extra en escribir un buen prompt y ahorra 30 minutos de idas y vueltas.</p>
+
+                <p>La habilidad de extraer conocimiento útil de IA es tan importante hoy como saber usar Google lo era hace 10 años. Domina esta habilidad y multiplica tu productividad.</p>
+            </div>
+        </article>
+        <footer>
+            <p>© 2024 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a></p>
+        </footer>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[TÍTULO DEL POST] | Kevin Romero</title>
+    <meta name="description" content="[DESCRIPCIÓN BREVE DEL POST - 150-160 caracteres]">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            line-height: 1.7;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .back-link {
+            display: inline-block;
+            color: #60a5fa;
+            text-decoration: none;
+            margin-bottom: 2rem;
+            transition: color 0.2s;
+        }
+        
+        .back-link:hover {
+            color: #93c5fd;
+        }
+        
+        article {
+            background: #111;
+            border: 1px solid #222;
+            padding: 3rem;
+            border-radius: 8px;
+        }
+        
+        .post-header {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #222;
+        }
+        
+        /* CAMBIAR SEGÚN LA SERIE:
+           homelab: #10b98120 / #10b981
+           aws: #f59e0b20 / #f59e0b
+           ai: #8b5cf620 / #a78bfa
+           awscli: #ef444420 / #f87171
+        */
+        .series-badge {
+            display: inline-block;
+            background: #10b98120;
+            color: #10b981;
+            border: 1px solid #10b981;
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .post-date {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        
+        .post-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            background: #1a1a1a;
+            color: #60a5fa;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            border: 1px solid #333;
+        }
+        
+        .post-content {
+            color: #d0d0d0;
+        }
+        
+        h2 {
+            color: #fff;
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #333;
+        }
+        
+        h3 {
+            color: #e0e0e0;
+            font-size: 1.3rem;
+            margin: 1.5rem 0 1rem;
+        }
+        
+        h4 {
+            color: #d0d0d0;
+            font-size: 1.1rem;
+            margin: 1rem 0 0.5rem;
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        code {
+            background: #1a1a1a;
+            color: #60a5fa;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        pre {
+            background: #0d0d0d;
+            border: 1px solid #222;
+            border-radius: 6px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: #d0d0d0;
+            display: block;
+            line-height: 1.6;
+        }
+        
+        .highlight {
+            background: #1a1a1a;
+            border-left: 4px solid #60a5fa;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .highlight strong {
+            color: #60a5fa;
+        }
+        
+        a {
+            color: #60a5fa;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        a:hover {
+            color: #93c5fd;
+            text-decoration: underline;
+        }
+        
+        .info-box {
+            background: #0d1b2a;
+            border-left: 4px solid #60a5fa;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .warning-box {
+            background: #2a1a0d;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .danger-box {
+            background: #2a0d0d;
+            border-left: 4px solid #ef4444;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .success-box {
+            background: #0d2a1b;
+            border-left: 4px solid #10b981;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: #0a0a0a;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #222;
+        }
+        
+        th {
+            background: #1a1a1a;
+            color: #60a5fa;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #111;
+        }
+        
+        .resources-list {
+            background: #0a0a0a;
+            padding: 1.5rem;
+            border: 1px solid #222;
+            border-radius: 6px;
+            margin: 1.5rem 0;
+        }
+        
+        .resources-list h3 {
+            margin-top: 0;
+            color: #60a5fa;
+        }
+        
+        .resources-list ul {
+            margin-left: 1.5rem;
+        }
+        
+        footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #333;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" class="back-link">← Back to Blog</a>
+        
+        <article>
+            <div class="post-header">
+                <!-- CAMBIAR SEGÚN LA SERIE:
+                     🏠 Mi Home Lab DevOps
+                     ☁️ Automatización AWS
+                     🤖 Agentes de IA en DevOps
+                     🛠️ AWS CLI Mastery
+                -->
+                <span class="series-badge">🏠 Mi Home Lab DevOps</span>
+                <div class="post-date">[FECHA: Month DD, YYYY]</div>
+                <h1>[TÍTULO DEL POST]</h1>
+                <div class="post-tags">
+                    <span class="tag">tag1</span>
+                    <span class="tag">tag2</span>
+                    <span class="tag">tag3</span>
+                    <span class="tag">tag4</span>
+                </div>
+            </div>
+            
+            <div class="post-content">
+                <h2>📋 Contexto</h2>
+                <p>
+                    [Explicar por qué hiciste esto, qué problema enfrentabas, contexto general]
+                </p>
+                <p>
+                    [Más contexto si es necesario]
+                </p>
+
+                <h2>🎯 Objetivo</h2>
+                <p>[Descripción breve del objetivo principal]</p>
+                <ul>
+                    <li>Objetivo específico 1</li>
+                    <li>Objetivo específico 2</li>
+                    <li>Objetivo específico 3</li>
+                    <li>Objetivo específico 4</li>
+                </ul>
+
+                <h2>🛠️ Implementación</h2>
+                <h3>Paso 1: [Título del Paso]</h3>
+                <p>[Explicación del paso]</p>
+                <pre><code># Código o comandos
+comando1
+comando2</code></pre>
+
+                <h3>Paso 2: [Título del Paso]</h3>
+                <p>[Explicación del paso]</p>
+
+                <div class="info-box">
+                    <strong>💡 Tip:</strong> [Consejo útil relacionado]
+                </div>
+
+                <h2>🐛 Troubleshooting (Opcional)</h2>
+                <h3>Problema 1: [Descripción]</h3>
+                <p><strong>Causa:</strong> [Explicación de la causa]</p>
+                <p><strong>Solución:</strong> [Cómo se resolvió]</p>
+                <pre><code># Comandos de diagnóstico o solución
+comando</code></pre>
+
+                <div class="warning-box">
+                    <strong>⚠️ Precaución:</strong> [Advertencia importante]
+                </div>
+
+                <h2>📊 Resultados (Opcional)</h2>
+                <p>[Resultados obtenidos, métricas, comparaciones]</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspecto</th>
+                            <th>Antes</th>
+                            <th>Después</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Métrica 1</strong></td>
+                            <td>Valor A</td>
+                            <td>Valor B</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Métrica 2</strong></td>
+                            <td>Valor C</td>
+                            <td>Valor D</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>✅ Resultado Final</h2>
+                <p>[Resumen del resultado final conseguido]</p>
+
+                <div class="success-box">
+                    <strong>Logros:</strong><br>
+                    • Logro 1<br>
+                    • Logro 2<br>
+                    • Logro 3
+                </div>
+
+                <div class="highlight">
+                    <strong>🎯 Enlaces relevantes:</strong><br>
+                    • Link 1: <a href="#">descripción</a><br>
+                    • Link 2: <a href="#">descripción</a>
+                </div>
+
+                <div class="resources-list">
+                    <h3>📚 Recursos Útiles</h3>
+                    <ul>
+                        <li><a href="#" target="_blank">Documentación Oficial</a></li>
+                        <li><a href="#" target="_blank">Tutorial Relacionado</a></li>
+                        <li><a href="#" target="_blank">GitHub Repo</a></li>
+                        <li><a href="#" target="_blank">Artículo de Referencia</a></li>
+                    </ul>
+                </div>
+
+                <h2>💡 Lecciones Aprendidas</h2>
+                <ul>
+                    <li><strong>Lección 1:</strong> [Descripción]</li>
+                    <li><strong>Lección 2:</strong> [Descripción]</li>
+                    <li><strong>Lección 3:</strong> [Descripción]</li>
+                </ul>
+
+                <h2>🚀 Próximos Pasos (Opcional)</h2>
+                <p>Mejoras futuras o ideas relacionadas:</p>
+                <ol>
+                    <li>Mejora futura 1</li>
+                    <li>Mejora futura 2</li>
+                    <li>Mejora futura 3</li>
+                </ol>
+
+                <h2>💭 Conclusión</h2>
+                <p>
+                    [Reflexión final sobre el proyecto/tema. Mensaje clave que quieres que el lector se lleve.]
+                </p>
+                <p>
+                    [Párrafo adicional si es necesario. Puedes mencionar el próximo post de la serie.]
+                </p>
+            </div>
+        </article>
+        
+        <footer>
+            <p>© 2024 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a> | <a href="https://github.com/romerok9">GitHub</a></p>
+        </footer>
+    </div>
+</body>
+</html>
+

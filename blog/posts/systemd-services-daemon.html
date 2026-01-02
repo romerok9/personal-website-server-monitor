@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Systemd Services: De Script Bash a Daemon Profesional | Kevin Romero</title>
+    <meta name="description" content="Convierte tus scripts bash en servicios profesionales con systemd. Aprende a crear archivos .service, manejar logs con journalctl y configurar auto-restart.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        article { background: #111; border: 1px solid #222; padding: 3rem; border-radius: 8px; }
+        .series-badge { background: #10b98120; color: #10b981; border: 1px solid #10b981; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
+        h1 { font-size: 2.5rem; color: #fff; margin: 1rem 0; }
+        h2 { color: #fff; font-size: 1.8rem; margin: 2rem 0 1rem; border-bottom: 2px solid #333; padding-bottom: 0.5rem; }
+        h3 { color: #e0e0e0; font-size: 1.3rem; margin: 1.5rem 0 1rem; }
+        pre { background: #0d0d0d; border: 1px solid #222; padding: 1.5rem; border-radius: 6px; overflow-x: auto; margin: 1.5rem 0; }
+        code { background: #1a1a1a; color: #60a5fa; padding: 0.2rem 0.5rem; border-radius: 3px; font-family: 'Courier New', monospace; }
+        pre code { background: none; padding: 0; color: #d0d0d0; }
+        .info-box { background: #0d1b2a; border-left: 4px solid #60a5fa; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        .success-box { background: #0d2a1b; border-left: 4px solid #10b981; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        .warning-box { background: #2a1a0d; border-left: 4px solid #f59e0b; padding: 1rem 1.5rem; margin: 1.5rem 0; }
+        ul, ol { margin-left: 2rem; margin-top: 1rem; }
+        li { margin: 0.5rem 0; }
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+        th, td { padding: 0.75rem; text-align: left; border: 1px solid #222; }
+        th { background: #1a1a1a; color: #60a5fa; }
+        footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #333; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" style="color: #60a5fa; text-decoration: none;">← Back to Blog</a>
+        <article>
+            <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #222;">
+                <span class="series-badge">🏠 Mi Home Lab DevOps</span>
+                <div style="color: #666; margin: 0.5rem 0;">November 25, 2024</div>
+                <h1>Systemd Services: De Script Bash a Daemon Profesional</h1>
+            </div>
+            
+            <div style="color: #d0d0d0;">
+                <h2>📋 Contexto</h2>
+                <p>Tenía un script Python (<code>sysmon_web.py</code>) que generaba el status HTML de mi servidor. Lo ejecutaba manualmente o con cron, pero quería algo más robusto: que inicie automáticamente al bootear, se reinicie si falla, y tenga logs centralizados. La solución: convertirlo en un systemd service.</p>
+
+                <h2>🎯 Objetivo</h2>
+                <p>Convertir un script bash/python en un servicio systemd con:</p>
+                <ul>
+                    <li>✅ Auto-start al bootear el sistema</li>
+                    <li>✅ Auto-restart si el proceso falla</li>
+                    <li>✅ Logs centralizados con journalctl</li>
+                    <li>✅ Control con systemctl (start/stop/restart/status)</li>
+                    <li>✅ Ejecución como usuario no-root</li>
+                </ul>
+
+                <h2>🛠️ Anatomía de un Service File</h2>
+                
+                <h3>Ejemplo: sysmon-web.service</h3>
+                <pre><code>[Unit]
+Description=SysDevOps Web Monitor - Server Status Generator
+Documentation=https://github.com/romerok9/server-monitor
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=mytechzone
+Group=mytechzone
+WorkingDirectory=/home/mytechzone/scripts
+
+# Main process
+ExecStart=/usr/bin/python3 /home/mytechzone/scripts/sysmon_web.py
+
+# Restart policy
+Restart=always
+RestartSec=30
+
+# Resource limits (optional)
+MemoryLimit=256M
+CPUQuota=50%
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sysmon-web
+
+# Security (optional but recommended)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/home/mytechzone/n8n-lab/website/html
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+
+                <h3>Desglose de Secciones</h3>
+                
+                <h4>[Unit] - Metadata y Dependencias</h4>
+                <ul>
+                    <li><code>Description</code>: Qué hace el servicio</li>
+                    <li><code>After</code>: Inicia después de estos servicios</li>
+                    <li><code>Wants</code>: Dependencias opcionales (no críticas)</li>
+                    <li><code>Requires</code>: Dependencias obligatorias</li>
+                </ul>
+
+                <h4>[Service] - Configuración de Ejecución</h4>
+                <table>
+                    <tr>
+                        <th>Directiva</th>
+                        <th>Propósito</th>
+                    </tr>
+                    <tr>
+                        <td><code>Type=simple</code></td>
+                        <td>Proceso en foreground (default)</td>
+                    </tr>
+                    <tr>
+                        <td><code>Type=forking</code></td>
+                        <td>Proceso hace fork (típico de daemons)</td>
+                    </tr>
+                    <tr>
+                        <td><code>User/Group</code></td>
+                        <td>Usuario para ejecutar el proceso</td>
+                    </tr>
+                    <tr>
+                        <td><code>WorkingDirectory</code></td>
+                        <td>Directorio de trabajo</td>
+                    </tr>
+                    <tr>
+                        <td><code>ExecStart</code></td>
+                        <td>Comando a ejecutar</td>
+                    </tr>
+                    <tr>
+                        <td><code>ExecStartPre</code></td>
+                        <td>Comando antes de iniciar</td>
+                    </tr>
+                    <tr>
+                        <td><code>ExecStop</code></td>
+                        <td>Comando al detener</td>
+                    </tr>
+                    <tr>
+                        <td><code>Restart=always</code></td>
+                        <td>Reinicia siempre que termine</td>
+                    </tr>
+                    <tr>
+                        <td><code>RestartSec=30</code></td>
+                        <td>Espera 30s antes de reiniciar</td>
+                    </tr>
+                </table>
+
+                <h4>[Install] - Comportamiento de Instalación</h4>
+                <ul>
+                    <li><code>WantedBy=multi-user.target</code>: Inicia en runlevel multi-usuario (equivalente a runlevel 3)</li>
+                    <li><code>WantedBy=graphical.target</code>: Inicia en modo gráfico (runlevel 5)</li>
+                </ul>
+
+                <h2>🚀 Proceso Completo: Script a Service</h2>
+                
+                <h3>Paso 1: Crear el Service File</h3>
+                <pre><code># Local machine
+cat > sysmon-web.service << 'EOF'
+[Unit]
+Description=SysDevOps Web Monitor
+After=network.target
+
+[Service]
+User=mytechzone
+Group=mytechzone
+WorkingDirectory=/home/mytechzone/scripts
+ExecStart=/usr/bin/python3 /home/mytechzone/scripts/sysmon_web.py
+Restart=always
+RestartSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF</code></pre>
+
+                <h3>Paso 2: Copiar al Servidor</h3>
+                <pre><code>scp sysmon-web.service mytechzone:/tmp/</code></pre>
+
+                <h3>Paso 3: Instalar el Service</h3>
+                <pre><code># On server
+sudo mv /tmp/sysmon-web.service /etc/systemd/system/
+sudo chmod 644 /etc/systemd/system/sysmon-web.service
+
+# Reload systemd para detectar el nuevo service
+sudo systemctl daemon-reload
+
+# Enable (auto-start al bootear)
+sudo systemctl enable sysmon-web.service
+
+# Start now
+sudo systemctl start sysmon-web.service</code></pre>
+
+                <h3>Paso 4: Verificar Estado</h3>
+                <pre><code># Check status
+sudo systemctl status sysmon-web
+
+# Check logs
+sudo journalctl -u sysmon-web -f
+
+# Check if enabled
+sudo systemctl is-enabled sysmon-web</code></pre>
+
+                <h2>💡 Ejemplos Prácticos</h2>
+                
+                <h3>Ejemplo 1: Script de Backup con Pre/Post Commands</h3>
+                <pre><code>[Unit]
+Description=Daily Backup Service
+After=network.target
+
+[Service]
+Type=oneshot
+User=backupuser
+WorkingDirectory=/opt/backups
+
+# Pre-check: Ensure target directory exists
+ExecStartPre=/bin/mkdir -p /opt/backups/daily
+
+# Main backup
+ExecStart=/opt/scripts/backup.sh
+
+# Post-backup: Send notification
+ExecStartPost=/opt/scripts/notify-backup-complete.sh
+
+# Cleanup old backups
+ExecStartPost=/usr/bin/find /opt/backups/daily -mtime +7 -delete
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+
+                <p>Programar con timer:</p>
+                <pre><code># backup.timer
+[Unit]
+Description=Daily Backup Timer
+
+[Timer]
+OnCalendar=daily
+OnCalendar=02:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+
+# Enable timer
+sudo systemctl enable backup.timer
+sudo systemctl start backup.timer</code></pre>
+
+                <h3>Ejemplo 2: Service con Environment Variables</h3>
+                <pre><code>[Unit]
+Description=My API Service
+After=network.target
+
+[Service]
+Type=simple
+User=apiuser
+WorkingDirectory=/opt/api
+
+# Environment variables
+Environment="NODE_ENV=production"
+Environment="PORT=3000"
+Environment="LOG_LEVEL=info"
+
+# Or load from file
+EnvironmentFile=/opt/api/.env
+
+ExecStart=/usr/bin/node /opt/api/server.js
+
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+
+                <h3>Ejemplo 3: Service con Healthcheck</h3>
+                <pre><code>[Unit]
+Description=Web Service with Healthcheck
+After=network.target
+
+[Service]
+Type=simple
+User=webuser
+WorkingDirectory=/opt/web
+
+ExecStart=/usr/bin/python3 /opt/web/app.py
+
+# Healthcheck every 30s
+ExecStartPost=/bin/sleep 5
+ExecStartPost=/usr/bin/curl -f http://localhost:5000/health || exit 1
+
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+
+                <h2>🔍 Comandos systemctl Esenciales</h2>
+                <pre><code># Control básico
+sudo systemctl start myservice
+sudo systemctl stop myservice
+sudo systemctl restart myservice
+sudo systemctl reload myservice  # Sin interrumpir conexiones
+
+# Estado
+sudo systemctl status myservice
+sudo systemctl is-active myservice
+sudo systemctl is-enabled myservice
+sudo systemctl is-failed myservice
+
+# Enable/Disable auto-start
+sudo systemctl enable myservice
+sudo systemctl disable myservice
+
+# Logs
+sudo journalctl -u myservice         # All logs
+sudo journalctl -u myservice -f      # Follow (tail -f)
+sudo journalctl -u myservice -n 50   # Last 50 lines
+sudo journalctl -u myservice --since "1 hour ago"
+sudo journalctl -u myservice --since "2024-12-01"
+
+# List all services
+systemctl list-units --type=service
+systemctl list-units --type=service --state=running
+systemctl list-units --type=service --state=failed
+
+# Reload systemd after editing service files
+sudo systemctl daemon-reload</code></pre>
+
+                <h2>🐛 Troubleshooting</h2>
+                
+                <h3>Service No Inicia</h3>
+                <pre><code># Check syntax errors
+sudo systemd-analyze verify /etc/systemd/system/myservice.service
+
+# Check status and logs
+sudo systemctl status myservice
+sudo journalctl -u myservice -n 100 --no-pager
+
+# Test ExecStart command manually
+sudo -u myuser /usr/bin/python3 /path/to/script.py
+
+# Check file permissions
+ls -la /etc/systemd/system/myservice.service
+ls -la /path/to/script.py</code></pre>
+
+                <h3>Service Falla Constantemente</h3>
+                <pre><code># Check restart loop
+sudo journalctl -u myservice | grep -i "restart"
+
+# Increase RestartSec to avoid rapid restart loops
+RestartSec=60
+
+# Or limit restart attempts
+StartLimitInterval=300
+StartLimitBurst=5</code></pre>
+
+                <h3>Logs No Aparecen en journalctl</h3>
+                <pre><code># Ensure output goes to journal
+StandardOutput=journal
+StandardError=journal
+
+# If script uses logging to file, redirect:
+ExecStart=/bin/bash -c '/path/to/script.sh 2>&1 | /usr/bin/logger -t myservice'</code></pre>
+
+                <h2>🔒 Security Hardening</h2>
+                <pre><code>[Service]
+# Basic security
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Filesystem protection
+ProtectSystem=strict          # Read-only /usr, /boot, /efi
+ProtectHome=true              # Hide /home
+ReadWritePaths=/var/myapp     # Only allow writes here
+
+# Kernel protection
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+
+# Restrict capabilities
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
+# Network isolation (if not needed)
+PrivateNetwork=true
+
+# Restrict system calls
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM</code></pre>
+
+                <div class="warning-box">
+                    <strong>⚠️ Testing:</strong> Siempre testa las opciones de security en dev antes de producción. Algunas pueden romper tu servicio si el script necesita acceso a recursos protegidos.
+                </div>
+
+                <h2>💡 Tips y Mejores Prácticas</h2>
+                <ul>
+                    <li><strong>Usa rutas absolutas:</strong> <code>/usr/bin/python3</code> no <code>python3</code></li>
+                    <li><strong>Run as non-root:</strong> Especifica <code>User</code> y <code>Group</code></li>
+                    <li><strong>Usa <code>Type=simple</code>:</strong> Más fácil de debuggear que <code>forking</code></li>
+                    <li><strong>Agrega <code>Description</code> descriptivo:</strong> Te ayuda a recordar qué hace</li>
+                    <li><strong>Logs a journal:</strong> <code>StandardOutput=journal</code> centraliza logs</li>
+                    <li><strong>RestartSec razonable:</strong> 30-60s evita restart loops agresivos</li>
+                    <li><strong>Test antes de enable:</strong> <code>systemctl start</code> primero, luego <code>enable</code></li>
+                </ul>
+
+                <h2>📊 Resultado en Mi Servidor</h2>
+                <div class="success-box">
+                    <strong>Antes (script + cron):</strong><br>
+                    • Ejecutaba cada 5 min con cron<br>
+                    • Si fallaba, esperaba al próximo cron<br>
+                    • Logs dispersos en archivos<br>
+                    • No auto-start al bootear (tenía que configurar cron @reboot)<br><br>
+                    
+                    <strong>Después (systemd service):</strong><br>
+                    ✓ Corre continuamente (actualiza cada 30s)<br>
+                    ✓ Auto-restart si falla (en 30s)<br>
+                    ✓ Logs centralizados con <code>journalctl</code><br>
+                    ✓ Auto-start al bootear<br>
+                    ✓ Control con <code>systemctl</code><br>
+                    ✓ Uptime visible: <code>systemctl status sysmon-web</code>
+                </div>
+
+                <h2>📚 Recursos</h2>
+                <ul>
+                    <li><a href="https://www.freedesktop.org/software/systemd/man/systemd.service.html" target="_blank">systemd.service Man Page</a></li>
+                    <li><a href="https://www.freedesktop.org/software/systemd/man/systemd.exec.html" target="_blank">systemd.exec Options</a></li>
+                    <li><a href="https://www.digitalocean.com/community/tutorials/understanding-systemd-units-and-unit-files" target="_blank">Understanding Systemd Units (DigitalOcean)</a></li>
+                </ul>
+
+                <h2>💭 Conclusión</h2>
+                <p>Convertir scripts en systemd services es el paso de "funciona en mi terminal" a "production-ready". Te da confiabilidad, observabilidad y control profesional sobre tus servicios. Si tienes un script que corre en cron y es crítico para tu infra, considera convertirlo a systemd service.</p>
+
+                <p>En mi caso, transformó un script de monitoreo de "esperemos que cron lo ejecute" a un daemon robusto que nunca he tenido que tocar en meses.</p>
+            </div>
+        </article>
+        <footer>
+            <p>© 2024 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a></p>
+        </footer>
+    </div>
+</body>
+</html>
+
