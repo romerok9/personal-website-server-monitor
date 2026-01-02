@@ -8,9 +8,9 @@
 
 Portfolio personal minimalista con dashboard de monitoreo en tiempo real de servidor Debian/Linux. Métricas de CPU, RAM, disco, red y containers Docker actualizadas automáticamente cada 30 segundos.
 
-## ✨ Demo
+## ✨ Features Overview
 
-![Dashboard Preview](https://via.placeholder.com/800x450/0a0a0a/60a5fa?text=Server+Status+Dashboard)
+Modern, minimalist portfolio combined with a powerful real-time server monitoring solution.
 
 ## 🎯 Características
 
@@ -135,13 +135,6 @@ personal-website-server-monitor/
 │   ├── sysmon.py                  # Monitor terminal (TUI)
 │   ├── start_monitor.sh           # Script de inicio
 │   └── sysmon-web.service         # Systemd service
-├── docs/
-│   ├── INSTALLATION.md            # Guía de instalación detallada
-│   ├── CUSTOMIZATION.md           # Guía de personalización
-│   └── TROUBLESHOOTING.md         # Solución de problemas
-├── screenshots/
-│   ├── website.png
-│   └── monitor.png
 ├── .gitignore
 ├── LICENSE
 └── README.md
@@ -316,11 +309,10 @@ sudo nginx -t
 sudo systemctl restart nginx
 ```
 
-## 📚 Documentación Adicional
+## 📚 Additional Resources
 
-- [Installation Guide](docs/INSTALLATION.md) - Instalación paso a paso
-- [Customization Guide](docs/CUSTOMIZATION.md) - Personalización avanzada
-- [Troubleshooting](docs/TROUBLESHOOTING.md) - Solución de problemas comunes
+- [psutil Documentation](https://psutil.readthedocs.io/) - Python system monitoring library
+- [Docker Python SDK](https://docker-py.readthedocs.io/) - Docker API for Python
 
 ## 🤝 Contribuciones
 

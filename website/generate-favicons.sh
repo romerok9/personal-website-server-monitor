@@ -41,3 +41,24 @@ echo ""
 echo "📤 Ahora copia los archivos al servidor:"
 echo "   scp favicon.svg favicon.ico mytechzone@192.168.68.116:/home/mytechzone/n8n-lab/website/html/"
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

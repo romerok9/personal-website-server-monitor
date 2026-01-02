@@ -47,3 +47,24 @@ else
     echo "Usando alternativa con SVG solamente"
 fi
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
