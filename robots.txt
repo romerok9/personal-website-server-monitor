@@ -1,0 +1,18 @@
+# robots.txt for mytechzone.dev
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://mytechzone.dev/sitemap.xml
+
+# Opcional: bloquear archivos innecesarios
+Disallow: /assets/scripts/
+Disallow: /.git/
+Disallow: /.github/
+
+# Permitir rastreo de recursos
+Allow: /blog/
+Allow: /blog/posts/
+Allow: /*.css
+Allow: /*.js
+Allow: /favicon.svg

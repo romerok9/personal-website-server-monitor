@@ -1,0 +1,58 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0a0a0a"/>
+  
+  <!-- Grid pattern (subtle) -->
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  
+  <!-- Accent line top -->
+  <rect x="0" y="0" width="1200" height="4" fill="#60a5fa"/>
+  
+  <!-- Main content container -->
+  <g>
+    <!-- Terminal prompt symbol -->
+    <text x="100" y="180" font-family="'Courier New', monospace" font-size="80" fill="#60a5fa" font-weight="bold">&gt;_</text>
+    
+    <!-- Site name -->
+    <text x="100" y="280" font-family="'Segoe UI', -apple-system, sans-serif" font-size="72" fill="#ffffff" font-weight="700">
+      MYTECHZONE.DEV
+    </text>
+    
+    <!-- Tagline -->
+    <text x="100" y="360" font-family="'Segoe UI', -apple-system, sans-serif" font-size="36" fill="#999999" font-weight="400">
+      DevOps Engineer | SRE | Cloud Infrastructure
+    </text>
+    
+    <!-- Topics/Tags -->
+    <g transform="translate(100, 430)">
+      <!-- Tag 1 -->
+      <rect x="0" y="0" width="140" height="50" rx="8" fill="#1a1a1a" stroke="#60a5fa" stroke-width="2"/>
+      <text x="70" y="32" font-family="'Segoe UI', sans-serif" font-size="20" fill="#60a5fa" text-anchor="middle" font-weight="600">DevOps</text>
+      
+      <!-- Tag 2 -->
+      <rect x="160" y="0" width="120" height="50" rx="8" fill="#1a1a1a" stroke="#10b981" stroke-width="2"/>
+      <text x="220" y="32" font-family="'Segoe UI', sans-serif" font-size="20" fill="#10b981" text-anchor="middle" font-weight="600">AWS</text>
+      
+      <!-- Tag 3 -->
+      <rect x="300" y="0" width="160" height="50" rx="8" fill="#1a1a1a" stroke="#f59e0b" stroke-width="2"/>
+      <text x="380" y="32" font-family="'Segoe UI', sans-serif" font-size="20" fill="#f59e0b" text-anchor="middle" font-weight="600">Home Lab</text>
+      
+      <!-- Tag 4 -->
+      <rect x="480" y="0" width="100" height="50" rx="8" fill="#1a1a1a" stroke="#ef4444" stroke-width="2"/>
+      <text x="530" y="32" font-family="'Segoe UI', sans-serif" font-size="20" fill="#ef4444" text-anchor="middle" font-weight="600">n8n</text>
+    </g>
+    
+    <!-- Author -->
+    <text x="100" y="560" font-family="'Segoe UI', sans-serif" font-size="28" fill="#666666" font-weight="400">
+      Kevin Romero
+    </text>
+  </g>
+  
+  <!-- Accent line bottom -->
+  <rect x="0" y="626" width="1200" height="4" fill="#60a5fa"/>
+</svg>
