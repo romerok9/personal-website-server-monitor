@@ -50,7 +50,7 @@
     
     <!-- Article Meta -->
     <meta property="article:published_time" content="2025-10-25T00:00:00Z">
-    <meta property="article:modified_time" content="2026-01-02T00:00:00Z">
+    <meta property="article:modified_time" content="2026-01-05T00:00:00Z">
     <meta property="article:author" content="Kevin Romero">
     <meta property="article:section" content="DevOps">
     <meta property="article:tag" content="ai">
@@ -320,6 +320,169 @@ grep -E '(a+)+$' file.txt  # Puede causar DoS</code></pre>
                     </ul>
                 </div>
 
+                <h2>🚫 Limitación 11: Riesgo de Propiedad Intelectual y Exposición de Secretos</h2>
+                
+                <h3>El Problema Crítico</h3>
+                <p>Cuando pegas código de tu empresa en ChatGPT, Claude, o cualquier IA pública, estás potencialmente:</p>
+
+                <ul>
+                    <li><strong>Violando NDAs:</strong> Tu contrato laboral probablemente prohíbe compartir código propietario</li>
+                    <li><strong>Exponiendo secretos comerciales:</strong> Lógica de negocio única, algoritmos propietarios</li>
+                    <li><strong>Filtrando arquitectura:</strong> Estructura interna de sistemas críticos</li>
+                    <li><strong>Revelando vulnerabilidades:</strong> Bugs o debilidades de seguridad de tu empresa</li>
+                </ul>
+
+                <h3>Caso Real: Developer Despedido</h3>
+                <pre><code>Developer pega en ChatGPT:
+"Tengo este código de nuestra API de pagos que da error..."
+[código completo con lógica de procesamiento de tarjetas]
+
+Problema:
+1. Violó NDA de la empresa
+2. Expuso lógica propietaria de procesamiento de pagos
+3. Reveló nombres de variables/funciones internas
+4. Potencial brecha de compliance (PCI-DSS)
+
+Resultado: Despido inmediato + posible demanda legal</code></pre>
+
+                <div class="danger-box">
+                    <strong>🚨 NUNCA compartas con IA pública:</strong><br>
+                    • Código propietario de tu empresa<br>
+                    • Nombres reales de servidores/dominios internos<br>
+                    • Credenciales (ni siquiera "sanitizadas")<br>
+                    • Estructura de bases de datos productivas<br>
+                    • Logs con información sensible de clientes<br>
+                    • Configuraciones de seguridad internas<br>
+                    <br>
+                    <strong>Alternativas seguras:</strong><br>
+                    • Usa IAs self-hosted (si tu empresa lo permite)<br>
+                    • Generaliza el código antes de compartir<br>
+                    • Usa nombres ficticios para todo<br>
+                    • Elimina cualquier dato real<br>
+                    • Consulta con Legal/Security antes de compartir
+                </div>
+
+                <h3>Lo Que Muchos No Saben</h3>
+                <p>Según los términos de servicio de la mayoría de IAs públicas:</p>
+
+                <ul>
+                    <li>Tu input puede ser usado para entrenar futuros modelos</li>
+                    <li>Empleados de la empresa pueden revisar conversaciones para QA</li>
+                    <li>Puede haber obligaciones legales de reportar cierto contenido</li>
+                    <li>Algunos países tienen leyes de retención de datos</li>
+                </ul>
+
+                <div class="warning-box">
+                    <strong>Pregunta crítica:</strong> Si tu manager viera todo lo que le preguntaste a ChatGPT sobre el código de la empresa, ¿te despedirían?<br><br>
+                    Si la respuesta es "posiblemente", estás tomando demasiado riesgo.
+                </div>
+
+                <h2>🚫 Limitación 12: El "Impuesto de Revisión" - Costo Oculto</h2>
+                
+                <h3>La Ilusión de Productividad</h3>
+                <p>IA genera código en 30 segundos. Suena genial, ¿verdad?</p>
+                
+                <p><strong>El costo oculto:</strong> Revisar ese código para asegurar que no tiene race conditions, edge cases sin manejar, o errores sutiles puede tomar <strong>MÁS tiempo</strong> que escribirlo desde cero.</p>
+
+                <h3>Ejemplo Real: El Script de Migración</h3>
+                <pre><code>IA generó script de migración de DB en 1 minuto:
+"Script perfecto!" - pensé
+
+Tiempo de revisión:
+- 15 min: Leer y entender qué hace
+- 10 min: Identificar que no maneja NULL values
+- 15 min: Encontrar que asume orden de operaciones incorrecto
+- 20 min: Descubrir que no es idempotente (falla si lo corres 2 veces)
+- 30 min: Testear con datos reales
+- 20 min: Agregar error handling que falta
+- 10 min: Documentar lo que cambié
+
+Total: 2 horas de "revisión"
+
+Si lo hubiera escrito yo desde cero con el patrón que conozco:
+45 minutos + 15 minutos de testing = 1 hora
+
+Ahorro real: NEGATIVO (-1 hora)</code></pre>
+
+                <h3>¿Cuándo el "Impuesto de Revisión" es Alto?</h3>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0;">
+                    <tr style="background: #1a1a1a;">
+                        <th style="padding: 0.75rem; border: 1px solid #333;">Escenario</th>
+                        <th style="padding: 0.75rem; border: 1px solid #333;">Costo de Revisión</th>
+                        <th style="padding: 0.75rem; border: 1px solid #333;">Mejor Opción</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Código crítico (pagos, auth)</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333; color: #ef4444;">MUY ALTO (2-3x)</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Escribir desde cero</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Código con concurrencia</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333; color: #ef4444;">ALTO (1.5-2x)</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Escribir desde cero</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Código en tu stack habitual</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333; color: #f59e0b;">MEDIO (1x)</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Depende</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Boilerplate / templates</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333; color: #10b981;">BAJO (0.3x)</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Usa IA</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Tech nueva que no conoces</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333; color: #10b981;">BAJO (0.5x)</td>
+                        <td style="padding: 0.75rem; border: 1px solid #333;">Usa IA</td>
+                    </tr>
+                </table>
+
+                <h3>Lo Que Los Managers No Entienden</h3>
+                <p>Manager: "Con IA, el equipo debería ser 2x más productivo"</p>
+
+                <p><strong>Reality check:</strong></p>
+                <ul>
+                    <li>IA genera código rápido, pero SIN garantía de calidad</li>
+                    <li>Code review de código de IA toma 50-100% más tiempo que de humano</li>
+                    <li>Debugging de bugs introducidos por IA puede tomar días</li>
+                    <li>Refactoring posterior porque "funcionaba pero era malo" es costoso</li>
+                </ul>
+
+                <h3>La Métrica Correcta</h3>
+                <pre><code>❌ Métrica incorrecta: "Líneas de código generadas"
+✅ Métrica correcta: "Tiempo desde tarea asignada hasta código productivo y confiable"
+
+Ejemplo real:
+- Con IA: 1 min generación + 2 horas revisión = 2h 1min
+- Sin IA: 1 hora escribiendo con patrones conocidos = 1h
+
+Winner: Sin IA (en este caso)</code></pre>
+
+                <div class="info-box">
+                    <strong>Regla práctica:</strong> Si conoces bien la tecnología y el patrón a usar, escribir desde cero probablemente sea más rápido que revisar código de IA.<br><br>
+                    <strong>Usa IA cuando:</strong> Estás aprendiendo algo nuevo o necesitas boilerplate repetitivo donde los errores son obvios.
+                </div>
+
+                <h3>El Costo de Bugs No Detectados</h3>
+                <p>El peor escenario: El código de IA "funcionaba" en testing, pero:</p>
+
+                <ul>
+                    <li>Tenía un race condition que solo aparece bajo carga</li>
+                    <li>Fallaba en edge case que nadie testeó</li>
+                    <li>Tenía memory leak sutil</li>
+                    <li>No manejaba correctamente reintentos</li>
+                </ul>
+
+                <p><strong>Costo real:</strong> Incidente productivo + horas de debugging + reputación dañada + rollback de emergencia</p>
+
+                <div class="danger-box">
+                    <strong>⚠️ Advertencia final sobre el "impuesto de revisión":</strong><br><br>
+                    No te dejes engañar por la velocidad inicial. Mide el tiempo TOTAL desde que empiezas la tarea hasta que el código está en producción funcionando correctamente.<br><br>
+                    A veces "lento y correcto" gana sobre "rápido pero requiere 3 iteraciones de debugging".
+                </div>
+
                 <h2>✅ Entonces, ¿Cuándo SÍ Usar IA?</h2>
                 <p>IA es excelente para:</p>
                 <ul>
@@ -334,28 +497,41 @@ grep -E '(a+)+$' file.txt  # Puede causar DoS</code></pre>
 
                 <h2>❌ Cuándo NO Usar (o Usar con Extrema Precaución)</h2>
                 <ul>
+                    <li>❌ Código propietario de tu empresa (riesgo legal/NDA)</li>
                     <li>❌ Decisiones de arquitectura críticas</li>
                     <li>❌ Configuración de seguridad</li>
                     <li>❌ Debugging de incidentes productivos complejos</li>
                     <li>❌ Código que maneja dinero o datos sensibles</li>
                     <li>❌ Políticas de IAM en AWS</li>
+                    <li>❌ Código con concurrencia/race conditions</li>
                     <li>❌ Disaster recovery procedures</li>
                     <li>❌ Compliance y regulaciones</li>
+                    <li>❌ Cuando ya conoces bien el patrón a usar (el impuesto de revisión es alto)</li>
                 </ul>
 
                 <h2>📝 Checklist: Uso Responsable de IA</h2>
-                <p>Antes de usar código/configs generados por IA:</p>
+                <p><strong>ANTES de compartir código con IA:</strong></p>
+                <ul>
+                    <li>☐ ¿Es código propietario de mi empresa? (Si sí → NO compartir)</li>
+                    <li>☐ ¿Contiene nombres reales de servidores/dominios internos? (Cambiar a ficticios)</li>
+                    <li>☐ ¿Tiene datos sensibles de clientes? (Remover completamente)</li>
+                    <li>☐ ¿Mi NDA me permite compartir esto? (Si no estás seguro → NO compartir)</li>
+                    <li>☐ ¿Consultaría esto con Security/Legal? (Si sí → Consulta primero)</li>
+                </ul>
 
+                <p><strong>ANTES de usar código/configs generados por IA:</strong></p>
                 <ul>
                     <li>☐ Revisé línea por línea (no copiar/pegar ciego)</li>
                     <li>☐ Entiendo qué hace cada parte</li>
+                    <li>☐ Medí si revisar esto toma menos tiempo que escribirlo yo</li>
                     <li>☐ Validé sintaxis con <code>--dry-run</code> o en ambiente de test</li>
                     <li>☐ Busqué en docs oficiales para confirmar</li>
-                    <li>☐ Consideré edge cases</li>
+                    <li>☐ Consideré edge cases y race conditions</li>
                     <li>☐ Agregué error handling si falta</li>
                     <li>☐ Verifiqué que no hay secrets hardcodeados</li>
                     <li>☐ Evalué impacto si algo sale mal</li>
                     <li>☐ Testé en ambiente no productivo primero</li>
+                    <li>☐ Code review por humano si es código crítico</li>
                 </ul>
 
                 <h2>💭 Mi Postura Final</h2>
