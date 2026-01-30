@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docusaurus: Documentación de Equipos con Open Source | Kevin Romero</title>
+    <meta name="description" content="Cómo implementar Docusaurus para documentación de equipos de ingeniería. Setup, troubleshooting, infraestructura necesaria y casos de uso reales.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+        .back-link { display: inline-block; color: #60a5fa; text-decoration: none; margin-bottom: 2rem; transition: color 0.2s; font-weight: 500; }
+        .back-link:hover { color: #93c5fd; text-decoration: underline; }
+        article { background: #111; border: 1px solid #222; padding: 3rem; border-radius: 8px; }
+        .post-header { margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #222; }
+        .series-badge { display: inline-block; background: #10b98120; color: #10b981; border: 1px solid #10b981; font-size: 0.85rem; padding: 0.25rem 0.75rem; border-radius: 4px; margin-bottom: 1rem; font-weight: 600; }
+        .post-date { color: #666; font-size: 0.95rem; margin-bottom: 1rem; }
+        h1 { font-size: 2.5rem; color: #fff; margin-bottom: 1rem; line-height: 1.2; }
+        .post-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .tag { background: #1a1a1a; color: #60a5fa; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; border: 1px solid #333; }
+        .post-content { color: #d0d0d0; }
+        h2 { color: #fff; font-size: 1.8rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #333; }
+        h3 { color: #e0e0e0; font-size: 1.3rem; margin: 1.5rem 0 1rem; }
+        p { margin-bottom: 1rem; }
+        ul, ol { margin-left: 1.5rem; margin-bottom: 1rem; }
+        li { margin-bottom: 0.5rem; }
+        code { background: #1a1a1a; color: #60a5fa; padding: 0.2rem 0.5rem; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 0.9rem; }
+        pre { background: #0d0d0d; border: 1px solid #222; border-radius: 6px; padding: 1.5rem; overflow-x: auto; margin: 1.5rem 0; }
+        pre code { background: none; padding: 0; color: #d0d0d0; display: block; line-height: 1.6; }
+        .highlight { background: #1a1a1a; border-left: 4px solid #10b981; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .highlight strong { color: #10b981; }
+        a { color: #60a5fa; text-decoration: none; transition: color 0.2s; }
+        a:hover { color: #93c5fd; text-decoration: underline; }
+        .info-box { background: #0d1b2a; border-left: 4px solid #60a5fa; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .warning-box { background: #2a1a0d; border-left: 4px solid #f59e0b; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .success-box { background: #0d2a1b; border-left: 4px solid #10b981; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .resources-list { background: #0a0a0a; padding: 1.5rem; border: 1px solid #222; border-radius: 6px; margin: 1.5rem 0; }
+        .resources-list h3 { margin-top: 0; color: #60a5fa; }
+        .resources-list ul { margin-left: 1.5rem; }
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; background: #0a0a0a; }
+        th, td { padding: 0.75rem; text-align: left; border: 1px solid #222; }
+        th { background: #1a1a1a; color: #60a5fa; font-weight: 600; }
+        tr:hover { background: #111; }
+        footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #333; text-align: center; color: #666; }
+    </style>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-19H0L3L7QB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-19H0L3L7QB');
+</script>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Cómo implementar Docusaurus para documentación de equipos de ingeniería. Setup, troubleshooting, infraestructura necesaria y casos de uso reales.">
+    <meta name="keywords" content="docusaurus, documentation, mdx, knowledge management, devops, team documentation">
+    <meta name="author" content="Kevin Romero">
+    <link rel="canonical" href="https://mytechzone.dev/blog/posts/docusaurus-documentacion-equipos.html">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://mytechzone.dev/blog/posts/docusaurus-documentacion-equipos.html">
+    <meta property="og:title" content="Docusaurus: Documentación de Equipos con Open Source | MyTechZone">
+    <meta property="og:description" content="Cómo implementar Docusaurus para documentación de equipos de ingeniería. Setup, troubleshooting y casos de uso reales.">
+    <meta property="og:image" content="https://mytechzone.dev/og-image.svg">
+    <meta property="og:site_name" content="MyTechZone">
+    
+    <!-- Article Meta -->
+    <meta property="article:published_time" content="2026-01-02T00:00:00Z">
+    <meta property="article:modified_time" content="2026-01-02T00:00:00Z">
+    <meta property="article:author" content="Kevin Romero">
+    <meta property="article:section" content="DevOps">
+    <meta property="article:tag" content="docusaurus">
+    <meta property="article:tag" content="documentation">
+    <meta property="article:tag" content="mdx">
+    <meta property="article:tag" content="knowledge-management">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://mytechzone.dev/blog/posts/docusaurus-documentacion-equipos.html">
+    <meta property="twitter:title" content="Docusaurus: Documentación de Equipos con Open Source">
+    <meta property="twitter:description" content="Implementación de Docusaurus para documentación de equipos. Setup, troubleshooting y casos de uso.">
+    <meta property="twitter:image" content="https://mytechzone.dev/og-image.svg">
+
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" class="back-link">← Back to Blog</a>
+        
+        <article>
+            <div class="post-header">
+                <span class="series-badge">🏠 Mi Home Lab DevOps</span>
+                <div class="post-date">January 2, 2026</div>
+                <h1>Docusaurus: Documentación de Equipos con Open Source</h1>
+                <div class="post-tags">
+                    <span class="tag">docusaurus</span>
+                    <span class="tag">documentation</span>
+                    <span class="tag">mdx</span>
+                    <span class="tag">knowledge-management</span>
+                </div>
+            </div>
+            
+            <div class="post-content">
+                <h2>📋 Contexto</h2>
+                <p>
+                    La documentación es uno de los activos más valiosos (y descuidados) en equipos de ingeniería. 
+                    Wiki interna obsoleta, Google Docs dispersos, README.md desactualizados, conocimiento tribal 
+                    que solo existe en la cabeza de seniors.
+                </p>
+                <p>
+                    Recientemente implementé <strong>Docusaurus</strong>, un generador de sitios estáticos open source 
+                    creado por Meta (Facebook), para centralizar la documentación de un equipo de ingeniería. 
+                    Este post documenta el proceso, problemas encontrados, y cómo podrías usar Docusaurus 
+                    en tu contexto (empresa o home lab).
+                </p>
+
+                <div class="info-box">
+                    <strong>💡 Nota:</strong> Este post está basado en experiencia real implementando un sistema 
+                    de documentación para un equipo de ingeniería, pero toda la información está generalizada 
+                    para mantener confidencialidad corporativa.
+                </div>
+
+                <h2>🎯 ¿Qué es Docusaurus?</h2>
+                <p>Docusaurus es un framework de React que convierte archivos Markdown/MDX en un sitio web de documentación profesional.</p>
+
+                <h3>Características Principales</h3>
+                <ul>
+                    <li><strong>Markdown/MDX:</strong> Escribe en Markdown, con soporte para componentes React</li>
+                    <li><strong>Versionado:</strong> Documenta múltiples versiones de tu software/APIs</li>
+                    <li><strong>Search:</strong> Búsqueda full-text integrada (Algolia DocSearch gratis)</li>
+                    <li><strong>Dark mode:</strong> Built-in, sin configuración adicional</li>
+                    <li><strong>i18n:</strong> Internacionalización nativa</li>
+                    <li><strong>Blog integrado:</strong> Para changelogs, release notes, tutoriales</li>
+                    <li><strong>SEO-friendly:</strong> Static site generation (SSG)</li>
+                </ul>
+
+                <h3>¿Por Qué Docusaurus vs Otras Opciones?</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Herramienta</th>
+                            <th>Pros</th>
+                            <th>Contras</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Docusaurus</strong></td>
+                            <td>Moderno, completo, mantenido por Meta</td>
+                            <td>Requiere Node.js, build process</td>
+                        </tr>
+                        <tr>
+                            <td><strong>MkDocs</strong></td>
+                            <td>Simple, Python-based</td>
+                            <td>Menos features, UI básica</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Confluence</strong></td>
+                            <td>Enterprise, mucho features</td>
+                            <td>Caro, pesado, requiere Jira</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Notion</strong></td>
+                            <td>UI moderna, colaborativo</td>
+                            <td>Vendor lock-in, no code-friendly</td>
+                        </tr>
+                        <tr>
+                            <td><strong>GitHub Wiki</strong></td>
+                            <td>Gratis, integrado con repos</td>
+                            <td>UI pobre, features limitados</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>🛠️ Implementación: Setup Inicial</h2>
+                
+                <h3>Prerequisitos</h3>
+                <pre><code># Node.js 18+ (recomiendo 20 LTS)
+node --version
+
+# npm o yarn
+npm --version
+
+# Git (para versionado)
+git --version</code></pre>
+
+                <h3>Paso 1: Crear Proyecto Docusaurus</h3>
+                <pre><code># Crear proyecto nuevo
+npx create-docusaurus@latest my-docs classic
+
+cd my-docs
+
+# Estructura generada:
+my-docs/
+├── docs/                    # Documentación principal
+│   └── intro.md
+├── blog/                    # Blog (opcional)
+│   └── welcome.md
+├── src/
+│   ├── components/          # Componentes React custom
+│   ├── css/                 # Estilos custom
+│   └── pages/               # Páginas adicionales
+├── static/                  # Assets estáticos (imágenes)
+├── docusaurus.config.js     # Configuración principal
+└── sidebars.js              # Estructura del menú lateral</code></pre>
+
+                <h3>Paso 2: Configuración Básica</h3>
+                <p>Editar <code>docusaurus.config.js</code>:</p>
+
+                <pre><code>// docusaurus.config.js
+module.exports = {
+  title: 'Engineering Docs',
+  tagline: 'Internal documentation for the engineering team',
+  url: 'https://docs.mycompany.internal',
+  baseUrl: '/',
+  
+  // Opciones de deployment
+  organizationName: 'mycompany',
+  projectName: 'eng-docs',
+  
+  // Theme config
+  themeConfig: {
+    navbar: {
+      title: 'Engineering Docs',
+      logo: {
+        alt: 'Logo',
+        src: 'img/logo.svg',
+      },
+      items: [
+        {
+          type: 'doc',
+          docId: 'intro',
+          position: 'left',
+          label: 'Documentation',
+        },
+        {to: '/blog', label: 'Changelog', position: 'left'},
+        {
+          href: 'https://github.com/myorg/docs',
+          label: 'GitHub',
+          position: 'right',
+        },
+      ],
+    },
+    
+    // Dark mode (ya viene incluido)
+    colorMode: {
+      defaultMode: 'dark',
+      disableSwitch: false,
+      respectPrefersColorScheme: true,
+    },
+    
+    // Footer
+    footer: {
+      style: 'dark',
+      links: [
+        {
+          title: 'Docs',
+          items: [
+            {label: 'Getting Started', to: '/docs/intro'},
+            {label: 'Architecture', to: '/docs/architecture'},
+          ],
+        },
+        {
+          title: 'Community',
+          items: [
+            {label: 'Slack', href: 'https://myteam.slack.com'},
+            {label: 'GitHub', href: 'https://github.com/myorg'},
+          ],
+        },
+      ],
+      copyright: `Copyright © ${new Date().getFullYear()} Engineering Team`,
+    },
+  },
+  
+  presets: [
+    [
+      'classic',
+      {
+        docs: {
+          sidebarPath: require.resolve('./sidebars.js'),
+          editUrl: 'https://github.com/myorg/docs/edit/main/',
+        },
+        blog: {
+          showReadingTime: true,
+          editUrl: 'https://github.com/myorg/docs/edit/main/',
+        },
+        theme: {
+          customCss: require.resolve('./src/css/custom.css'),
+        },
+      },
+    ],
+  ],
+};</code></pre>
+
+                <h3>Paso 3: Desarrollo Local</h3>
+                <pre><code># Iniciar servidor de desarrollo
+npm run start
+
+# Abre automáticamente: http://localhost:3000
+# Hot reload: Guarda cambios y se reflejan automáticamente</code></pre>
+
+                <h2>📁 Estructura de Documentación</h2>
+                
+                <h3>Organización Sugerida</h3>
+                <pre><code>docs/
+├── getting-started/
+│   ├── intro.md
+│   ├── installation.md
+│   └── quickstart.md
+├── architecture/
+│   ├── overview.md
+│   ├── services.md
+│   └── data-flow.md
+├── apis/
+│   ├── rest-api.md
+│   ├── authentication.md
+│   └── examples.md
+├── deployment/
+│   ├── docker.md
+│   ├── kubernetes.md
+│   └── ci-cd.md
+├── runbooks/
+│   ├── incident-response.md
+│   ├── maintenance.md
+│   └── troubleshooting.md
+└── best-practices/
+    ├── coding-standards.md
+    ├── security.md
+    └── testing.md</code></pre>
+
+                <div class="info-box">
+                    <strong>💡 Tip:</strong> Estructura tu documentación por "journey" del usuario, no por componentes técnicos. 
+                    Piensa: ¿Qué necesita saber alguien nuevo en el equipo primero?
+                </div>
+
+                <h2>🐛 Problemas Comunes y Soluciones</h2>
+                
+                <h3>1. Build Falla con "Out of Memory"</h3>
+                <p><strong>Síntoma:</strong> <code>npm run build</code> termina con error <code>FATAL ERROR: Reached heap limit</code></p>
+                
+                <p><strong>Causa:</strong> Documentación muy grande (100+ páginas) excede memoria de Node.js por defecto.</p>
+                
+                <p><strong>Solución:</strong></p>
+                <pre><code># Aumentar memoria de Node.js
+NODE_OPTIONS="--max-old-space-size=4096" npm run build
+
+# O agregar a package.json:
+{
+  "scripts": {
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' docusaurus build"
+  }
+}</code></pre>
+
+                <h3>2. Search No Funciona (Algolia)</h3>
+                <p><strong>Síntoma:</strong> Barra de búsqueda no encuentra nada.</p>
+                
+                <p><strong>Causa:</strong> Algolia DocSearch requiere aplicar y ser aprobado (puede tardar semanas).</p>
+                
+                <p><strong>Solución:</strong> Usar búsqueda local mientras esperas:</p>
+                <pre><code># Instalar plugin de búsqueda local
+npm install @easyops-cn/docusaurus-search-local
+
+# docusaurus.config.js
+themes: [
+  [
+    '@easyops-cn/docusaurus-search-local',
+    {
+      hashed: true,
+      language: ['en', 'es'],
+    },
+  ],
+],</code></pre>
+
+                <h3>3. Imágenes Rotas Después del Build</h3>
+                <p><strong>Síntoma:</strong> Imágenes se ven en dev pero no en producción.</p>
+                
+                <p><strong>Causa:</strong> Rutas relativas incorrectas o imágenes no en <code>/static</code>.</p>
+                
+                <p><strong>Solución:</strong></p>
+                <pre><code># Imágenes en /static/img/
+static/
+└── img/
+    └── architecture.png
+
+# En Markdown, usar:
+![Architecture](/img/architecture.png)
+
+# NO usar:
+![Architecture](../img/architecture.png)  # ❌ Relativo falla</code></pre>
+
+                <h3>4. Deploy en Servidor Interno Falla (CORS/404)</h3>
+                <p><strong>Síntoma:</strong> Sitio deployado da 404 en rutas o assets no cargan.</p>
+                
+                <p><strong>Causa:</strong> <code>baseUrl</code> incorrecto en config.</p>
+                
+                <p><strong>Solución:</strong></p>
+                <pre><code>// Si deploy en https://docs.company.com/
+baseUrl: '/',
+
+// Si deploy en https://company.com/docs/
+baseUrl: '/docs/',
+
+// Reconstruir después de cambiar baseUrl
+npm run build</code></pre>
+
+                <h2>🖥️ Infraestructura y Deployment</h2>
+                
+                <h3>Opción 1: GitHub Pages (Más Simple)</h3>
+                <pre><code># docusaurus.config.js
+organizationName: 'myorg',
+projectName: 'docs',
+deploymentBranch: 'gh-pages',
+
+# Deploy con un comando
+GIT_USER=<username> npm run deploy
+
+# Disponible en: https://myorg.github.io/docs/</code></pre>
+
+                <h3>Opción 2: Docker + Nginx (Para Empresas)</h3>
+                <pre><code># Dockerfile
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Nginx para servir estáticos
+FROM nginx:alpine
+COPY --from=builder /app/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]</code></pre>
+
+                <pre><code># docker-compose.yml
+version: '3.8'
+services:
+  docs:
+    build: .
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro</code></pre>
+
+                <h3>Opción 3: Vercel/Netlify (Deploy Automático)</h3>
+                <pre><code># Conectar repo GitHub a Vercel:
+# 1. Import project from GitHub
+# 2. Vercel detecta Docusaurus automáticamente
+# 3. Deploy automático en cada push a main
+# 
+# URL: https://my-docs.vercel.app</code></pre>
+
+                <h3>Opción 4: Home Lab (Self-Hosted)</h3>
+                <p>Para tener tu propia documentación en home lab:</p>
+
+                <pre><code># 1. Build estático
+npm run build
+# Output: build/ directory
+
+# 2. Copiar a tu servidor
+scp -r build/* user@your-server:/var/www/docs/
+
+# 3. Nginx config
+server {
+    listen 80;
+    server_name docs.yourdomain.com;
+    root /var/www/docs;
+    index index.html;
+    
+    location / {
+        try_files $uri $uri/ $uri.html /index.html;
+    }
+}</code></pre>
+
+                <h2>💡 Caso de Uso Empresarial (Generalizado)</h2>
+                
+                <h3>El Problema Que Resolvimos</h3>
+                <p>Un equipo de ingeniería con:</p>
+                <ul>
+                    <li>15+ microservicios sin documentación unificada</li>
+                    <li>Confluence obsoleto (última actualización: 2 años atrás)</li>
+                    <li>README.md dispersos en múltiples repos</li>
+                    <li>Onboarding de nuevos devs: 2-3 semanas</li>
+                    <li>Preguntas repetitivas en Slack</li>
+                </ul>
+
+                <h3>La Solución: Sistema de Documentación Centralizado</h3>
+                <p>Implementamos Docusaurus con:</p>
+                <ul>
+                    <li><strong>Arquitectura:</strong> Diagramas de componentes, flujo de datos</li>
+                    <li><strong>APIs:</strong> Documentación de endpoints con ejemplos</li>
+                    <li><strong>Runbooks:</strong> Procedimientos de incidentes, deploys</li>
+                    <li><strong>ADRs:</strong> Architectural Decision Records (por qué tomamos cada decisión)</li>
+                    <li><strong>Onboarding:</strong> Guía step-by-step para nuevos developers</li>
+                </ul>
+
+                <h3>Resultados (Después de 3 Meses)</h3>
+                <div class="success-box">
+                    <strong>Métricas:</strong><br>
+                    • Onboarding time: 2-3 semanas → <strong>3-5 días</strong> (80% reducción)<br>
+                    • Preguntas repetitivas en Slack: -60%<br>
+                    • Tiempo buscando información: -70%<br>
+                    • Incidentes por falta de documentación: -50%<br>
+                    • Satisfacción del equipo: +85%
+                </div>
+
+                <h2>🏠 Caso de Uso: Home Lab</h2>
+                
+                <h3>¿Por Qué Docusaurus en un Home Lab?</h3>
+                <p>Documentar tu home lab con Docusaurus es útil si:</p>
+                <ul>
+                    <li>Tienes múltiples servicios y te olvidas cómo configuraste cada uno</li>
+                    <li>Experimentas con tecnologías y quieres documentar aprendizajes</li>
+                    <li>Quieres compartir tus proyectos públicamente (como yo con este blog)</li>
+                    <li>Estás preparándote para certificaciones (documentar lo que aprendes)</li>
+                </ul>
+
+                <h3>Estructura para Home Lab</h3>
+                <pre><code>docs/
+├── services/
+│   ├── n8n.md              # Setup de n8n
+│   ├── nginx.md            # Configuración Nginx
+│   ├── postgres.md         # PostgreSQL configs
+│   └── cloudflare.md       # Cloudflare Tunnel
+├── infrastructure/
+│   ├── network.md          # Configuración de red
+│   ├── hardware.md         # Specs del servidor
+│   └── security.md         # Firewall, fail2ban
+├── procedures/
+│   ├── backup.md           # Procedimientos de backup
+│   ├── restore.md          # Cómo restaurar
+│   └── updates.md          # Actualizar servicios
+├── troubleshooting/
+│   ├── docker.md           # Problemas comunes Docker
+│   ├── network.md          # Issues de red
+│   └── performance.md      # Debugging performance
+└── learning/
+    ├── certifications.md   # Progreso de certificaciones
+    ├── projects.md         # Ideas de proyectos
+    └── resources.md        # Links útiles, cursos</code></pre>
+
+                <h3>Ejemplo: Documentar Tu Servidor</h3>
+                <pre><code>---
+id: server-specs
+title: Server Hardware Specifications
+sidebar_position: 1
+---
+
+# Server Hardware
+
+## Overview
+
+Home lab server built from Lenovo G480 (2013).
+
+## Specifications
+
+| Component | Details |
+|-----------|---------|
+| **CPU** | Intel Celeron B970 (2 cores, 2.3 GHz) |
+| **RAM** | 4 GB DDR3 |
+| **Storage** | 512 GB SSD |
+| **Network** | Ethernet 1 Gbps |
+| **Power** | 12-18W idle, 30-40W load |
+
+## Services Running
+
+- Docker (n8n, PostgreSQL, Nginx)
+- Cloudflare Tunnel
+- System monitor (sysmon_web.py)
+
+## Known Issues
+
+### Lid Close Suspension
+
+**Problem:** Closing laptop lid suspends the system.
+
+**Solution:**
+\`\`\`bash
+sudo nano /etc/systemd/logind.conf
+# Set:
+HandleLidSwitch=ignore
+\`\`\`
+
+### Temperature Management
+
+- Summer: Keep lid open (better ventilation)
+- Winter: Lid can be closed (lower temps)
+- Monitor: https://mytechzone.dev/status.html</code></pre>
+
+                <h2>🚀 Features Avanzadas</h2>
+                
+                <h3>1. Componentes React Personalizados</h3>
+                <pre><code>// src/components/APIEndpoint.js
+import React from 'react';
+
+export default function APIEndpoint({method, path, description}) {
+  return (
+    <div className="api-endpoint">
+      <span className={`method method-${method.toLowerCase()}`}>{method}</span>
+      <code>{path}</code>
+      <p>{description}</p>
+    </div>
+  );
+}
+
+// Uso en MDX:
+import APIEndpoint from '@site/src/components/APIEndpoint';
+
+<APIEndpoint 
+  method="POST" 
+  path="/api/users" 
+  description="Create new user"
+/></code></pre>
+
+                <h3>2. Versionado de Documentación</h3>
+                <pre><code># Crear nueva versión (cuando lanzas v2.0 de tu API)
+npm run docusaurus docs:version 2.0
+
+# Estructura resultante:
+docs/                    # Current (v2.1 en desarrollo)
+versioned_docs/
+├── version-2.0/        # Docs de v2.0
+└── version-1.0/        # Docs de v1.0
+
+# Dropdown automático en UI para cambiar versiones</code></pre>
+
+                <h3>3. Search con Algolia (Gratis para Open Source)</h3>
+                <pre><code># Aplicar en: https://docsearch.algolia.com/apply/
+
+# Después de aprobación, agregar a config:
+themeConfig: {
+  algolia: {
+    apiKey: 'YOUR_API_KEY',
+    indexName: 'my-docs',
+    appId: 'YOUR_APP_ID',
+  },
+}</code></pre>
+
+                <h2>📊 Infraestructura Necesaria</h2>
+                
+                <h3>Mínimo Viable (Para Empezar)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Componente</th>
+                            <th>Requerimiento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Servidor</strong></td>
+                            <td>1 vCPU, 512 MB RAM (sitio estático)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Storage</strong></td>
+                            <td>~50-100 MB (build output)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Node.js</strong></td>
+                            <td>v18+ (solo para build, no en runtime)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Web Server</strong></td>
+                            <td>Nginx, Apache, o cualquiera</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SSL</strong></td>
+                            <td>Let's Encrypt (gratis)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Setup Empresarial (Recomendado)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Componente</th>
+                            <th>Requerimiento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>CI/CD</strong></td>
+                            <td>GitHub Actions, GitLab CI</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Build Server</strong></td>
+                            <td>2 vCPU, 4 GB RAM (para builds)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CDN</strong></td>
+                            <td>CloudFront, Cloudflare (opcional)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Authentication</strong></td>
+                            <td>OAuth, SSO (si es interno)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Search</strong></td>
+                            <td>Algolia DocSearch (gratis) o local</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>🔄 CI/CD Pipeline</h2>
+                
+                <h3>GitHub Actions (Auto-Deploy)</h3>
+                <pre><code># .github/workflows/deploy.yml
+name: Deploy Docs
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Deploy to Server
+        run: |
+          rsync -avz --delete build/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/var/www/docs/
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}</code></pre>
+
+                <div class="warning-box">
+                    <strong>⚠️ Seguridad:</strong> Para documentación interna de empresa, asegúrate de:
+                    <ul>
+                        <li>Deploy en red interna (VPN required)</li>
+                        <li>Autenticación con SSO/OAuth</li>
+                        <li>NO hacer el repo público en GitHub si contiene info sensible</li>
+                        <li>Usar secrets de GitHub para credenciales</li>
+                    </ul>
+                </div>
+
+                <h2>💡 Best Practices</h2>
+                
+                <h3>1. Docs-as-Code</h3>
+                <ul>
+                    <li>✅ Documentación vive en Git (versionado, historial)</li>
+                    <li>✅ Pull requests para cambios (code review de docs)</li>
+                    <li>✅ CI/CD para deploy automático</li>
+                    <li>✅ Linting de Markdown (vale-cli, markdownlint)</li>
+                </ul>
+
+                <h3>2. Organización del Contenido</h3>
+                <ul>
+                    <li>✅ User journey primero (Getting Started → Advanced)</li>
+                    <li>✅ Una página = Un concepto</li>
+                    <li>✅ Evitar páginas gigantes (split en subsecciones)</li>
+                    <li>✅ Links internos frecuentes</li>
+                </ul>
+
+                <h3>3. Mantenimiento Sostenible</h3>
+                <ul>
+                    <li>✅ Asignar "doc owner" por sección</li>
+                    <li>✅ Review trimestral (marcar páginas obsoletas)</li>
+                    <li>✅ Incentivar contribuciones (parte del onboarding)</li>
+                    <li>✅ Metrics: qué páginas se leen más (Analytics)</li>
+                </ul>
+
+                <h3>4. Seguridad y Compliance</h3>
+                <ul>
+                    <li>✅ NO documentar passwords, API keys, secrets</li>
+                    <li>✅ Generalizar IPs, nombres de servidores productivos</li>
+                    <li>✅ Review de Legal/Security antes de hacer público</li>
+                    <li>✅ Separar docs públicas vs internas</li>
+                </ul>
+
+                <h2>📈 Comparación: Antes vs Después</h2>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspecto</th>
+                            <th>Antes (Confluence)</th>
+                            <th>Después (Docusaurus)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Búsqueda</strong></td>
+                            <td>🟡 Lenta, resultados malos</td>
+                            <td>🟢 Instant, relevante</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Actualización</strong></td>
+                            <td>🔴 Manual, nadie lo hace</td>
+                            <td>🟢 PR automatizados, CI/CD</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Versionado</strong></td>
+                            <td>🔴 No hay, confusión</td>
+                            <td>🟢 Múltiples versiones, dropdown</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Performance</strong></td>
+                            <td>🟡 Lenta (server-side)</td>
+                            <td>🟢 Instant (estático + CDN)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Costo</strong></td>
+                            <td>🔴 $10-50/user/mes</td>
+                            <td>🟢 $0 (self-hosted) o $10/mes (Vercel)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Code snippets</strong></td>
+                            <td>🟡 Formateado malo</td>
+                            <td>🟢 Syntax highlighting perfecto</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mantenibilidad</strong></td>
+                            <td>🔴 Difícil, nadie contribuye</td>
+                            <td>🟢 Fácil (Markdown), PRs naturales</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>🎯 Ideas para Diferentes Contextos</h2>
+                
+                <h3>1. Documentación de APIs (Equipo Backend)</h3>
+                <pre><code>docs/
+├── api-reference/
+│   ├── authentication.md
+│   ├── users-endpoint.md
+│   └── orders-endpoint.md
+├── guides/
+│   ├── getting-started.md
+│   └── best-practices.md
+└── changelog.md</code></pre>
+
+                <h3>2. Runbooks de SRE (Equipo Ops)</h3>
+                <pre><code>docs/
+├── incidents/
+│   ├── database-down.md
+│   ├── high-latency.md
+│   └── disk-full.md
+├── maintenance/
+│   ├── db-migration.md
+│   └── scaling-nodes.md
+└── monitoring/
+    ├── alerts-guide.md
+    └── dashboards.md</code></pre>
+
+                <h3>3. Knowledge Base Personal (Home Lab)</h3>
+                <pre><code>docs/
+├── server-setup/
+│   ├── debian-installation.md
+│   └── docker-compose.md
+├── services/
+│   ├── n8n-workflows.md
+│   └── monitoring.md
+├── troubleshooting/
+│   └── common-issues.md
+└── learning/
+    ├── aws-notes.md
+    └── kubernetes-study.md</code></pre>
+
+                <h3>4. Portfolio + Tutoriales (Blog Técnico)</h3>
+                <p>Exactamente como mi blog actual, pero con Docusaurus:</p>
+                <ul>
+                    <li>Mejor search</li>
+                    <li>Versionado de posts</li>
+                    <li>Categorías automáticas</li>
+                    <li>Tags con páginas dedicadas</li>
+                </ul>
+
+                <h2>💰 Costos de Implementación</h2>
+                
+                <h3>Home Lab (Self-Hosted)</h3>
+                <pre><code>Setup inicial:     4-6 horas
+Costo hardware:    $0 (servidor ya existe)
+Costo hosting:     $0 (self-hosted)
+Costo dominio:     $10-15/año (opcional)
+Costo SSL:         $0 (Let's Encrypt)
+Mantenimiento:     1 hora/mes
+
+Total año 1: ~$15 (solo dominio)</code></pre>
+
+                <h3>Empresarial (Hosted)</h3>
+                <pre><code>Setup inicial:     1-2 semanas (configuración, migración)
+Developer time:    40-80 horas ($4,000-8,000 en salarios)
+Hosting:           $20-50/mes (Vercel Pro, Netlify)
+Algolia Search:    $0 (DocSearch gratuito para open source)
+CI/CD:             $0 (GitHub Actions gratis para public repos)
+
+Total año 1: ~$500-1,000 (hosting)
+vs Confluence: ~$5,000-10,000/año (10-20 usuarios)</code></pre>
+
+                <div class="success-box">
+                    <strong>ROI:</strong> En contexto empresarial, Docusaurus se paga solo en el primer mes solo con el tiempo ahorrado en búsqueda de información.
+                </div>
+
+                <h2>🐛 Troubleshooting Avanzado</h2>
+                
+                <h3>Problema: Hot Reload Muy Lento</h3>
+                <p><strong>Causa:</strong> Proyecto muy grande, Docusaurus recompila todo.</p>
+                <p><strong>Solución:</strong> Fast refresh mode</p>
+                <pre><code># docusaurus.config.js
+module.exports = {
+  future: {
+    experimental_faster: true,
+  },
+};</code></pre>
+
+                <h3>Problema: Build Toma 10+ Minutos</h3>
+                <p><strong>Causa:</strong> Muchas imágenes grandes sin optimizar.</p>
+                <p><strong>Solución:</strong> Optimizar imágenes antes del build</p>
+                <pre><code># Instalar plugin
+npm install @docusaurus/plugin-ideal-image
+
+# Usar en docs:
+import Image from '@theme/IdealImage';
+<Image img={require('./large-image.png')} /></code></pre>
+
+                <h3>Problema: Links Rotos Después de Refactor</h3>
+                <p><strong>Solución:</strong> Usar plugin de validación</p>
+                <pre><code># Instalar
+npm install @docusaurus/plugin-client-redirects
+
+# Configurar redirects
+plugins: [
+  [
+    '@docusaurus/plugin-client-redirects',
+    {
+      redirects: [
+        {
+          from: '/old-path',
+          to: '/new-path',
+        },
+      ],
+    },
+  ],
+],</code></pre>
+
+                <div class="resources-list">
+                    <h3>📚 Recursos Útiles</h3>
+                    <ul>
+                        <li><a href="https://docusaurus.io/" target="_blank">Docusaurus Official Site</a></li>
+                        <li><a href="https://docusaurus.io/docs" target="_blank">Docusaurus Documentation</a></li>
+                        <li><a href="https://github.com/facebook/docusaurus" target="_blank">Docusaurus GitHub Repository</a></li>
+                        <li><a href="https://docsearch.algolia.com/" target="_blank">Algolia DocSearch (Free Search)</a></li>
+                        <li><a href="https://vercel.com/docs" target="_blank">Vercel Deployment Guide</a></li>
+                        <li><a href="https://www.markdownguide.org/" target="_blank">Markdown Guide</a></li>
+                    </ul>
+                </div>
+
+                <h2>💡 Lecciones Aprendidas</h2>
+                <ul>
+                    <li><strong>Empieza simple:</strong> No necesitas todas las features desde día 1. README básico → Docusaurus básico → Features avanzadas gradualmente.</li>
+                    <li><strong>La migración es costosa:</strong> Copiar contenido de Confluence/Notion a Markdown toma tiempo. Considera hacerlo gradualmente.</li>
+                    <li><strong>Documentación es iterativa:</strong> Mejor tener algo básico y funcional que esperar a que sea "perfecto".</li>
+                    <li><strong>Ownership es crítico:</strong> Asigna responsables por sección o se vuelve obsoleta.</li>
+                    <li><strong>Search es fundamental:</strong> Sin búsqueda buena, nadie usa la documentación.</li>
+                    <li><strong>Docs-as-code funciona:</strong> Devs contribuyen más cuando es Markdown en Git que una wiki web.</li>
+                    <li><strong>Performance importa:</strong> Build optimizado (< 2 min) o los devs no contribuyen.</li>
+                </ul>
+
+                <h2>🚀 Migración desde Otras Plataformas</h2>
+                
+                <h3>Desde Confluence</h3>
+                <pre><code># Usar herramienta de conversión
+npm install -g confluence-to-markdown
+
+confluence-to-markdown \
+  --space "MYSPACE" \
+  --user "user@example.com" \
+  --token "YOUR_TOKEN" \
+  --output ./docs
+
+# Review manual necesario (tablas, macros custom)</code></pre>
+
+                <h3>Desde Notion</h3>
+                <pre><code># Export desde Notion (Markdown & CSV)
+# Settings → Export All → Markdown
+
+# Convertir a formato Docusaurus
+# Revisar frontmatter y links manualmente</code></pre>
+
+                <h3>Desde README.md Dispersos</h3>
+                <pre><code># Script para consolidar READMEs de múltiples repos
+#!/bin/bash
+
+for repo in repo1 repo2 repo3; do
+    git clone https://github.com/myorg/$repo /tmp/$repo
+    cp /tmp/$repo/README.md docs/services/$repo.md
+done</code></pre>
+
+                <h2>✅ Resultado Final</h2>
+                <p>Una plataforma de documentación que:</p>
+                <ul>
+                    <li>✅ Es moderna y rápida (React, Static Site Generation)</li>
+                    <li>✅ Es mantenible (Markdown, Git workflow familiar)</li>
+                    <li>✅ Escala bien (de 10 páginas a 1000+)</li>
+                    <li>✅ Es económica ($0-50/mes vs $5000/año Confluence)</li>
+                    <li>✅ Tiene búsqueda excelente</li>
+                    <li>✅ Es accesible (dark mode, responsive)</li>
+                    <li>✅ Fomenta contribuciones (PRs como en código)</li>
+                </ul>
+
+                <div class="highlight">
+                    <strong>Mi experiencia:</strong> Implementar Docusaurus transformó la cultura de documentación 
+                    del equipo. De "nadie documenta" a "PRs siempre incluyen docs update".<br><br>
+                    
+                    El secreto: Hacer que documentar sea TAN fácil como hacer un commit de código.
+                </div>
+
+                <h2>🎓 Casos de Uso Más Allá de Documentación</h2>
+                <ul>
+                    <li><strong>Blog técnico:</strong> Como este que estás leyendo (aunque yo uso HTML puro)</li>
+                    <li><strong>Changelog público:</strong> Release notes de tu software</li>
+                    <li><strong>Knowledge base:</strong> FAQ, troubleshooting guides</li>
+                    <li><strong>Tutorial site:</strong> Curso online, bootcamp interno</li>
+                    <li><strong>API docs:</strong> Con componentes interactivos (Swagger UI integrado)</li>
+                    <li><strong>Design system:</strong> Documentar componentes UI, guías de estilo</li>
+                </ul>
+
+                <h2>💭 Conclusión</h2>
+                <p>
+                    Docusaurus es una solución moderna y pragmática para documentación técnica. No es perfecto 
+                    (requiere conocimientos de Node.js/React), pero para equipos de ingeniería es una opción 
+                    excelente que combina lo mejor de docs-as-code con una UI profesional.
+                </p>
+                <p>
+                    Si tu equipo usa Git diariamente, implementar Docusaurus es natural. Si tu home lab tiene 
+                    más de 5 servicios, Docusaurus te ayudará a no olvidar cómo configuraste todo.
+                </p>
+                <p>
+                    Mi recomendación: Empieza pequeño. Un <code>npx create-docusaurus</code>, una carpeta con 
+                    5 archivos Markdown, y despliega a GitHub Pages. Después crece orgánicamente según necesites.
+                </p>
+            </div>
+        </article>
+        
+        <footer>
+            <p>© 2025-2026 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a> | <a href="https://github.com/romerok9">GitHub</a></p>
+        </footer>
+    </div>
+</body>
+</html>
