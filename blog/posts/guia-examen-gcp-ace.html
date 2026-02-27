@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cómo Prepararse para el Examen ACE de GCP: Guía Real sin Vueltas | Kevin Romero</title>
+    <meta name="description" content="Guía práctica para rendir el examen Associate Cloud Engineer de Google Cloud. Tips reales, temas críticos, estrategia de estudio y qué esperar el día del examen.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        .back-link { display: inline-block; color: #60a5fa; text-decoration: none; margin-bottom: 2rem; transition: color 0.2s; font-weight: 500; }
+        .back-link:hover { color: #93c5fd; text-decoration: underline; }
+        article { background: #111; border: 1px solid #222; padding: 3rem; border-radius: 8px; }
+        .post-header { margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #222; }
+        .series-badge { display: inline-block; background: #4f46e520; color: #818cf8; border: 1px solid #818cf8; font-size: 0.85rem; padding: 0.25rem 0.75rem; border-radius: 4px; margin-bottom: 1rem; font-weight: 600; }
+        .post-date { color: #666; font-size: 0.95rem; margin-bottom: 1rem; }
+        h1 { font-size: 2.2rem; color: #fff; margin-bottom: 1rem; line-height: 1.2; }
+        .post-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .tag { background: #1a1a1a; color: #60a5fa; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; border: 1px solid #333; }
+        .post-content { color: #d0d0d0; }
+        h2 { color: #fff; font-size: 1.8rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #333; }
+        h3 { color: #e0e0e0; font-size: 1.3rem; margin: 1.5rem 0 1rem; }
+        h4 { color: #d0d0d0; font-size: 1.1rem; margin: 1rem 0 0.5rem; }
+        p { margin-bottom: 1rem; }
+        ul, ol { margin-left: 1.5rem; margin-bottom: 1rem; }
+        li { margin-bottom: 0.5rem; }
+        code { background: #1a1a1a; color: #60a5fa; padding: 0.2rem 0.5rem; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 0.9rem; }
+        pre { background: #0d0d0d; border: 1px solid #222; border-radius: 6px; padding: 1.5rem; overflow-x: auto; margin: 1.5rem 0; }
+        pre code { background: none; padding: 0; color: #d0d0d0; display: block; line-height: 1.6; }
+        .highlight { background: #1a1a1a; border-left: 4px solid #818cf8; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .highlight strong { color: #818cf8; }
+        a { color: #60a5fa; text-decoration: none; transition: color 0.2s; }
+        a:hover { color: #93c5fd; text-decoration: underline; }
+        .info-box { background: #0d1b2a; border-left: 4px solid #60a5fa; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .warning-box { background: #2a1a0d; border-left: 4px solid #f59e0b; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .success-box { background: #0d2a1b; border-left: 4px solid #10b981; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        .danger-box { background: #2a0d0d; border-left: 4px solid #ef4444; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; background: #0a0a0a; }
+        th, td { padding: 0.75rem; text-align: left; border: 1px solid #222; }
+        th { background: #1a1a1a; color: #818cf8; font-weight: 600; }
+        tr:hover { background: #111; }
+        .resources-list { background: #0a0a0a; padding: 1.5rem; border: 1px solid #222; border-radius: 6px; margin: 1.5rem 0; }
+        .resources-list h3 { margin-top: 0; color: #60a5fa; }
+        .resources-list ul { margin-left: 1.5rem; }
+        footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #333; text-align: center; color: #666; }
+    </style>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-19H0L3L7QB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-19H0L3L7QB');
+    </script>
+
+    <!-- SEO Meta Tags -->
+    <meta name="keywords" content="GCP ACE, Associate Cloud Engineer, Google Cloud, certificacion GCP, examen cloud, preparacion certificacion">
+    <meta name="author" content="Kevin Romero">
+    <link rel="canonical" href="https://mytechzone.dev/blog/posts/guia-examen-gcp-ace.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://mytechzone.dev/blog/posts/guia-examen-gcp-ace.html">
+    <meta property="og:title" content="Cómo Prepararse para el Examen ACE de GCP: Guía Real sin Vueltas">
+    <meta property="og:description" content="Tips reales para el examen Associate Cloud Engineer de Google Cloud. Temas críticos, estrategia de estudio y qué esperar el día del examen.">
+    <meta property="og:image" content="https://mytechzone.dev/og-image.svg">
+    <meta property="og:site_name" content="MyTechZone">
+
+    <!-- Article Meta -->
+    <meta property="article:published_time" content="2026-01-30T00:00:00Z">
+    <meta property="article:author" content="Kevin Romero">
+    <meta property="article:section" content="Cloud">
+    <meta property="article:tag" content="GCP">
+    <meta property="article:tag" content="certificacion">
+    <meta property="article:tag" content="google-cloud">
+
+    <!-- Twitter Cards -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://mytechzone.dev/blog/posts/guia-examen-gcp-ace.html">
+    <meta property="twitter:title" content="Cómo Prepararse para el Examen ACE de GCP: Guía Real sin Vueltas">
+    <meta property="twitter:description" content="Tips reales para el examen Associate Cloud Engineer de Google Cloud. Sin teoría vacía, solo lo que funciona de verdad.">
+    <meta property="twitter:image" content="https://mytechzone.dev/og-image.svg">
+</head>
+<body>
+    <div class="container">
+        <a href="/blog/" class="back-link">← Back to Blog</a>
+
+        <article>
+            <div class="post-header">
+                <span class="series-badge">☁️ Certificaciones Cloud</span>
+                <div class="post-date">January 30, 2026</div>
+                <h1>Cómo Prepararse para el Examen ACE de GCP: Guía Real sin Vueltas</h1>
+                <div class="post-tags">
+                    <span class="tag">GCP</span>
+                    <span class="tag">ACE</span>
+                    <span class="tag">certificacion</span>
+                    <span class="tag">google-cloud</span>
+                    <span class="tag">estudio</span>
+                </div>
+            </div>
+
+            <div class="post-content">
+
+                <h2>📋 ¿De qué va esto?</h2>
+                <p>
+                    Prepararse para una certificación cloud no es poca cosa. Entre el trabajo del día a día, los proyectos personales 
+                    y las ganas de seguir creciendo profesionalmente, encontrar el tiempo y la estrategia correcta puede ser toda 
+                    una movida. Yo estuve en esa misma situación con el <strong>Associate Cloud Engineer (ACE) de Google Cloud Platform</strong>, 
+                    y acá te cuento lo que aprendí en el proceso.
+                </p>
+                <p>
+                    Este post no es un resumen de documentación oficial que podés leer en cualquier lado. Es una guía con criterio 
+                    propio: qué estudiar, cómo estudiarlo, qué esperar el día del examen, y cómo no llevarte una sorpresa no deseada en el camino.
+                    Chevere si te sirve de empuje para arrancar.
+                </p>
+
+                <div class="info-box">
+                    <strong>¿Qué es el ACE?</strong> El Associate Cloud Engineer es la certificación de entrada de Google Cloud. 
+                    Valida que podés desplegar aplicaciones, monitorear operaciones y gestionar soluciones en la nube de Google. 
+                    Es el punto de partida ideal si venís del mundo AWS o Linux y querés sumar GCP a tu stack.
+                </div>
+
+                <h2>🎯 Por dónde empezar: el hands-on es todo</h2>
+                <p>
+                    La verdad, es que la principal diferencia entre aprobar y no aprobar este examen está en cuánto 
+                    tiempo pasaste con las manos en la consola. No alcanza con leer slides ni ver videos desde el sillón; 
+                    GCP tiene su propia forma de hacer las cosas y hay que vivirla.
+                </p>
+                <p>
+                    La consola de GCP es tu mejor aliada. Créate una cuenta de Google Cloud (tienen capa gratuita generosa, 
+                    $300 de créditos para nuevos usuarios) y empezá a romper cosas. Literalmente. Creá una VM, rompela, 
+                    entendé por qué se rompió. Desplegá un cluster de Kubernetes, escalalo, bajalo. Ahí es donde se aprende 
+                    de verdad.
+                </p>
+
+                <div class="highlight">
+                    <strong>Regla de oro:</strong> Por cada hora de video/lectura, dedicá al menos otra hora a la consola haciendo 
+                    lo mismo que viste. Sin eso, el conocimiento no se afinca.
+                </div>
+
+                <h3>¿Por dónde arrancar en la consola?</h3>
+                <ol>
+                    <li>Creá una cuenta GCP con la capa gratuita (<a href="https://cloud.google.com/free" target="_blank">cloud.google.com/free</a>)</li>
+                    <li>Explorá la consola web primero — entendé la estructura de proyectos, organizaciones y carpetas</li>
+                    <li>Instalá el <code>gcloud CLI</code> en tu máquina y empezá a usar comandos básicos</li>
+                    <li>Realizá los <strong>Google Cloud Skill Badges</strong> — son laboratorios guiados y gratuitos con insignias</li>
+                    <li>Completá al menos un Quest completo en Google Cloud Skills Boost</li>
+                </ol>
+
+                <pre><code># Primeros comandos que tenés que dominar
+gcloud auth login
+gcloud config set project [PROJECT_ID]
+gcloud config list
+
+# Crear y listar VMs
+gcloud compute instances create mi-vm --zone=us-central1-a
+gcloud compute instances list
+
+# Trabajar con GKE
+gcloud container clusters create mi-cluster --zone=us-central1-a
+gcloud container clusters get-credentials mi-cluster --zone=us-central1-a
+kubectl get nodes</code></pre>
+
+                <h2>📚 Temas Críticos: en qué meterse a fondo</h2>
+                <p>
+                    No todos los temas tienen el mismo peso en el examen. Acá van los que más aparecen y donde hay que 
+                    invertir tiempo de calidad. Si vas a estudiar con criterio, priorizá en este orden:
+                </p>
+
+                <h3>1. IAM y Gobernanza — el más traicionero</h3>
+                <p>
+                    Este tema es donde más candidatos se clavan, y entiendo por qué. IAM en GCP tiene una lógica propia 
+                    que parece simple pero tiene sus vueltas. El principio de <strong>mínimo privilegio</strong> no es solo 
+                    una frase bonita, es algo que el examen te va a preguntar de 15 formas distintas.
+                </p>
+                <ul>
+                    <li><strong>Tipos de roles:</strong> Básicos (Owner, Editor, Viewer), Predefinidos y Personalizados</li>
+                    <li><strong>Service Accounts:</strong> Para qué sirven, cuándo usarlas y cómo no sobreexponerlas</li>
+                    <li><strong>Condiciones IAM:</strong> Acceso condicional por atributos (hora, recurso, etiquetas)</li>
+                    <li><strong>Políticas de organización:</strong> Cómo restringir comportamientos a nivel de organización</li>
+                    <li><strong>Auditoría:</strong> Cloud Audit Logs y quién hace qué y cuándo</li>
+                </ul>
+
+                <div class="warning-box">
+                    <strong>Trampa común:</strong> El examen presenta escenarios donde tenés que elegir el rol con <em>menos privilegios posibles</em> 
+                    que resuelva el problema. Nunca vayas por el Owner si no es necesario. Praticá identificar el rol 
+                    predefinido más acotado para cada situación.
+                </div>
+
+                <h3>2. GKE — Google Kubernetes Engine</h3>
+                <p>
+                    Kubernetes está en todas partes del examen, porque Google es prácticamente la empresa que inventó Kubernetes 
+                    (Borg fue su predecesor interno), así que no es casualidad que el ACE haga hincapié en GKE.
+                </p>
+                <ul>
+                    <li><strong>Tipos de cluster:</strong> Standard vs Autopilot — diferencias clave y cuándo usar cada uno</li>
+                    <li><strong>Node pools:</strong> Gestión de recursos, autoscaling, tipos de máquina</li>
+                    <li><strong>Workloads:</strong> Deployments, Services, ConfigMaps, Secrets</li>
+                    <li><strong>Actualizaciones:</strong> Estrategias de rolling update y mantenimiento de cluster</li>
+                    <li><strong>Networking en GKE:</strong> VPC-native clusters, NetworkPolicy, Ingress</li>
+                </ul>
+
+                <pre><code># Comandos GKE que caen seguido en el examen
+# Escalar un deployment
+kubectl scale deployment mi-app --replicas=3
+
+# Ver el estado de los nodos
+kubectl get nodes -o wide
+
+# Logs de un pod
+kubectl logs [POD_NAME] -f
+
+# Describir un pod con problemas
+kubectl describe pod [POD_NAME]
+
+# Actualizar la imagen de un deployment
+kubectl set image deployment/mi-app container=gcr.io/project/imagen:v2</code></pre>
+
+                <h3>3. Networking — VPCs, Firewalls y Load Balancing</h3>
+                <p>
+                    Si venís de AWS, ojo: la arquitectura de red en GCP es diferente, fue mi gran dolor de cabeza ya que toda mi 
+                    experiencia era mayormente en AWS. Las VPCs en Google son globales por defecto 
+                    (no por región como en AWS), y eso cambia la forma en que pensás la conectividad. Hay bastante material acá 
+                    para estudiar con calma.
+                </p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Concepto</th>
+                            <th>Qué saber</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>VPC</strong></td>
+                            <td>Global, subredes por región, VPC compartidas, VPC peering</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Firewall Rules</strong></td>
+                            <td>Ingress/Egress, prioridades, targets por service account o tag</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cloud NAT</strong></td>
+                            <td>Para VMs sin IP pública que necesitan salir a internet</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Load Balancing</strong></td>
+                            <td>HTTP(S), TCP, SSL, interno vs externo — cuándo usar cada tipo</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cloud DNS</strong></td>
+                            <td>Zonas privadas, registros, políticas de enrutamiento</td>
+                        </tr>
+                        <tr>
+                            <td><strong>VPN / Interconnect</strong></td>
+                            <td>Diferencias entre Cloud VPN, Dedicated Interconnect y Partner Interconnect</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>4. Storage y Bases de Datos — entender cuándo usar qué</h3>
+                <p>
+                    El examen te va a tirar escenarios del estilo "necesito almacenar X tipo de dato con Y acceso". 
+                    Ahí es donde tenés que tener claro el mapa de opciones de GCP porque hay varias y cada una tiene 
+                    su caso de uso.
+                </p>
+
+                <h4>Cloud Storage (Objetos)</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Clase</th>
+                            <th>Acceso</th>
+                            <th>Caso de Uso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Standard</strong></td>
+                            <td>Frecuente</td>
+                            <td>Sitios web, apps activas, contenido servido</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nearline</strong></td>
+                            <td>~1 vez/mes</td>
+                            <td>Backups mensuales, datos de acceso infrecuente</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Coldline</strong></td>
+                            <td>~1 vez/90 días</td>
+                            <td>Disaster recovery, backups trimestrales</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Archive</strong></td>
+                            <td>~1 vez/año</td>
+                            <td>Compliance, archivos legales, datos históricos</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>Bases de Datos</h4>
+                <ul>
+                    <li><strong>Cloud SQL:</strong> MySQL/PostgreSQL/SQL Server administrado. Para apps web tradicionales con esquema relacional</li>
+                    <li><strong>Cloud Spanner:</strong> SQL distribuido globalmente, altísima disponibilidad. Para sistemas financieros o globales</li>
+                    <li><strong>Bigtable:</strong> NoSQL columnar para cargas analíticas o IoT con millones de escrituras por segundo</li>
+                    <li><strong>Firestore:</strong> NoSQL orientado a documentos, ideal para apps móviles y web en tiempo real</li>
+                    <li><strong>BigQuery:</strong> Data warehouse serverless para análisis a gran escala (SQL sobre petabytes)</li>
+                    <li><strong>Memorystore:</strong> Redis/Memcached administrado para caché en memoria</li>
+                </ul>
+
+                <div class="info-box">
+                    <strong>Zonal vs Regional Cluster:</strong> Un Zonal Cluster corre en una sola zona (útil para dev/testing, 
+                    más barato). Un Regional Cluster distribuye los nodos en 3 zonas de la región automáticamente, dando alta 
+                    disponibilidad real. En preguntas de examen sobre HA o tolerancia a fallos, la respuesta correcta casi 
+                    siempre apunta al cluster regional. El flag que los diferencia: <code>--zone</code> vs <code>--region</code>.
+                </div>
+
+                <div class="info-box">
+                    <strong>Truco mental:</strong> Si te preguntan sobre escala masiva y baja latencia → Bigtable. 
+                    Si necesitás consistencia global con SQL → Spanner. Si es una app web típica → Cloud SQL. 
+                    Si es análisis de datos → BigQuery.
+                </div>
+
+                <h3>5. gcloud CLI — tu mejor herramienta</h3>
+                <p>
+                    No alcanza con conocer la consola web. El examen tiene escenarios donde la solución más eficiente 
+                    pasa por un comando de <code>gcloud</code>. Familiarizate con la estructura básica:
+                </p>
+
+                <pre><code># Estructura del comando
+gcloud [GRUPO] [SUBGRUPO] [COMANDO] [FLAGS]
+
+# Ejemplos que caen en el examen
+
+# Compute Engine
+gcloud compute instances create vm-prod \
+  --machine-type=e2-medium \
+  --image-family=debian-11 \
+  --image-project=debian-cloud \
+  --zone=us-central1-a
+
+# Cloud Storage
+# Atención: el nombre del bucket debe ser globalmente único en TODO Google Cloud
+gsutil mb -l US gs://mi-bucket-nombre-unico-global
+gsutil cp archivo.txt gs://mi-bucket-nombre-unico-global/
+gsutil rsync -r ./local-dir gs://mi-bucket-nombre-unico-global/remote-dir
+
+# IAM
+gcloud projects add-iam-policy-binding mi-proyecto \
+  --member="user:usuario@gmail.com" \
+  --role="roles/viewer"
+
+# GKE — Zonal Cluster (un solo zone, desarrollo o testing)
+gcloud container clusters create mi-cluster \
+  --num-nodes=3 \
+  --zone=us-central1-a \
+  --enable-autoscaling \
+  --min-nodes=1 \
+  --max-nodes=5
+
+# GKE — Regional Cluster (nodos distribuidos en 3 zonas, recomendado para producción)
+gcloud container clusters create mi-cluster-prod \
+  --num-nodes=3 \
+  --region=us-central1 \
+  --enable-autoscaling \
+  --min-nodes=1 \
+  --max-nodes=5
+
+# App Engine
+gcloud app deploy app.yaml
+
+# Cloud Functions
+gcloud functions deploy mi-funcion \
+  --runtime=python39 \
+  --trigger-http</code></pre>
+
+                <h2>🗓️ Estrategia de Estudio: sin apuro pero sin parar</h2>
+                <p>
+                    Todo depende de tu punto de partida. Si ya tenés experiencia en cloud (aunque sea AWS), con 4 a 6 semanas 
+                    de estudio enfocado es suficiente. Si venís de cero, date 8 a 12 semanas sin apretarte.
+                </p>
+
+                <h3>Plan de Estudio Sugerido (6 semanas)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Semana</th>
+                            <th>Foco</th>
+                            <th>Dedicación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1</strong></td>
+                            <td>Fundamentos GCP: proyectos, billing, consola, gcloud CLI</td>
+                            <td>5-7 horas</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2</strong></td>
+                            <td>Compute Engine + GKE (teoría + laboratorios)</td>
+                            <td>6-8 horas</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3</strong></td>
+                            <td>Networking: VPC, firewalls, load balancing, Cloud NAT</td>
+                            <td>6-8 horas</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4</strong></td>
+                            <td>Storage + Bases de datos (todos los tipos)</td>
+                            <td>5-7 horas</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5</strong></td>
+                            <td>IAM, seguridad, monitoring, logging</td>
+                            <td>6-8 horas</td>
+                        </tr>
+                        <tr>
+                            <td><strong>6</strong></td>
+                            <td>Repaso general + exámenes de práctica (2-3 simulacros completos)</td>
+                            <td>8-10 horas</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Recursos Recomendados</h3>
+                <p>No necesitás gastar fortunas. Acá van los que realmente valen:</p>
+                <ul>
+                    <li>
+                        <strong>Google Cloud Skills Boost (oficial):</strong> Los Quests y Skill Badges son gratuitos o muy baratos. 
+                        Son laboratorios reales, no simulaciones. Indispensables.
+                    </li>
+                    <li>
+                        <strong>Udemy — Dan Sullivan o Ryan Kroonenburg:</strong> Los dos son buenos. Esperá ofertas (Udemy siempre tiene, 
+                        suelen estar a $15-20 USD). Dan Sullivan es más técnico y detallado.
+                    </li>
+                    <li>
+                        <strong>Documentación oficial:</strong> No la leas de corrido, usala como referencia cuando algo no queda claro 
+                        en los videos. Los "Best Practices" de cada servicio son oro puro para el examen.
+                    </li>
+                    <li>
+                        <strong>Exam Topics / Whizlabs:</strong> Para practicar con preguntas tipo examen. Hacé al menos 3 simulacros 
+                        completos antes de rendir.
+                    </li>
+                    <li>
+                        <strong>Apuntes propios:</strong> Esto es clave, chamo. No copies y pegues, escribí con tus propias palabras. 
+                        El proceso de reformular te ayuda a fijar el conocimiento mucho mejor que subrayar.
+                    </li>
+                </ul>
+
+                <div class="success-box">
+                    <strong>Mi recomendación personal:</strong><br>
+                    Combiná el curso de Dan Sullivan en Udemy con los Skill Badges de Google Cloud Skills Boost. 
+                    Eso solo te da el 80% de lo que necesitás. El 20% restante sale de practicar comandos 
+                    y resolver simulacros.
+                </div>
+
+                <h2>📅 El Día del Examen: lo que nadie te dice</h2>
+                <p>
+                    Llegaste hasta acá, estudiaste, practicaste, y ahora viene la parte que pone nervioso a cualquiera. 
+                    Acá va lo que tenés que saber para no llevarte sorpresas.
+                </p>
+
+                <h3>Formato y Logística</h3>
+                <ul>
+                    <li><strong>Preguntas:</strong> 50 preguntas de opción múltiple</li>
+                    <li><strong>Tiempo:</strong> 2 horas (bastante cómodo, unos 2-3 minutos por pregunta)</li>
+                    <li><strong>Idioma:</strong> Hacelo en inglés — la documentación, los errores y los conceptos técnicos están en inglés. La traducción a veces genera confusión innecesaria</li>
+                    <li><strong>Costo:</strong> USD 120 (a través de Webassessor) aunque me di cuenta que en algunos casos se puede pagar menos.</li>
+                    <li><strong>Modalidad:</strong> Presencial (centro de evaluación) u online con proctor</li>
+                    <li><strong>Aprobación:</strong> Score entre 200 y 400 (no se publica el porcentaje exacto, pero se estima ~70%)</li>
+                </ul>
+
+                <h3>Si rendís online (desde casa)</h3>
+                <p>
+                    Acá es un poco tenso, ya que el protocolo es muy exigente, el examen online tiene sus requisitos que hay que respetar sí o sí, o te rechazan la sesión:
+                </p>
+                <ul>
+                    <li>Habitación sin otras personas durante todo el examen</li>
+                    <li>Escritorio limpio, sin papeles ni monitores adicionales</li>
+                    <li>Cámara web funcional (el proctor te va a pedir mostrar el cuarto)</li>
+                    <li>Micrófono y auriculares simples (sin Bluetooth)</li>
+                    <li>Conexión estable — no te arriesgues con WiFi inestable</li>
+                    <li>Concentrarse en la pantalla, voltear a los costados puede ser motivo de rechazo del examen.</li>
+                    <li>Hacé el <strong>chequeo técnico previo</strong> que ofrece la plataforma (al menos 24hs antes)</li>
+                </ul>
+
+                <div class="warning-box">
+                    <strong>Experiencia real:</strong> El chequeo técnico previo no es opcional si rendís online. 
+                    Hay gente que llegó al día del examen y el antivirus o el firewall del router bloqueaba la plataforma. 
+                    Eso se resuelve antes, no cuando el reloj ya está corriendo.
+                </div>
+
+                <h3>Técnica para Responder</h3>
+                <p>
+                    El ACE tiene preguntas con bastante criterio. Rara vez es "memorizar un dato puntual"; suelen ser 
+                    escenarios donde hay que razonar. Algunas estrategias que funcionan:
+                </p>
+                <ol>
+                    <li>
+                        <strong>Leé todo el enunciado primero.</strong> Muchas preguntas tienen palabras clave al final 
+                        que cambian completamente la respuesta correcta ("con el menor costo", "sin downtime", 
+                        "con mínimo esfuerzo operativo").
+                    </li>
+                    <li>
+                        <strong>Descartá primero.</strong> En la mayoría de preguntas podés eliminar 2 opciones rápido. 
+                        Eso te deja con 2 candidatas reales donde pensar con calma.
+                    </li>
+                    <li>
+                        <strong>Marcá y seguí.</strong> Si una pregunta te traba, marcala y avanzá. No te quedés atascado. 
+                        Al final del examen tenés tiempo para revisarlas.
+                    </li>
+                    <li>
+                        <strong>Confiá en tu primera intuición.</strong> Estadísticamente, cambiar respuestas de las que ya 
+                        estabas seguro baja el puntaje. Solo cambiá si encontrás algo que claramente contradice tu elección.
+                    </li>
+                    <li>
+                        <strong>No busques la respuesta "perfecta".</strong> Buscá la respuesta <em>más correcta</em> 
+                        dentro del contexto GCP. A veces ninguna opción es ideal, pero una es claramente mejor que las otras.
+                    </li>
+                </ol>
+
+                <h2>🔄 Plan B: si no aprobás la primera vez</h2>
+                <p>
+                    Pasa, y está bien. No es un fracaso, es información. Google te da la oportunidad de volver a intentarlo:
+                </p>
+                <ul>
+                    <li><strong>Primer reintento:</strong> Podés rendir nuevamente después de 14 días</li>
+                    <li><strong>Segundo reintento:</strong> Si fallás dos veces, tenés que esperar 60 días</li>
+                    <li><strong>Tercer y siguientes reintentos:</strong> 365 días de espera entre intentos</li>
+                </ul>
+
+                <p>
+                    Lo más importante después de un intento fallido es entender en qué áreas te fue peor. 
+                    El resultado te dice en qué dominios estuviste por debajo del umbral, así que usá eso como 
+                    mapa para el próximo intento.
+                </p>
+
+                <div class="info-box">
+                    <strong>Dato útil:</strong> Google no te dice cuánto sacaste, solo si aprobaste o no, 
+                    y un desglose por dominio. Guardá ese reporte, es la hoja de ruta para la segunda vuelta.
+                </div>
+
+                <h2>✅ Checklist de Preparación</h2>
+
+                <h3>Semanas antes del examen</h3>
+                <ul>
+                    <li>☑ Completé al menos un curso completo (Udemy o similar)</li>
+                    <li>☑ Hice laboratorios prácticos en la consola de GCP</li>
+                    <li>☑ Completé Skill Badges en Google Cloud Skills Boost</li>
+                    <li>☑ Practiqué los comandos clave de <code>gcloud</code> y <code>kubectl</code></li>
+                    <li>☑ Hice al menos 2 simulacros completos (50 preguntas, 2 horas)</li>
+                    <li>☑ Tengo claro el mapa de productos: cuándo usar qué</li>
+                    <li>☑ Repasé IAM roles con profundidad</li>
+                    <li>☑ Entendí las diferencias entre clases de Cloud Storage</li>
+                    <li>☑ Practiqué escenarios de networking (VPC, firewalls, LB)</li>
+                </ul>
+
+                <h3>El día anterior</h3>
+                <ul>
+                    <li>☑ Dormí bien (en serio, no hagas una trasnocha de repaso)</li>
+                    <li>☑ Verifiqué la plataforma de examen (online) o la dirección del centro (presencial)</li>
+                    <li>☑ Tengo el DNI/pasaporte a mano</li>
+                    <li>☑ Escritorio listo (online) o llegada con tiempo (presencial)</li>
+                </ul>
+
+                <div class="resources-list">
+                    <h3>📚 Recursos Útiles</h3>
+                    <ul>
+                        <li><a href="https://cloud.google.com/learn/certification/cloud-engineer" target="_blank">Página oficial del examen ACE — Google Cloud</a></li>
+                        <li><a href="https://www.cloudskillsboost.google/" target="_blank">Google Cloud Skills Boost (laboratorios y Skill Badges)</a></li>
+                        <li><a href="https://cloud.google.com/free" target="_blank">Google Cloud Free Tier ($300 créditos)</a></li>
+                        <li><a href="https://cloud.google.com/docs/overview" target="_blank">Documentación oficial de GCP</a></li>
+                        <li><a href="https://www.udemy.com/courses/search/?q=GCP+Associate+Cloud+Engineer" target="_blank">Cursos en Udemy (buscá ofertas)</a></li>
+                        <li><a href="https://www.examtopics.com/exams/google/associate-cloud-engineer/" target="_blank">ExamTopics — Preguntas de práctica ACE</a></li>
+                        <li><a href="https://cloud.google.com/blog/topics/training-certifications" target="_blank">Blog de certificaciones de Google Cloud</a></li>
+                    </ul>
+                </div>
+
+                <h2>💡 Lo que me llevé del proceso</h2>
+                <ul>
+                    <li>
+                        <strong>El hands-on es irremplazable:</strong> Todo lo que estudié en papel, lo entendí de verdad 
+                        cuando lo hice en la consola. Sin excepción.
+                    </li>
+                    <li>
+                        <strong>GCP y AWS no son lo mismo:</strong> Si venís de AWS, no asumas que todo funciona igual. 
+                        Las VPCs globales, el modelo de IAM, y los productos tienen diferencias conceptuales importantes.
+                    </li>
+                    <li>
+                        <strong>Los Skill Badges valen más de lo que parece:</strong> Además de ser buen material de estudio, 
+                        te quedan las insignias en tu perfil de LinkedIn, lo que suma visibilidad.
+                    </li>
+                    <li>
+                        <strong>La documentación oficial como referencia, no como libro:</strong> Usala cuando algo no queda 
+                        claro, no como punto de partida. Es extensa y puede abrumarte si la abordás sin foco.
+                    </li>
+                    <li>
+                        <strong>Tomá apuntes propios:</strong> No copiés, reformulá. El esfuerzo de escribir con tus palabras 
+                        es parte del aprendizaje. Yo usé una Notion simple, funciona bárbaro.
+                    </li>
+                    <li>
+                        <strong>Los simulacros te salvan:</strong> Identificar en qué fallás <em>antes</em> del examen real 
+                        es infinitamente mejor que descubrirlo después.
+                    </li>
+                </ul>
+
+                <h2>💭 Conclusión</h2>
+                <p>
+                    El ACE de GCP no es el examen más difícil del mundo, pero tampoco es algo que se pase sin esfuerzo. 
+                    La clave está en el balance: teoría suficiente para entender los conceptos, y práctica real para 
+                    que esos conceptos se afianquen.
+                </p>
+                <p>
+                    Si venís del mundo AWS o Linux, tenés una ventaja real: ya pensás en cloud. Solo necesitás 
+                    aprender el dialecto de Google. Y si venís de cero, bien, este es un excelente punto de partida 
+                    para meterte en el mundo cloud de manera estructurada y con un certificado reconocido por la industria.
+                </p>
+                <p>
+                    Suerte. Y si tenés dudas del proceso, dejame un mensaje. Con gusto comparto la experiencia.
+                </p>
+
+                <div class="highlight">
+                    <strong>Seguí aprendiendo en el blog:</strong><br>
+                    • <a href="/blog/posts/aws-cli-productividad.html">AWS CLI: Flujo de Trabajo Profesional</a><br>
+                    • <a href="/blog/posts/automatizacion-aws-iac.html">Automatización AWS con Infrastructure as Code</a><br>
+                    • <a href="/blog/posts/notebook-a-servidor-homelab.html">De Notebook Vieja a Servidor Home Lab en Debian</a>
+                </div>
+            </div>
+        </article>
+
+        <footer>
+            <p>© 2025-2026 Kevin Romero | <a href="/">Home</a> | <a href="/blog/">Blog</a> | <a href="https://github.com/romerok9">GitHub</a></p>
+        </footer>
+    </div>
+</body>
+</html>
